@@ -2,15 +2,14 @@
 {% block content %}
 
     <div class="container">
-        <h3 class="text-center">Загруженность дороги в районе ж/д переезда</h3>
+        <h3 class="text-center">В настоящее время в городе работают две доставки пиццы.</h3>
+        <div id="map" style="height: 500px;">Google Maps</div>
         <div class="row">
-            <div class="col-xs-12 col-sm-6">
-                <h4 class="text-center">По версии <strong>Google Maps</strong></h4>
-                <div id="map" style="height: 400px;">Google Maps</div>
+            <div class="col-xs-12 col-sm-6" align="center">
+                <h4 class="text-center">Мисато</h4>
             </div>
-            <div class="col-xs-12 col-sm-6">
-                <h4 class="text-center">По версии <strong>Яндекс Карты</strong></h4>
-                <div id="YMapsID" style="height: 400px;">Яндекс Карты</div>
+            <div class="col-xs-12 col-sm-6" align="center">
+                <h4 class="text-center">Жар-птица</h4>
             </div>
         </div>
     </div>
@@ -20,24 +19,35 @@
       var map;
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 45.363690, lng: 41.695917},
-          zoom: 14,
+          center: {lat: 45.367557, lng: 41.711604},
+          zoom: 13,
             disableDefaultUI: true,
           draggable: false,
             scrollwheel: false,
         });
-            var trafficLayer = new google.maps.TrafficLayer();
-            trafficLayer.setMap(map);
           // Маркер
-            var myLatLng = {lat: 45.363829, lng: 41.695582};
+            var myLatLng = {lat: 45.384486, lng: 41.721747};
+            var iconBase = 'https://maps.google.com/mapfiles/ms/micons/';
+            var marker1 = new google.maps.Marker({
+              position: myLatLng,
+              map: map,
+{#              icon: iconBase + 'pie.png',#}
+            });
+            var infowindow1 = new google.maps.InfoWindow({
+            content: 'Мисато'});
+            marker1.addListener('click', function() {
+            infowindow1.open(map, marker1);
+             });
+          // Маркер2
+            var myLatLng = {lat: 45.373015, lng:  41.709585};
             var iconBase = 'https://maps.google.com/mapfiles/ms/micons/';
             var marker = new google.maps.Marker({
               position: myLatLng,
               map: map,
-              icon: iconBase + 'rail.png',
+{#              icon: iconBase + 'pie.png',#}
             });
             var infowindow = new google.maps.InfoWindow({
-            content: 'Ж/д переезд'});
+            content: 'Жар-птица'});
             marker.addListener('click', function() {
             infowindow.open(map, marker);
              });

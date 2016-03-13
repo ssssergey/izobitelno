@@ -1,6 +1,6 @@
 from flask import render_template, redirect, flash, url_for
 from app import app
-from models import Post
+from models import PostModel
 from decorators import login_required
 from google.appengine.api import users
 
@@ -14,15 +14,14 @@ class PostForm(Form):
 
 @app.route('/posts')
 def list_posts():
-    posts = Post.all()
+    posts = PostModel.all()
     return render_template('list_posts.html', posts=posts)
 
 @app.route('/posts/new', methods = ['GET', 'POST'])
-@login_required
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
-        post = Post(title = form.title.data,
+        post = PostModel(title = form.title.data,
                     content = form.content.data,
                     author = users.get_current_user())
         post.put()
@@ -33,6 +32,10 @@ def new_post():
 @app.route('/')
 def index():
     return render_template("index.html")
+
+@app.route('/pizza')
+def pizza():
+    return render_template("pizza.html")
 
 @app.route('/traffic')
 def traffic():

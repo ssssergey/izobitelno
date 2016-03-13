@@ -6,8 +6,8 @@
 .row-content {
 	margin: 0px auto;
 	padding: 10px 0px 10px 0px;
-	border-bottom: 1px ridge;
-	min-height: 400px;
+	border-bottom: 2px ridge;
+	min-height: 100px;
 }
 
 .row-footer {
@@ -32,6 +32,7 @@ address{
 body{
     padding:50px 0px 0px 0px;
     z-index:0;
+	background: #e0f8ff;
 }
 
 .navbar-inverse {
@@ -64,4 +65,8 @@ body{
 
 .navbar-brand {
     font-size: large;
+}
+
+.btn-centered {
+    margin-top: 15px;
 }
