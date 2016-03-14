@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from google.appengine.ext import ndb
 from endpoints_proto_datastore.ndb import EndpointsModel
 
@@ -9,14 +10,14 @@ class PostModel(ndb.Model):
 
 class OrganizationModel(EndpointsModel):
     category = ndb.StringProperty()
-    title = ndb.StringProperty(required = True)
+    title = ndb.StringProperty()
     location = ndb.GeoPtProperty()
     adres = ndb.StringProperty()
     phonenumber = ndb.StringProperty()
-    rating = ndb.StringProperty()
+    rating = ndb.IntegerProperty()
     when_added = ndb.DateTimeProperty(auto_now_add = True)
     when_modified = ndb.DateTimeProperty(auto_now_add = True)
-    author = ndb.UserProperty()
+    author = ndb.UserProperty(required = True)
     owner = ndb.StringProperty()
 
 class UserModel(ndb.Model):

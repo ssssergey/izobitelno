@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Изобильный</title>
+    <meta content='Изобильный, изобильный, разливное, пиво, пицца, пица, доставка, купить, Ставропольский край' name='keywords'/>
 	<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,6 +12,10 @@
     <link href="/css/font-awesome.min.css" rel="stylesheet">
   	<link href="/css/mystyles.css" rel="stylesheet" type="text/css">
     <script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
 </head>
 
 
@@ -28,14 +33,14 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">Изобил-Батл</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">Изобильный</a>
         </div>
         <div class="container">
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="#"><i class="fa fa-pie-chart fa-fw"></i> Пицца</a></li>
-                    <li><a href="#"><i class="fa fa-beer fa-fw"></i> Пиво</a></li>
-                    <li><a href="#"><i class="fa fa-question-circle fa-fw"></i> Контакты</a></li>
+                    <li><a href="{{ url_for('pizza') }}"><i class="fa fa-pie-chart fa-fw"></i> Пицца</a></li>
+                    <li><a href="{{ url_for('beer') }}"><i class="fa fa-beer fa-fw"></i> Пиво</a></li>
+                    <li><a href="{{ url_for('contacts') }}"><i class="fa fa-question-circle fa-fw"></i> Контакты</a></li>
                 </ul>
             </div>
         </div>
@@ -43,13 +48,12 @@
 	{% block content %}
 
 	{% endblock %}
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/js/bootstrap.min.js"></script>
+
+
+
 </body>
 
-<script type="text/javascript" src="/js/angular.min.js"></script>
+{#<script type="text/javascript" src="/js/angular.min.js"></script>#}
 
 </html>
 

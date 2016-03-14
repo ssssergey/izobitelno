@@ -26,7 +26,7 @@
     <div class="container">
         <div class="row row-header">
             <div class="col-xs-12 col-sm-8">
-                <h1>Изобил-Батл</h1>
+                <h1>Изобильный</h1>
 {#                <p>КТО ЛУЧШИЙ В ГОРОДЕ?</p>#}
             </div>
             <div class="col-xs-12 col-sm-4">
@@ -43,7 +43,7 @@
             <h3>Лучшая доставка ПИЦЦЫ в городе</h3>
         </div>
         <div class="col-sm-6" align="center">
-            <a class="btn btn-lg btn-primary btn-centered" href="/pizza" role="button"><i class="fa fa-pie-chart fa-fw"></i> ПИЦЦА</a>
+            <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('pizza') }}" role="button"><i class="fa fa-pie-chart fa-fw"></i> ПИЦЦА</a>
         </div>
     </div>
     <div class="row row-content">
@@ -51,7 +51,7 @@
             <h3>Самое свежее и вкусное разливное ПИВО в городе</h3>
         </div>
         <div class="col-sm-6" align="center">
-            <a class="btn btn-lg btn-primary btn-centered" href="#" role="button"><i class="fa fa-beer fa-fw"></i> ПИВО</a>
+            <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('beer') }}" role="button"><i class="fa fa-beer fa-fw"></i> ПИВО</a>
         </div>
     </div>
 {#    <div class="row row-content">#}

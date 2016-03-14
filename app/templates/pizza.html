@@ -26,71 +26,31 @@
             scrollwheel: false,
         });
           // Маркер
-            var myLatLng = {lat: 45.384486, lng: 41.721747};
-            var iconBase = 'https://maps.google.com/mapfiles/ms/micons/';
-            var marker1 = new google.maps.Marker({
-              position: myLatLng,
-              map: map,
-{#              icon: iconBase + 'pie.png',#}
-            });
-            var infowindow1 = new google.maps.InfoWindow({
-            content: 'Мисато'});
-            marker1.addListener('click', function() {
-            infowindow1.open(map, marker1);
-             });
-          // Маркер2
-            var myLatLng = {lat: 45.373015, lng:  41.709585};
-            var iconBase = 'https://maps.google.com/mapfiles/ms/micons/';
-            var marker = new google.maps.Marker({
-              position: myLatLng,
-              map: map,
-{#              icon: iconBase + 'pie.png',#}
-            });
-            var infowindow = new google.maps.InfoWindow({
-            content: 'Жар-птица'});
-            marker.addListener('click', function() {
-            infowindow.open(map, marker);
-             });
+          var posts = {{ posts | safe }};
+          for (var i = 0; i < posts.length; i++) {
+              if (posts[i].location) {
+                  var myLatLng = {lat: posts[i].location.lat, lng: posts[i].location.lng};
+                var iconBase = 'https://maps.google.com/mapfiles/ms/micons/';
+                var marker1 = new google.maps.Marker({
+                  position: myLatLng,
+                  map: map
+                });
+                var infowindow1 = new google.maps.InfoWindow({
+                content: posts[i].title});
+                marker1.addListener('click', function() {
+                infowindow1.open(map, marker1);
+                 });
+              }
+          }
       }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"
         async defer></script>
 
-    {# ЯНДЕКС КАРТЫ#}
-    <script type="text/javascript">
-        YMaps.jQuery(function () {
-            // Создает экземпляр карты и привязывает его к созданному контейнеру
-            var myMap = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
-            myMap.disableDragging();
-            myMap.disableScrollZoom();
-            myMap.disableMagnifier();
-            // Устанавливает начальные параметры отображения карты: центр карты и коэффициент масштабирования
-            myMap.setCenter(new YMaps.GeoPoint(41.695917, 45.363690), 14);
-            var traffic = new YMaps.Traffic.Control({ showInfoSwitcher: true }, { infoLayerShown: false });
-            traffic.setOptions({
-              layerOptions: { // Опции слоя пробок
-                hasHint: false,
-                hasBalloon: false,
-                cursor: YMaps.Cursor.INHERIT // значение INHERIT отменяет смену курсора над пробками
-              },
-              infoLayerOptions: { // опции слоя дорожных событий
-                  hasHint: false,
-                hasBalloon: false,
-                cursor: YMaps.Cursor.HELP
-              }
-            });
-            myMap.addControl(traffic);
-            // включение показа пробок
-            traffic.show();
-            // Метка
-            var s = new YMaps.Style();
-            s.iconStyle = new YMaps.IconStyle();
-            s.iconStyle.href = "http://maps.google.com/mapfiles/ms/micons/rail.png";
-            var point = new YMaps.GeoPoint(41.695582, 45.363829);
-            var placemark = new YMaps.Placemark(point, {style: s});
-            placemark.name = "Ж/д переезд";
-            myMap.addOverlay(placemark);
-        });
+    <script>
+        $(document).ready(function() {
+            $('ul.navbar-nav').children().removeClass('active');
+            $('i.fa-pie-chart').parent().parent().addClass('active');
+        })
     </script>
-
 {% endblock %}

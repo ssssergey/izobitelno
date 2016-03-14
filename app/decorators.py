@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from functools import wraps
 from google.appengine.api import users
 from flask import redirect, request
