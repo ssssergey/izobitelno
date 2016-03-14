@@ -1,15 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
 
+{#<ul>#}
+{#    {% for post in posts %}#}
+{#    <li>#}
+{#        {{ post.title }} (written by {{ post.author.email() }})#}
+{##}
+{#        {{ post.category }}#}
+{#    </li>#}
+{#    {% endfor %}#}
+{#</ul>#}
+
+
+
     <div class="container">
-        <h3 class="text-center">В настоящее время в городе работают две доставки пиццы.</h3>
+        <h3 class="text-center">В настоящее время в городе работают n точек продажи разливного пива.</h3>
         <div id="map" style="height: 500px;">Google Maps</div>
         <div class="row">
             <div class="col-xs-12 col-sm-6" align="center">
-                <h4 class="text-center">Мисато</h4>
+                <h4 class="text-center">Мега-Пиво</h4>
             </div>
             <div class="col-xs-12 col-sm-6" align="center">
-                <h4 class="text-center">Жар-птица</h4>
+                <h4 class="text-center">Пивной животик</h4>
             </div>
         </div>
     </div>
@@ -50,7 +62,10 @@
     <script>
         $(document).ready(function() {
             $('ul.navbar-nav').children().removeClass('active');
-            $('i.fa-pie-chart').parent().parent().addClass('active');
+            $('i.fa-beer').parent().parent().addClass('active');
         })
     </script>
+
+
+
 {% endblock %}
