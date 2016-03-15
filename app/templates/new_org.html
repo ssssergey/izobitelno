@@ -6,16 +6,19 @@
             {# // Карта#}
             <div class="col-sm-6">
                 <h4>Укажите улицу(переулок) или покажите место на карте.</h4>
-                <div id="floating-panel">
-                        <input id="address" type="textbox" value="" placeholder="ул. Ленина, 10">
-                        <input id="submit" type="button" value="Искать">
+                <div class="row" id="wrapper">
+                    <div id="map" style="height: 500px;">
+                        Google Maps
+                    </div>
+                    <div id="floating-panel">
+                            <input id="address" type="textbox" value="" placeholder="ул. Ленина, 10">
+                            <input id="submit" type="button" value="Искать">
+                    </div>
+                    <div id="floating-panel2">
+                            <input id="submit2" type="button" value="Определить свое местоположение на карте">
+                    </div>
                 </div>
-                <div id="map" style="height: 500px;">
-                    Google Maps
-                </div>
-                <div id="floating-panel2">
-                        <input id="submit2" type="button" value="Определить свое местоположение на карте">
-                </div>
+
                 <div id="accuracy"></div>
             </div>
 
@@ -36,7 +39,7 @@
                     </p>
                     <p>
                         <label for="content">Категория</label>
-                        {{ form.category|safe }}
+                        {{ form.category(value=request.args.get('category_value'))|safe }}
                         {% if form.category.errors %}
                         <ul class="errors">
                             {% for error in form.category.errors %}
@@ -47,10 +50,10 @@
                     </p>
                     <p>
                         <label for="adres">Адрес</label>
-                        {{ form.adres(readonly=true, size=60)|safe }}
+                        {{ form.adres(readonly=true)|safe }}
+                        <i>Воспользуйтесь картой слева</i><br>
                         {{ form.lat(readonly=true, size=10)|safe }}
                         {{ form.lng(readonly=true, size=10)|safe }}
-                        <i>Воспользуйтесь картой</i>
                         {% if form.adres.errors %}
                         <ul class="errors">
                             {% for error in form.adres.errors %}
@@ -83,29 +86,29 @@
     <script>
       var map;
       function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: new google.maps.LatLng(45.37, 41.71),
-            zoom: 13,
-            minZoom: 13,
-            disableDefaultUI: true,
-            scaleControl: true,
-            zoomControl: true,
-            draggable: true,
-            scrollwheel: true,
-        });
+          map = new google.maps.Map(document.getElementById('map'), {
+              center: new google.maps.LatLng(45.37, 41.71),
+              zoom: 13,
+              minZoom: 13,
+              disableDefaultUI: true,
+              scaleControl: true,
+              zoomControl: true,
+              draggable: true,
+              scrollwheel: true,
+          });
 
           var geocoder = new google.maps.Geocoder();
-          var infowindow = new google.maps.InfoWindow();
-    {#Listeners#}
-        document.getElementById('submit').addEventListener('click', function() {
-            geocodeAddress(geocoder, map);
-        });
-        document.getElementById('submit2').addEventListener('click', function() {
-            navigator.geolocation.watchPosition(GetLocation, Error, {enableHighAccuracy: true});
-        });
-        map.addListener('click', function(event) {
-            geocodeLatLng(geocoder, event.latLng, infowindow);
-        });
+
+          {#Listeners#}
+          document.getElementById('submit').addEventListener('click', function () {
+              geocodeAddress(geocoder, map);
+          });
+          document.getElementById('submit2').addEventListener('click', function () {
+              navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
+          });
+          map.addListener('click', function (event) {
+              geocodeLatLng(event.latLng);
+          });
       }
 
       function geocodeAddress(geocoder, resultsMap) {
@@ -126,25 +129,27 @@
         });
       }
 
-      function geocodeLatLng(geocoder, location, infowindow) {
+      function geocodeLatLng(location) {
+          var geocoder = new google.maps.Geocoder();
           geocoder.geocode({'location': location}, function(results, status) {
             if (status === google.maps.GeocoderStatus.OK) {
               if (results[0]) {
-                var marker = new google.maps.Marker({
-                  position: location,
-                  map: map
-                });
                   var address = results[0].formatted_address;
-                infowindow.setContent(address);
-                infowindow.open(map, marker);
                   document.getElementById("adres").value = address;
                   document.getElementById("lat").value = location.lat();
                   document.getElementById("lng").value = location.lng();
+                  var marker = new google.maps.Marker({
+                          position: location,
+                          map: map
+                        });
+                  var infowindow = new google.maps.InfoWindow();
+                    infowindow.setContent(address);
+                    infowindow.open(map, marker);
               } else {
-                window.alert('Ничего не найдено');
+                console.log('Ничего не найдено');
               }
             } else {
-              window.alert('Геопоиск не удался из-за: ' + status);
+              console.log('Геопоиск не удался из-за: ' + status);
             }
           });
         }
@@ -152,14 +157,15 @@
         function GetLocation(location) {
 {#            $('.coordinates').append(location.coords.latitude + ", " + location.coords.longitude);#}
             if (location.coords.accuracy > 20) {
-                $('#accuracy').append("Точность местоопределения очень низкая. Пожалуйста, выйдите на улицу.");
+                $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, выйдите на улицу.");
             } else {
+
                 initialLocation = new google.maps.LatLng(location.coords.latitude,location.coords.longitude);
                 map.setCenter(initialLocation);
-                var coords = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
+{#                var coords = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);#}
                 var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                 var marker = new google.maps.Marker({
-                  position: coords,
+                  position: initialLocation,
                     icon: image,
                   map: map,
                   title:"Вы находитесь здесь!"
@@ -167,6 +173,14 @@
                 var infowindow = new google.maps.InfoWindow();
                 infowindow.setContent("Вы находитесь здесь!<br>Точность местоопределения: " + location.coords.accuracy);
                 infowindow.open(map, marker);
+                var geocoder = new google.maps.Geocoder();
+{#                geocodeLatLng(coords);#}
+                geocoder.geocode({'location': initialLocation}, function(results, status) {
+                if (status === google.maps.GeocoderStatus.OK) {
+                  if (results[0]) {
+                      document.getElementById("adres").value = results[0].formatted_address;
+                      document.getElementById("lat").value = initialLocation.lat();
+                      document.getElementById("lng").value = initialLocation.lng();}}});
             }
         }
 

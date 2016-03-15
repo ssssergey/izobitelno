@@ -73,8 +73,8 @@ body{
 
 #floating-panel {
 	position: absolute;
-	top: 10%;
-	left: 5%;
+	top: 1%;
+	left: 1%;
 	z-index: 5;
 	background-color: #fff;
 	padding: 5px;
@@ -87,8 +87,8 @@ body{
 
 #floating-panel2 {
 	position: absolute;
-	bottom: 5%;
-	left: 5%;
+	bottom: 1%;
+	left: 1%;
 	z-index: 5;
 	background-color: #fff;
 	padding: 5px;
@@ -98,3 +98,6 @@ body{
 	line-height: 30px;
 	padding-left: 10px;
 }
+
+#wrapper { position: relative; }
+#over_map { position: absolute; top: 10px; left: 10px; z-index: 99; }

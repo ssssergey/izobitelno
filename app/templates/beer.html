@@ -1,21 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 
-{#<ul>#}
-{#    {% for post in posts %}#}
-{#    <li>#}
-{#        {{ post.title }} (written by {{ post.author.email() }})#}
-{##}
-{#        {{ post.category }}#}
-{#    </li>#}
-{#    {% endfor %}#}
-{#</ul>#}
-
-
-
     <div class="container">
         <h3 class="text-center">В настоящее время в городе работают n точек продажи разливного пива.</h3>
-        <div id="map" style="height: 500px;">Google Maps</div>
+        <div class="row" id="wrapper">
+            <div id="map" style="height: 500px;">Google Maps</div>
+            <div id="over_map">
+                <a class="btn btn-sm btn-default" href="{{ url_for('new_org', category_value="Пиво") }}" role="button">Добавить объект</a>
+            </div>
+        </div>
         <div class="row">
             <div class="col-xs-12 col-sm-6" align="center">
                 <h4 class="text-center">Мега-Пиво</h4>
@@ -29,6 +22,7 @@
     {#GOOGLE MAPS#}
     <script>
       var map;
+      var markers = [];
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 45.367557, lng: 41.711604},
@@ -37,24 +31,24 @@
           draggable: false,
             scrollwheel: false,
         });
-          // Маркер
+          // Маркеры
           var posts = {{ posts | safe }};
           for (var i = 0; i < posts.length; i++) {
               if (posts[i].location) {
-                  var myLatLng = {lat: posts[i].location.lat, lng: posts[i].location.lng};
-                var iconBase = 'https://maps.google.com/mapfiles/ms/micons/';
-                var marker1 = new google.maps.Marker({
-                  position: myLatLng,
-                  map: map
-                });
-                var infowindow1 = new google.maps.InfoWindow({
-                content: posts[i].title + "<br>" + posts[i].adres});
-                marker1.addListener('click', function() {
-                infowindow1.open(map, marker1);
-                 });
+                  addMarker(posts[i]);
               }
           }
       }
+        function addMarker(post) {
+            var myLatLng = {lat: post.location.lat, lng: post.location.lng};
+            var marker1 = new google.maps.Marker({
+              position: myLatLng,
+              map: map
+            });
+            var infowindow1 = new google.maps.InfoWindow({content: post.title + "<br>" + post.adres});
+            marker1.addListener('click', function() {infowindow1.open(map, marker1);});
+            markers.push(marker1);
+        }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"
         async defer></script>
