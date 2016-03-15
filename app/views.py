@@ -64,12 +64,12 @@ def index():
 @app.route('/pizza')
 def pizza():
     orgs = OrganizationModel.query(OrganizationModel.category == u'Пицца').fetch()
-    return render_template("pizza.html", posts = json.dumps(orgs, cls=GaeEncoder))
+    return render_template("pizza.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)))
 
 @app.route('/beer')
 def beer():
     orgs = OrganizationModel.query(OrganizationModel.category == u'Пиво').fetch()
-    return render_template("beer.html", posts = json.dumps(orgs, cls=GaeEncoder))
+    return render_template("beer.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)))
 
 @app.route('/contacts')
 def contacts():

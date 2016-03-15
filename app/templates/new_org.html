@@ -51,7 +51,7 @@
                     <p>
                         <label for="adres">Адрес</label>
                         {{ form.adres(readonly=true)|safe }}
-                        <i>Воспользуйтесь картой слева</i><br>
+                        <i>Воспользуйтесь интерактивной картой.</i><br>
                         {{ form.lat(readonly=true, size=10)|safe }}
                         {{ form.lng(readonly=true, size=10)|safe }}
                         {% if form.adres.errors %}
