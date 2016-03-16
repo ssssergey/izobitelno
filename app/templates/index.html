@@ -9,14 +9,15 @@
 	<link href="css/bootstrap.min.css" rel="stylesheet">
   	<link href="css/bootstrap-theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font-awesome.min.css">
-  	<link href="css/mystyles.css" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+    <link href="css/mystyles.css" rel="stylesheet" type="text/css">
 </head>
 <style>
     body{
         padding:0px 0px 0px 0px;
         background: #e0f8ff;
 }
-    .fa-thumbs-up, .fa-thumbs-down {
+    .fa {
         font-size: 7em;
 }
 </style>
@@ -26,8 +27,7 @@
     <div class="container">
         <div class="row row-header">
             <div class="col-xs-12 col-sm-8">
-                <h1>Изобильный</h1>
-{#                <p>КТО ЛУЧШИЙ В ГОРОДЕ?</p>#}
+                <h1><span style="color:orangered">И</span>зобильный</h1>
             </div>
             <div class="col-xs-12 col-sm-4">
                 <i class="fa fa-thumbs-up fa-fw"></i>
@@ -37,21 +37,38 @@
     </div>
 </header>
 
-<div class="container">
+<div class="container-fluid">
     <div class="row row-content">
-        <div class="col-sm-6" align="center">
-            <h3>Лучшая доставка ПИЦЦЫ в городе</h3>
+        <div class="col-sm-2" align="center">
+            <i class="fa fa-cutlery fa-fw"></i>
+            <br>
+            <h3>{{ categories[0].rus_title }}</h3>
         </div>
-        <div class="col-sm-6" align="center">
-            <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('pizza') }}" role="button"><i class="fa fa-pie-chart fa-fw"></i> ПИЦЦА</a>
+        <div class="col-sm-10" align="left">
+            {% for eng, rus in categories[0].categs.items() %}
+                <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+            {% endfor %}
         </div>
     </div>
     <div class="row row-content">
-        <div class="col-sm-6 pull-right" align="center">
-            <h3>Самое свежее и вкусное разливное ПИВО в городе</h3>
+        <div class="col-sm-2" align="center">
+            <i class="fa fa-car fa-fw"></i>
+            <br>
+            <h3>{{ categories[1].rus_title }}</h3>
         </div>
-        <div class="col-sm-6" align="center">
-            <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('beer') }}" role="button"><i class="fa fa-beer fa-fw"></i> ПИВО</a>
+        <div class="col-sm-10" align="left">
+            {% for eng, rus in categories[1].categs.items() %}
+                <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+            {% endfor %}
+{#            <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('pizza') }}" role="button"><i class="fa fa-car fa-fw"></i> Поменять Моторное масло</a>#}
+        </div>
+    </div>
+    <div class="row row-footer">
+        <div class="col-sm-6">
+            <ul>
+                <a href="{{ url_for('list_posts') }}" style="color: floralwhite"><li>Комментарии, пожелания, отзывы</li></a>
+                <a href="{{ url_for('contacts') }}" style="color: floralwhite"><li>Контакты</li></a>
+            </ul>
         </div>
     </div>
 {#    <div class="row row-content">#}
@@ -82,7 +99,43 @@
 </body>
 
 {#<script type="text/javascript" src="js/angular.min.js"></script>#}
+<!-- Yandex.Metrika informer -->
+<div style="position: fixed; bottom: 0px; left: 0px">
+<a href="https://metrika.yandex.ru/stat/?id=36077980&amp;from=informer"
+target="_blank" rel="nofollow"><img src="https://informer.yandex.ru/informer/36077980/3_1_FFFFFFFF_EFEFEFFF_0_uniques"
+style="width:88px; height:31px; border:0;" alt="Яндекс.Метрика" title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)" /></a>
+</div>
+    <!-- /Yandex.Metrika informer -->
 
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter36077980 = new Ya.Metrika({
+                    id:36077980,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/36077980" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
 </html>
 
 

@@ -2,25 +2,24 @@
 from google.appengine.ext import ndb
 from endpoints_proto_datastore.ndb import EndpointsModel
 
-class PostModel(ndb.Model):
-    title = ndb.StringProperty(required = True)
+class PostModel(EndpointsModel):
     content = ndb.TextProperty(required = True)
     when = ndb.DateTimeProperty(auto_now_add = True)
     author = ndb.UserProperty(required = True)
 
 class OrganizationModel(EndpointsModel):
-    category = ndb.StringProperty()
-    title = ndb.StringProperty()
+    category = ndb.StringProperty(default=u'Другие')
+    title = ndb.StringProperty(default=u'Без названия')
     location = ndb.GeoPtProperty()
     adres = ndb.StringProperty()
     phonenumber = ndb.StringProperty()
-    rating = ndb.IntegerProperty()
+    rating = ndb.IntegerProperty(default=0)
     when_added = ndb.DateTimeProperty(auto_now_add = True)
     when_modified = ndb.DateTimeProperty(auto_now_add = True)
     author = ndb.UserProperty(required = True)
     owner = ndb.StringProperty()
 
-class UserModel(ndb.Model):
+class UserModel(EndpointsModel):
     auth_object = ndb.UserProperty(required = True)
     nickname = ndb.StringProperty(required = True)
     password = ndb.StringProperty()

@@ -1,7 +1,10 @@
     <div class="row" id="wrapper">
-        <div id="map" style="height: 500px;">Google Maps</div>
+        <div id="map">Google Maps</div>
         <div id="over_map">
-            <a class="btn btn-default" href="{{ url_for('new_org', category_value=posts[0].category) }}" role="button">Добавить объект</a>
+            <a class="btn btn-primary" href="{{ url_for('new_org', category_value=category_rus, category_eng=category_eng) }}" role="button">Добавить объект</a>
+        </div>
+        <div id="floating-panel2">
+                <input id="submit2" type="button" value="Определить свое местоположение на карте">
         </div>
     </div>
 
@@ -13,9 +16,12 @@
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 45.367557, lng: 41.711604},
           zoom: 13,
-            disableDefaultUI: true,
-          draggable: false,
-            scrollwheel: false,
+          minZoom: 13,
+          disableDefaultUI: true,
+          scaleControl: true,
+          zoomControl: true,
+          draggable: true,
+          scrollwheel: true,
         });
           // Маркеры
           var posts = {{ posts | tojson | safe }};
@@ -24,7 +30,11 @@
                   addMarker(posts[i]);
               }
           }
+          document.getElementById('submit2').addEventListener('click', function () {
+              navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
+          });
       }
+
         function addMarker(post) {
             var myLatLng = {lat: post.location.lat, lng: post.location.lng};
             var marker1 = new google.maps.Marker({
@@ -35,6 +45,33 @@
             var infowindow1 = new google.maps.InfoWindow({content: post.title + "<br>" + adress});
             marker1.addListener('click', function() {infowindow1.open(map, marker1);});
             markers.push(marker1);
+        }
+
+      function GetLocation(location) {
+            if (location.coords.accuracy > 20) {
+                $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, включите GPS и выйдите на улицу.");
+            } else {
+
+                initialLocation = new google.maps.LatLng(location.coords.latitude,location.coords.longitude);
+                map.setCenter(initialLocation);
+                var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+                var marker = new google.maps.Marker({
+                  position: initialLocation,
+                    icon: image,
+                  map: map,
+                  title:"Вы находитесь здесь!"
+                });
+                var infowindow = new google.maps.InfoWindow();
+                infowindow.setContent("Вы находитесь здесь!<br>Точность местоопределения: " + location.coords.accuracy);
+                infowindow.open(map, marker);
+                var geocoder = new google.maps.Geocoder();
+                geocoder.geocode({'location': initialLocation}, function(results, status) {
+                if (status === google.maps.GeocoderStatus.OK) {
+                  if (results[0]) {
+                      document.getElementById("adres").value = results[0].formatted_address;
+                      document.getElementById("lat").value = initialLocation.lat();
+                      document.getElementById("lng").value = initialLocation.lng();}}});
+            }
         }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"

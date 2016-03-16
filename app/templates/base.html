@@ -33,13 +33,24 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('index') }}">Изобильный</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}"><span style="color:orangered">И</span>зобильный</a>
         </div>
         <div class="container">
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('pizza') }}"><i class="fa fa-pie-chart fa-fw"></i> Пицца</a></li>
-                    <li><a href="{{ url_for('beer') }}"><i class="fa fa-beer fa-fw"></i> Пиво</a></li>
+                    {% for cat_group in categories %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                             role="button" aria-haspopup="true" aria-expanded="false">
+                             {{ cat_group.rus_title }} <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                              {% for eng, rus in cat_group.categs.items() %}
+                                  <li id="{{ eng }}"><a href="{{  url_for('category', category_eng=eng) }}">{{ rus }}</a></li>
+                              {% endfor %}
+                            </ul>
+                        </li>
+{#                            <li><a href="{{  url_for('category', category_eng='beer') }}"><i class="fa fa-beer fa-fw"></i> Пиво</a></li>#}
+                    {% endfor %}
                     <li><a href="{{ url_for('contacts') }}"><i class="fa fa-question-circle fa-fw"></i> Контакты</a></li>
                 </ul>
             </div>
@@ -49,12 +60,48 @@
 
 	{% endblock %}
 
-
+{#    <script>#}
+{#        $(document).ready(function() {#}
+{#            $('ul.navbar-nav').children().removeClass('active');#}
+{#            var category = {{ category_eng }}#}
+{#            $('#'+category).addClass('active');#}
+{#        })#}
+{#    </script>#}
 
 </body>
 
 {#<script type="text/javascript" src="/js/angular.min.js"></script>#}
 
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+        (w[c] = w[c] || []).push(function() {
+            try {
+                w.yaCounter36077980 = new Ya.Metrika({
+                    id:36077980,
+                    clickmap:true,
+                    trackLinks:true,
+                    accurateTrackBounce:true,
+                    webvisor:true
+                });
+            } catch(e) { }
+        });
+
+        var n = d.getElementsByTagName("script")[0],
+            s = d.createElement("script"),
+            f = function () { n.parentNode.insertBefore(s, n); };
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+        if (w.opera == "[object Opera]") {
+            d.addEventListener("DOMContentLoaded", f, false);
+        } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/36077980" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
 </html>
 
 

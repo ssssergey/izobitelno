@@ -7,7 +7,7 @@
             <div class="col-sm-6">
                 <h4>Укажите улицу(переулок) или покажите место на карте.</h4>
                 <div class="row" id="wrapper">
-                    <div id="map" style="height: 500px;">
+                    <div id="map">
                         Google Maps
                     </div>
                     <div id="floating-panel">
@@ -23,8 +23,7 @@
             </div>
 
             <div class="col-sm-6">
-                <h1 id="">Добавьте организацию</h1>
-                <form action="{{ url_for('new_org') }}" method="post" accept-charset="utf-8">
+                <form action="{{ url_for('new_org', category_eng = category_eng) }}" method="post" accept-charset="utf-8">
                     {{ form.csrf_token }}
                     <p>
                         <label for="title">Название</label>
@@ -157,7 +156,7 @@
         function GetLocation(location) {
 {#            $('.coordinates').append(location.coords.latitude + ", " + location.coords.longitude);#}
             if (location.coords.accuracy > 20) {
-                $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, выйдите на улицу.");
+                $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, включите GPS и выйдите на улицу.");
             } else {
 
                 initialLocation = new google.maps.LatLng(location.coords.latitude,location.coords.longitude);

@@ -15,7 +15,7 @@ from wtforms.validators import DataRequired,Length,EqualTo
 class OrganizationForm(Form):
     category = StringField(render_kw={"placeholder": u"Пиво"})
     title = StringField(render_kw={"placeholder": u"МегаПиво"})
-    adres = StringField(render_kw={"placeholder": u"ул. Ленина, 10"})
+    adres = StringField()
     phonenumber = StringField(render_kw={"placeholder": u"+7 928 1231212"})
     rating = IntegerField(render_kw={"placeholder": u"+7 928 1231212"})
     owner = StringField(render_kw={"placeholder": u"дядя Коля"})
@@ -41,7 +41,10 @@ def new_org():
                     author = users.get_current_user())
         post.put()
         flash('Organization saved on database.')
-        return redirect(url_for('list_orgs'))
+        for eng, rus in categories_all.iteritems():
+            if rus == form.category.data:
+                category_eng = eng
+        return redirect(url_for('category', category_eng=category_eng))
     return render_template('new_org.html', form=form)
 
 class GaeEncoder(json.JSONEncoder):
@@ -57,19 +60,29 @@ class GaeEncoder(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, obj)
 
+categories = [
+    {'eng_title':'food',
+    'rus_title':u'Еда',
+    'categs':{'beer':u'Пиво','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты'}},
+    {'eng_title':'auto',
+    'rus_title':u'Авто',
+    'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autoglass':u'Автостекло','autotyres':u'Шиномонтаж',
+              'motoroil_buy':u'Купить моторное масло','motoroil_change':u'Замена моторного масла'}},
+    ]
+categories_all = {}
+for i_dict in categories:
+    categories_all.update(i_dict['categs'])
+
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template("index.html", categories=categories)
 
-@app.route('/pizza')
-def pizza():
-    orgs = OrganizationModel.query(OrganizationModel.category == u'Пицца').fetch()
-    return render_template("pizza.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)))
+@app.route('/category/<category_eng>')
+def category(category_eng):
+    orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).fetch()
+    return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
+                           category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories)
 
-@app.route('/beer')
-def beer():
-    orgs = OrganizationModel.query(OrganizationModel.category == u'Пиво').fetch()
-    return render_template("beer.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)))
 
 @app.route('/contacts')
 def contacts():
@@ -85,7 +98,6 @@ def location():
 
 ######## POST ###########
 class PostForm(Form):
-    title = StringField('Title', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
 
 @app.route('/posts')
@@ -97,7 +109,7 @@ def list_posts():
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
-        post = PostModel(title = form.title.data,
+        post = PostModel(
                     content = form.content.data,
                     author = users.get_current_user())
         post.put()
