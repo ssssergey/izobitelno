@@ -4,7 +4,7 @@
 <ul>
     {% for post in posts %}
     <li>
-        {{ post.title }} (written by {{ post.author.nickname() }})
+        {{ post.title }} (автор: {{ post.author.nickname() }})
 
         {{ post.category }}
     </li>

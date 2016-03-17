@@ -13,6 +13,44 @@ from flask.ext.wtf import Form
 from wtforms import StringField, FloatField, TextAreaField, IntegerField
 from wtforms.validators import DataRequired,Length,EqualTo
 
+categories = [
+    {'eng_title':'food',
+    'rus_title':u'Еда',
+    'icon':"fa fa-cutlery fa-fw",
+    'categs':{'beer':u'Пиво','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты',
+              'water':u'Вода для кулеров'}},
+    {'eng_title':'auto',
+    'rus_title':u'Авто',
+     'icon':"fa fa-car fa-fw",
+    'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autoglass':u'Автостекло','autotyres':u'Шиномонтаж',
+              'motoroil_buy':u'Купить моторное масло','motoroil_change':u'Замена моторного масла', 'chassis':u'Ходовая',
+              'electric':u'Электрик','osago':u'ОСАГО'}},
+    {'eng_title':'service',
+    'rus_title':u'Бытовые услуги',
+     'icon':"fa fa-group fa-fw",
+    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'grugstore':u'Аптека'}},
+    {'eng_title':'house',
+    'rus_title':u'Для дома',
+     'icon':"fa fa-bank fa-fw",
+    'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород'}},
+    {'eng_title':'finance',
+    'rus_title':u'Банки и финансы',
+     'icon':"fa fa-dollar fa-fw",
+    'categs':{'sbercashpoint':u'Банкомат Сбербанка', 'bank':u'Банк'}},
+    {'eng_title':'gadget',
+    'rus_title':u'Компьютеры и гаджеты',
+     'icon':"fa fa-tablet fa-fw",
+    'categs':{'pc':u'Компьютеры и комплектующие', 'smarphones':u'Телефоны', 'repair_gadgets':'Ремонт'}},
+    {'eng_title':'sport',
+    'rus_title':u'Спорт',
+     'icon':"fa fa-futbol-o fa-fw",
+    'categs':{'gym':u'Тренажерный (фитнес) зал', 'running':u'Бег'}},
+    ]
+categories_all = {}
+for i_dict in categories:
+    categories_all.update(i_dict['categs'])
+
+
 class OrganizationForm(Form):
     category = StringField()
     title = StringField(default=u"Без названия")
@@ -23,6 +61,30 @@ class OrganizationForm(Form):
     lat = FloatField()
     lng = FloatField()
     description = TextAreaField()
+
+class GaeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return (obj - datetime(1970,1,1)).total_seconds()
+        elif isinstance(obj, ndb.Model):
+            return obj.to_dict()
+        elif isinstance(obj, users.User):
+            return obj.nickname()
+        elif isinstance(obj, datastore_types.GeoPt):
+            return {'lat': obj.lat, 'lng':obj.lon}
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+
+@app.route('/')
+def index():
+    return render_template("index.html", categories=categories)
+
+@app.route('/category/<category_eng>')
+def category(category_eng):
+    orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).fetch()
+    return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
+                           category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories)
 
 @app.route('/orgs')
 def list_orgs():
@@ -50,49 +112,6 @@ def new_org():
                 category_eng = eng
         return redirect(url_for('category', category_eng=category_eng))
     return render_template('new_org.html', form=form)
-
-class GaeEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return (obj - datetime(1970,1,1)).total_seconds()
-        elif isinstance(obj, ndb.Model):
-            return obj.to_dict()
-        elif isinstance(obj, users.User):
-            return obj.nickname()
-        elif isinstance(obj, datastore_types.GeoPt):
-            return {'lat': obj.lat, 'lng':obj.lon}
-        else:
-            return json.JSONEncoder.default(self, obj)
-
-categories = [
-    {'eng_title':'food',
-    'rus_title':u'Еда',
-    'icon':"fa fa-cutlery fa-fw",
-    'categs':{'beer':u'Пиво','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты',
-              'water':u'Вода для кулеров'}},
-    {'eng_title':'auto',
-    'rus_title':u'Авто',
-     'icon':"fa fa-car fa-fw",
-    'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autoglass':u'Автостекло','autotyres':u'Шиномонтаж',
-              'motoroil_buy':u'Купить моторное масло','motoroil_change':u'Замена моторного масла'}},
-    {'eng_title':'service',
-    'rus_title':u'Бытовые услуги',
-     'icon':"fa fa-group fa-fw",
-    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье'}},
-    ]
-categories_all = {}
-for i_dict in categories:
-    categories_all.update(i_dict['categs'])
-
-@app.route('/')
-def index():
-    return render_template("index.html", categories=categories)
-
-@app.route('/category/<category_eng>')
-def category(category_eng):
-    orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).fetch()
-    return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
-                           category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories)
 
 
 @app.route('/contacts')

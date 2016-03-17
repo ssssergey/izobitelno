@@ -17,7 +17,8 @@
                 <br>
                 (автор: {{ post.author.nickname() }})
                 <br>
-                {{ post.when }}
+                {{ momentjs(post.when).fromNow() }}
+                ({{ momentjs(post.when).format('LLLL') }})
             </li>
             {% endfor %}
         </ul>
