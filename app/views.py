@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 from datetime import datetime
+from collections import OrderedDict
 from flask import render_template, redirect, flash, url_for
 from app import app
 from models import PostModel, OrganizationModel
@@ -13,14 +14,15 @@ from wtforms import StringField, FloatField, TextAreaField, IntegerField
 from wtforms.validators import DataRequired,Length,EqualTo
 
 class OrganizationForm(Form):
-    category = StringField(render_kw={"placeholder": u"Пиво"})
-    title = StringField(render_kw={"placeholder": u"МегаПиво"})
+    category = StringField()
+    title = StringField(default=u"Без названия")
     adres = StringField()
-    phonenumber = StringField(render_kw={"placeholder": u"+7 928 1231212"})
-    rating = IntegerField(render_kw={"placeholder": u"+7 928 1231212"})
+    phonenumber = StringField(render_kw={"placeholder": u"+7 928 1111111"})
+    rating = IntegerField(default=0)
     owner = StringField(render_kw={"placeholder": u"дядя Коля"})
     lat = FloatField()
     lng = FloatField()
+    description = TextAreaField()
 
 @app.route('/orgs')
 def list_orgs():
@@ -32,15 +34,17 @@ def new_org():
     form = OrganizationForm()
     if form.validate_on_submit():
         post = OrganizationModel(title = form.title.data,
-                    category = form.category.data,
-                    phonenumber = form.phonenumber.data,
-                    rating = form.rating.data,
-                    owner = form.owner.data,
-                    adres = form.adres.data,
-                    location = ndb.GeoPt(form.lat.data, form.lng.data),
-                    author = users.get_current_user())
+                                category = form.category.data,
+                                phonenumber = form.phonenumber.data,
+                                rating = form.rating.data,
+                                owner = form.owner.data,
+                                adres = form.adres.data,
+                                location = ndb.GeoPt(form.lat.data, form.lng.data),
+                                author = users.get_current_user(),
+                                description = form.description.data,
+                                 )
         post.put()
-        flash('Organization saved on database.')
+        flash(u'Организация успешно добавлена!')
         for eng, rus in categories_all.iteritems():
             if rus == form.category.data:
                 category_eng = eng
@@ -63,11 +67,18 @@ class GaeEncoder(json.JSONEncoder):
 categories = [
     {'eng_title':'food',
     'rus_title':u'Еда',
-    'categs':{'beer':u'Пиво','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты'}},
+    'icon':"fa fa-cutlery fa-fw",
+    'categs':{'beer':u'Пиво','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты',
+              'water':u'Вода для кулеров'}},
     {'eng_title':'auto',
     'rus_title':u'Авто',
+     'icon':"fa fa-car fa-fw",
     'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autoglass':u'Автостекло','autotyres':u'Шиномонтаж',
               'motoroil_buy':u'Купить моторное масло','motoroil_change':u'Замена моторного масла'}},
+    {'eng_title':'service',
+    'rus_title':u'Бытовые услуги',
+     'icon':"fa fa-group fa-fw",
+    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье'}},
     ]
 categories_all = {}
 for i_dict in categories:
@@ -113,6 +124,6 @@ def new_post():
                     content = form.content.data,
                     author = users.get_current_user())
         post.put()
-        flash('Post saved on database.')
+        flash(u'Комментарий успешно создан!')
         return redirect(url_for('list_posts'))
     return render_template('new_post.html', form=form)

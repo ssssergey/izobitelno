@@ -72,7 +72,28 @@
                         </ul>
                         {% endif %}
                     </p>
-
+                    <p>
+                        <label for="rating">Рейтинг</label>
+                        {{ form.rating|safe }}
+                        {% if form.rating.errors %}
+                        <ul class="errors">
+                            {% for error in form.rating.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </p>
+                    <p>
+                        <label for="description">Описание</label>
+                        {{ form.description(cols="40", rows="10")|safe }}
+                        {% if form.description.errors %}
+                        <ul class="errors">
+                            {% for error in form.description.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </p>
                     <p><input type="submit" value="Сохранить"/></p>
                 </form>
             </div>

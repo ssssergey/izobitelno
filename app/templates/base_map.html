@@ -42,7 +42,11 @@
               map: map
             });
             var adress = post.adres.split(', Изобильный')[0];
-            var infowindow1 = new google.maps.InfoWindow({content: post.title + "<br>" + adress});
+            var rating = "Рейтинг: " + post.rating
+            var infowindow1 = new google.maps.InfoWindow({content: post.title + "<br>"
+                                                                    + adress + "<br>"
+                                                                    + rating + "<br>"
+                                                                    + post.description + "<br>" });
             marker1.addListener('click', function() {infowindow1.open(map, marker1);});
             markers.push(marker1);
         }

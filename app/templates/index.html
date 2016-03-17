@@ -31,43 +31,36 @@
             </div>
             <div class="col-xs-12 col-sm-4">
                 <i class="fa fa-thumbs-up fa-fw"></i>
-                <i class="fa fa-thumbs-down fa-fw"></i>
             </div>
         </div>
     </div>
 </header>
-
 <div class="container-fluid">
-    <div class="row row-content">
-        <div class="col-sm-2" align="center">
-            <i class="fa fa-cutlery fa-fw"></i>
-            <br>
-            <h3>{{ categories[0].rus_title }}</h3>
+    {% for cat_group in categories %}
+        <div class="row row-content">
+            <div class="col-sm-2" align="center">
+                <i class="{{ cat_group.icon }}" ></i>
+                <br>
+                <h3>{{ cat_group.rus_title }}</h3>
+            </div>
+            <div class="col-sm-10" align="left">
+                {% for eng, rus in cat_group.categs.items() %}
+                    <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+                {% endfor %}
+            </div>
         </div>
-        <div class="col-sm-10" align="left">
-            {% for eng, rus in categories[0].categs.items() %}
-                <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="row row-content">
-        <div class="col-sm-2" align="center">
-            <i class="fa fa-car fa-fw"></i>
-            <br>
-            <h3>{{ categories[1].rus_title }}</h3>
-        </div>
-        <div class="col-sm-10" align="left">
-            {% for eng, rus in categories[1].categs.items() %}
-                <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
-            {% endfor %}
-{#            <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('pizza') }}" role="button"><i class="fa fa-car fa-fw"></i> Поменять Моторное масло</a>#}
-        </div>
-    </div>
+    {% endfor %}
+
     <div class="row row-footer">
         <div class="col-sm-6">
             <ul>
                 <a href="{{ url_for('list_posts') }}" style="color: floralwhite"><li>Комментарии, пожелания, отзывы</li></a>
                 <a href="{{ url_for('contacts') }}" style="color: floralwhite"><li>Контакты</li></a>
+            </ul>
+        </div>
+        <div class="col-sm-6">
+            <ul>
+                <a href="{{ url_for('traffic') }}" style="color: floralwhite"><li>Пробки</li></a>
             </ul>
         </div>
     </div>
