@@ -2,7 +2,7 @@
 import json
 from datetime import datetime
 from collections import OrderedDict
-from flask import render_template, redirect, flash, url_for
+from flask import render_template, redirect, flash, url_for, request
 from app import app
 from models import PostModel, OrganizationModel
 from decorators import login_required
@@ -40,7 +40,7 @@ categories = [
     {'eng_title':'gadget',
     'rus_title':u'Компьютеры и гаджеты',
      'icon':"fa fa-tablet fa-fw",
-    'categs':{'pc':u'Компьютеры и комплектующие', 'smarphones':u'Телефоны', 'repair_gadgets':'Ремонт'}},
+    'categs':{'pc':u'Компьютеры и комплектующие', 'smarphones':u'Телефоны', 'repair_gadgets':u'Ремонт'}},
     {'eng_title':'sport',
     'rus_title':u'Спорт',
      'icon':"fa fa-futbol-o fa-fw",
@@ -62,12 +62,15 @@ class OrganizationForm(Form):
     lng = FloatField()
     description = TextAreaField()
 
+
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
             return (obj - datetime(1970,1,1)).total_seconds()
         elif isinstance(obj, ndb.Model):
-            return obj.to_dict()
+            result = obj.to_dict()
+            result['id'] = obj.key.id()
+            return result
         elif isinstance(obj, users.User):
             return obj.nickname()
         elif isinstance(obj, datastore_types.GeoPt):
@@ -85,6 +88,41 @@ def category(category_eng):
     orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).fetch()
     return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
                            category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories)
+
+@app.route('/editorg/<int:id>', methods = ['GET', 'POST'])
+def edit_org(id):
+    form = OrganizationForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            org = OrganizationModel.get_by_id(int(id))
+            org.populate(title = form.title.data,
+                        category = form.category.data,
+                        phonenumber = form.phonenumber.data,
+                        rating = form.rating.data,
+                        owner = form.owner.data,
+                        adres = form.adres.data,
+                        location = ndb.GeoPt(form.lat.data, form.lng.data),
+                        author = users.get_current_user(),
+                        description = form.description.data,
+                         )
+            org.put()
+            flash(u'Изменения приняты!')
+            for eng, rus in categories_all.iteritems():
+                if rus == form.category.data:
+                    category_eng = eng
+            return redirect(url_for('category', category_eng=category_eng))
+    org = OrganizationModel.get_by_id(int(id))
+    form = OrganizationForm()
+    form.category.data = org.category
+    form.title.data = org.title
+    form.phonenumber.data = org.phonenumber
+    form.rating.data = org.rating
+    form.owner.data = org.owner
+    form.adres.data = org.adres
+    form.description.data = org.description
+    form.lat.data = org.location.lat
+    form.lng.data = org.location.lon
+    return render_template("edit_org.html", form=form, id=id)
 
 @app.route('/orgs')
 def list_orgs():

@@ -46,7 +46,9 @@
             var infowindow1 = new google.maps.InfoWindow({content: post.title + "<br>"
                                                                     + adress + "<br>"
                                                                     + rating + "<br>"
-                                                                    + post.description + "<br>" });
+                                                                    + post.description + "<br>"
+                                                    + "<a href='/editorg/"+post.id+"'>Редактировать</a>"
+                                                            });
             marker1.addListener('click', function() {infowindow1.open(map, marker1);});
             markers.push(marker1);
         }
