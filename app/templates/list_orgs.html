@@ -5,8 +5,9 @@
     {% for post in posts %}
     <li>
         {{ post.title }} (автор: {{ post.author.nickname() }})
-
         {{ post.category }}
+        <br>
+        {{ momentjs(post.when_added).fromNow() }}
     </li>
     {% endfor %}
 </ul>

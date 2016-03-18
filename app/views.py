@@ -126,8 +126,8 @@ def edit_org(id):
 
 @app.route('/orgs')
 def list_orgs():
-    orgs = OrganizationModel.query()
-    return render_template('list_orgs.html', posts=orgs)
+    orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
+    return render_template('list_orgs.html', posts=orgs, categories=categories)
 
 @app.route('/orgs/new', methods = ['GET', 'POST'])
 def new_org():
@@ -149,16 +149,16 @@ def new_org():
             if rus == form.category.data:
                 category_eng = eng
         return redirect(url_for('category', category_eng=category_eng))
-    return render_template('new_org.html', form=form)
+    return render_template('new_org.html', form=form, categories=categories)
 
 
 @app.route('/contacts')
 def contacts():
-    return render_template("contacts.html")
+    return render_template("contacts.html", categories=categories)
 
 @app.route('/traffic')
 def traffic():
-    return render_template("traffic.html")
+    return render_template("traffic.html", categories=categories)
 
 @app.route('/location')
 def location():
@@ -170,8 +170,8 @@ class PostForm(Form):
 
 @app.route('/posts')
 def list_posts():
-    posts = PostModel.query()
-    return render_template('list_posts.html', posts=posts)
+    posts = PostModel.query().order(-PostModel.when)
+    return render_template('list_posts.html', posts=posts, categories=categories)
 
 @app.route('/posts/new', methods = ['GET', 'POST'])
 def new_post():
@@ -183,4 +183,4 @@ def new_post():
         post.put()
         flash(u'Комментарий успешно создан!')
         return redirect(url_for('list_posts'))
-    return render_template('new_post.html', form=form)
+    return render_template('new_post.html', form=form, categories=categories)
