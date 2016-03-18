@@ -17,6 +17,7 @@ class OrganizationModel(EndpointsModel):
     when_added = ndb.DateTimeProperty(auto_now_add = True)
     when_modified = ndb.DateTimeProperty(auto_now_add = True)
     author = ndb.UserProperty(required = True)
+    user_modified = ndb.UserProperty()
     owner = ndb.StringProperty()
     description = ndb.TextProperty()
 

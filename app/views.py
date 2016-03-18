@@ -89,7 +89,30 @@ def category(category_eng):
     return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
                            category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories)
 
-@app.route('/editorg/<int:id>', methods = ['GET', 'POST'])
+@app.route('/orgs/new', methods = ['GET', 'POST'])
+def new_org():
+    form = OrganizationForm()
+    if form.validate_on_submit():
+        post = OrganizationModel(title = form.title.data,
+                                category = form.category.data,
+                                phonenumber = form.phonenumber.data,
+                                rating = form.rating.data,
+                                owner = form.owner.data,
+                                adres = form.adres.data,
+                                location = ndb.GeoPt(form.lat.data, form.lng.data),
+                                author = users.get_current_user(),
+                                user_modified = users.get_current_user(),
+                                description = form.description.data,
+                                 )
+        post.put()
+        flash(u'Организация успешно добавлена!')
+        for eng, rus in categories_all.iteritems():
+            if rus == form.category.data:
+                category_eng = eng
+        return redirect(url_for('category', category_eng=category_eng))
+    return render_template('new_org.html', form=form, categories=categories)
+
+@app.route('/edit_org/<int:id>', methods = ['GET', 'POST'])
 def edit_org(id):
     form = OrganizationForm()
     if request.method == 'POST':
@@ -102,7 +125,8 @@ def edit_org(id):
                         owner = form.owner.data,
                         adres = form.adres.data,
                         location = ndb.GeoPt(form.lat.data, form.lng.data),
-                        author = users.get_current_user(),
+                        user_modified = users.get_current_user(),
+                        when_modified = datetime.now(),
                         description = form.description.data,
                          )
             org.put()
@@ -124,32 +148,32 @@ def edit_org(id):
     form.lng.data = org.location.lon
     return render_template("edit_org.html", form=form, id=id)
 
+@app.route('/del_org/<int:id>', methods = ['GET','DELETE'])
+def del_org(id):
+    org = OrganizationModel.get_by_id(int(id))
+    current_user = users.get_current_user()
+    for eng, rus in categories_all.iteritems():
+        if rus == org.category:
+            category_eng = eng
+    if users.is_current_user_admin():
+        flash(u"Вы успешно удалили объект как администратор!")
+        org.key.delete()
+        return redirect(url_for('category', category_eng=category_eng))
+    if current_user == org.author:
+        flash(u"Вы успешно удалили объект как автор!")
+        org.key.delete()
+        return redirect(url_for('category', category_eng=category_eng))
+    else:
+        flash(u"У вас нет права на удаление. Вы не являетесь автором этого объекта!")
+        return redirect(url_for('category', category_eng=category_eng))
+
+
 @app.route('/orgs')
 def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
     return render_template('list_orgs.html', posts=orgs, categories=categories)
 
-@app.route('/orgs/new', methods = ['GET', 'POST'])
-def new_org():
-    form = OrganizationForm()
-    if form.validate_on_submit():
-        post = OrganizationModel(title = form.title.data,
-                                category = form.category.data,
-                                phonenumber = form.phonenumber.data,
-                                rating = form.rating.data,
-                                owner = form.owner.data,
-                                adres = form.adres.data,
-                                location = ndb.GeoPt(form.lat.data, form.lng.data),
-                                author = users.get_current_user(),
-                                description = form.description.data,
-                                 )
-        post.put()
-        flash(u'Организация успешно добавлена!')
-        for eng, rus in categories_all.iteritems():
-            if rus == form.category.data:
-                category_eng = eng
-        return redirect(url_for('category', category_eng=category_eng))
-    return render_template('new_org.html', form=form, categories=categories)
+
 
 
 @app.route('/contacts')

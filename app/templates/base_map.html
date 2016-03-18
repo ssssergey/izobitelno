@@ -47,7 +47,9 @@
                                                                     + adress + "<br>"
                                                                     + rating + "<br>"
                                                                     + post.description + "<br>"
-                                                    + "<a href='/editorg/"+post.id+"'>Редактировать</a>"
+                                                                    + "Последнее изменение: " + moment.unix(post.when_modified).format('LLL') + "<br>"
+                                                    + "<a href='/edit_org/"+post.id+"'>Редактировать</a>" + "<br>"
+                                                    + "<a href='/del_org/"+post.id+"'>Удалить</a>"
                                                             });
             marker1.addListener('click', function() {infowindow1.open(map, marker1);});
             markers.push(marker1);
