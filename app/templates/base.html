@@ -51,7 +51,6 @@
                         </li>
 {#                            <li><a href="{{  url_for('category', category_eng='beer') }}"><i class="fa fa-beer fa-fw"></i> Пиво</a></li>#}
                     {% endfor %}
-                    <li><a href="{{ url_for('contacts') }}"><i class="fa fa-question-circle fa-fw"></i> Контакты</a></li>
                 </ul>
             </div>
         </div>
@@ -68,7 +67,7 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-
+    <h3 align="center">{{ category_rus }}</h3>
 	{% block content %}
 
 	{% endblock %}

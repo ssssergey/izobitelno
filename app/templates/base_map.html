@@ -1,9 +1,9 @@
     <div class="row" id="wrapper">
         <div id="map">Google Maps</div>
-        <div id="over_map">
+        <div id="add_button">
             <a class="btn btn-primary" href="{{ url_for('new_org', category_value=category_rus, category_eng=category_eng) }}" role="button">Добавить объект</a>
         </div>
-        <div id="floating-panel2">
+        <div id="selflocate_button">
                 <input id="submit2" type="button" value="Определить свое местоположение на карте">
         </div>
     </div>
@@ -23,50 +23,63 @@
           draggable: true,
           scrollwheel: true,
         });
-          // Маркеры
+          // Получает JSON от БД и в цикле добавляет маркер в массив маркеров.
           var posts = {{ posts | tojson | safe }};
-          for (var i = 0; i < posts.length; i++) {
-              if (posts[i].location) {
-                  addMarker(posts[i]);
-              }
-          }
+            addMarkerstoMap(posts);
+          // Определение своего местоположения. Вызывается функция GetLocation
           document.getElementById('submit2').addEventListener('click', function () {
               navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
+              addMarkerstoMap(posts);
           });
       }
 
-        function addMarker(post) {
-            var myLatLng = {lat: post.location.lat, lng: post.location.lng};
-            var marker1 = new google.maps.Marker({
-              position: myLatLng,
-              map: map
-            });
-            var adress = post.adres.split(', Изобильный')[0];
-            var rating = "Рейтинг: " + post.rating
-            var infowindow1 = new google.maps.InfoWindow({content: post.title + "<br>"
-                                                                    + adress + "<br>"
-                                                                    + rating + "<br>"
-                                                                    + post.description + "<br>"
-                                                                    + "Последнее изменение: " + moment.unix(post.when_modified).format('LLL') + "<br>"
-                                                    + "<a href='/edit_org/"+post.id+"'>Редактировать</a>" + "<br>"
-                                                    + "<a href='/del_org/"+post.id+"'>Удалить</a>"
-                                                            });
-            marker1.addListener('click', function() {infowindow1.open(map, marker1);});
-            markers.push(marker1);
-        }
+        function addMarkerstoMap(posts) {
+            for (var i = 0; i < posts.length; i++) {
+                var post = posts[i];
+                add(post);
+                function add (post) {
+                          if (post.location) {
+                              var myLatLng = {lat: post.location.lat, lng: post.location.lng};
+                                var marker1 = new google.maps.Marker({
+                                  position: myLatLng,
+                                  map: map
+                                });
+                                var adress = post.adres.split(', Изобильный')[0];
+                                var rating = post.rating;
+                                if (post.description) {
+                                    var description = post.description.replaceAll('\n','<br>');
+                                } else {
+                                    var description = ''
+                                }
+                                var content = "<div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>"+post.title+"</h3></div>" +
+                                        "<div class='panel-body'>" +
+                                        "<div>Адрес: "+adress+"</div>" +
+                                        "<div>Рейтинг: "+post.rating+"</div>" +
+                                        "<div>Изменено: "+moment.unix(post.when_modified).format('LLL')+"</div>" +
+                                        "</div>" +
+                                        "<div class='panel-footer'>" + post.description + "</div></div>" +
+                                        "<a href='/edit_org/"+post.id+"'>Редактировать</a>" + "<br>" +
+                                        "<a href='/del_org/"+post.id+"'>Удалить</a>";
+                                var infowindow1 = new google.maps.InfoWindow({content: content});
+                                marker1.addListener('click', function() {infowindow1.open(map, marker1);});
+                                markers.push(marker1);
+                                }
+                    }
+        }}
 
       function GetLocation(location) {
-            if (location.coords.accuracy > 20) {
+            if (location.coords.accuracy > 15) {
                 $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, включите GPS и выйдите на улицу.");
             } else {
 
                 initialLocation = new google.maps.LatLng(location.coords.latitude,location.coords.longitude);
                 map.setCenter(initialLocation);
+                map.setZoom(16);
                 var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                 var marker = new google.maps.Marker({
                   position: initialLocation,
                     icon: image,
-                  map: map,
+                    map: map,
                   title:"Вы находитесь здесь!"
                 });
                 var infowindow = new google.maps.InfoWindow();
@@ -80,6 +93,10 @@
                       document.getElementById("lat").value = initialLocation.lat();
                       document.getElementById("lng").value = initialLocation.lng();}}});
             }
+        }
+      // Фунцкия для тотальной замены (в частности, переводов строки в описании маркера)
+      String.prototype.replaceAll = function(search, replace){
+          return this.split(search).join(replace);
         }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"

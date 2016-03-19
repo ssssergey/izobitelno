@@ -6,6 +6,8 @@ class PostModel(EndpointsModel):
     content = ndb.TextProperty(required = True)
     when = ndb.DateTimeProperty(auto_now_add = True)
     author = ndb.UserProperty(required = True)
+    category = ndb.StringProperty()
+    organization_id = ndb.IntegerProperty()
 
 class OrganizationModel(EndpointsModel):
     category = ndb.StringProperty(default=u'Другие')
@@ -13,7 +15,7 @@ class OrganizationModel(EndpointsModel):
     location = ndb.GeoPtProperty()
     adres = ndb.StringProperty()
     phonenumber = ndb.StringProperty()
-    rating = ndb.IntegerProperty(default=0)
+    rating = ndb.IntegerProperty()
     when_added = ndb.DateTimeProperty(auto_now_add = True)
     when_modified = ndb.DateTimeProperty(auto_now_add = True)
     author = ndb.UserProperty(required = True)

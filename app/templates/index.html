@@ -17,7 +17,7 @@
         padding:0px 0px 0px 0px;
         background: #e0f8ff;
 }
-    .fa {
+    .fa, .glyphicon {
         font-size: 7em;
 }
 </style>
@@ -36,20 +36,50 @@
     </div>
 </header>
 <div class="container-fluid">
-    {% for cat_group in categories %}
-        <div class="row row-content">
-            <div class="col-sm-2" align="center">
-                <i class="{{ cat_group.icon }}" ></i>
-                <br>
-                <h3>{{ cat_group.rus_title }}</h3>
+    <h3>Выберите вкладку</h3>
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+        <a href="#intown" aria-controls="intown"
+         role="tab" data-toggle="tab"><h4>В городе</h4></a></li>
+        <li role="presentation">
+        <a href="#callable" aria-controls="callable"
+         role="tab" data-toggle="tab"><h4>Вызов на дом</h4></a></li>
+    </ul>
+
+    <div class="tab-content" style="background: #ccecff">
+        <div role="tabpanel" class="tab-pane fade in active" id="intown">
+        {% for cat_group in categories %}
+            <div class="row row-content">
+                <div class="col-sm-2" align="center">
+                    <i class="{{ cat_group.icon }}" ></i>
+                    <br>
+                    <h3>{{ cat_group.rus_title }}</h3>
+                </div>
+                <div class="col-sm-10" align="left">
+                    {% for eng, rus in cat_group.categs.items() %}
+                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="col-sm-10" align="left">
-                {% for eng, rus in cat_group.categs.items() %}
-                    <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
-                {% endfor %}
-            </div>
+        {% endfor %}
         </div>
-    {% endfor %}
+        <div role="tabpanel" class="tab-pane fade in active" id="callable">
+        {% for cat_group in categories_callable %}
+            <div class="row row-content">
+                <div class="col-sm-2" align="center">
+                    <i class="{{ cat_group.icon }}" ></i>
+                    <br>
+                    <h3>{{ cat_group.rus_title }}</h3>
+                </div>
+                <div class="col-sm-10" align="left">
+                    {% for eng, rus in cat_group.categs.items() %}
+                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
 
     <div class="row row-footer">
         <div class="col-sm-6">

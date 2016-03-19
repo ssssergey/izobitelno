@@ -14,7 +14,7 @@
                             <input id="address" type="textbox" value="" placeholder="ул. Ленина, 10">
                             <input id="submit" type="button" value="Искать">
                     </div>
-                    <div id="floating-panel2">
+                    <div id="selflocate_button">
                             <input id="submit2" type="button" value="Определить свое местоположение на карте">
                     </div>
                 </div>
@@ -105,6 +105,7 @@
             async defer></script>
     <script>
       var map;
+      var markers = [];
       function initMap() {
           map = new google.maps.Map(document.getElementById('map'), {
               center: new google.maps.LatLng(45.37, 41.71),
@@ -116,20 +117,59 @@
               draggable: true,
               scrollwheel: true,
           });
-
+          // Получает JSON от БД и в цикле добавляет маркер в массив маркеров.
+          var posts = {{ posts | tojson | safe }};
+          addMarkerstoMap(posts);
           var geocoder = new google.maps.Geocoder();
 
           {#Listeners#}
           document.getElementById('submit').addEventListener('click', function () {
               geocodeAddress(geocoder, map);
+              addMarkerstoMap(posts)
           });
           document.getElementById('submit2').addEventListener('click', function () {
               navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
+              addMarkerstoMap(posts)
           });
           map.addListener('click', function (event) {
               geocodeLatLng(event.latLng);
+              addMarkerstoMap(posts)
           });
       }
+
+        function addMarkerstoMap(posts) {
+            for (var i = 0; i < posts.length; i++) {
+                var post = posts[i];
+                add(post);
+                function add (post) {
+                          if (post.location) {
+                              var myLatLng = {lat: post.location.lat, lng: post.location.lng};
+                                var marker1 = new google.maps.Marker({
+                                  position: myLatLng,
+                                  map: map
+                                });
+                                var adress = post.adres.split(', Изобильный')[0];
+                                var rating = post.rating;
+                                if (post.description) {
+                                    var description = post.description.replaceAll('\n','<br>');
+                                } else {
+                                    var description = ''
+                                }
+                                var content = "<div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>"+post.title+"</h3></div>" +
+                                        "<div class='panel-body'>" +
+                                        "<div>Адрес: "+adress+"</div>" +
+                                        "<div>Рейтинг: "+post.rating+"</div>" +
+                                        "<div>Изменено: "+moment.unix(post.when_modified).format('LLL')+"</div>" +
+                                        "</div>" +
+                                        "<div class='panel-footer'>" + post.description + "</div></div>" +
+                                        "<a href='/edit_org/"+post.id+"'>Редактировать</a>" + "<br>" +
+                                        "<a href='/del_org/"+post.id+"'>Удалить</a>";
+                                var infowindow1 = new google.maps.InfoWindow({content: content});
+                                marker1.addListener('click', function() {infowindow1.open(map, marker1);});
+                                markers.push(marker1);
+                                }
+                    }
+        }}
 
       function geocodeAddress(geocoder, resultsMap) {
         var address = document.getElementById('address').value + ", Изобильный, Ставропольский край, Россия";
@@ -176,12 +216,13 @@
 
         function GetLocation(location) {
 {#            $('.coordinates').append(location.coords.latitude + ", " + location.coords.longitude);#}
-            if (location.coords.accuracy > 20) {
+            if (location.coords.accuracy > 15) {
                 $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, включите GPS и выйдите на улицу.");
             } else {
 
                 initialLocation = new google.maps.LatLng(location.coords.latitude,location.coords.longitude);
                 map.setCenter(initialLocation);
+                map.setZoom(16);
 {#                var coords = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);#}
                 var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                 var marker = new google.maps.Marker({
@@ -203,6 +244,10 @@
                       document.getElementById("lng").value = initialLocation.lng();}}});
             }
         }
+
+      // Фунцкия для тотальной замены (в частности, переводов строки в описании маркера)
+      String.prototype.replaceAll = function(search, replace){
+          return this.split(search).join(replace);}
 
     </script>
 {% endblock %}

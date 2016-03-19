@@ -18,38 +18,60 @@ categories = [
     'rus_title':u'Еда',
     'icon':"fa fa-cutlery fa-fw",
     'categs':{'beer':u'Пиво','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты',
-              'water':u'Вода для кулеров'}},
+              'food_shop':u'Продуктовый магазин','dining':u'Столовая'}},
     {'eng_title':'auto',
     'rus_title':u'Авто',
      'icon':"fa fa-car fa-fw",
     'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autoglass':u'Автостекло','autotyres':u'Шиномонтаж',
-              'motoroil_buy':u'Купить моторное масло','motoroil_change':u'Замена моторного масла', 'chassis':u'Ходовая',
-              'electric':u'Электрик','osago':u'ОСАГО'}},
+              'autoshop':u'Автозапчасти','motoroil_change':u'Замена моторного масла', 'chassis':u'Ходовая',
+              'electric':u'Электрик','osago':u'ОСАГО','gasstation':u'АЗС'}},
     {'eng_title':'service',
     'rus_title':u'Бытовые услуги',
      'icon':"fa fa-group fa-fw",
-    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'grugstore':u'Аптека'}},
+    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'grugstore':u'Аптека', 'photo':u'Фото',
+              'repair_gadgets':u'Ремонт техники','salon':u'Салон красоты'}},
     {'eng_title':'house',
     'rus_title':u'Для дома',
-     'icon':"fa fa-bank fa-fw",
+     'icon':"glyphicon glyphicon-home",
     'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород'}},
-    {'eng_title':'finance',
-    'rus_title':u'Банки и финансы',
-     'icon':"fa fa-dollar fa-fw",
-    'categs':{'sbercashpoint':u'Банкомат Сбербанка', 'bank':u'Банк'}},
-    {'eng_title':'gadget',
-    'rus_title':u'Компьютеры и гаджеты',
+    {'eng_title':'finance_state',
+    'rus_title':u'Финансовые и госслужбы',
+     'icon':"fa fa-bank fa-fw",
+    'categs':{'sbercashpoint':u'Банкомат Сбербанка', 'bank':u'Банк', 'state_service':u'Госуслуги'}},
+    {'eng_title':'goods',
+    'rus_title':u'Бытовые товары',
      'icon':"fa fa-tablet fa-fw",
-    'categs':{'pc':u'Компьютеры и комплектующие', 'smarphones':u'Телефоны', 'repair_gadgets':u'Ремонт'}},
-    {'eng_title':'sport',
-    'rus_title':u'Спорт',
-     'icon':"fa fa-futbol-o fa-fw",
-    'categs':{'gym':u'Тренажерный (фитнес) зал', 'running':u'Бег'}},
+    'categs':{'pc':u'Компьютеры и комплектующие', 'smarphones':u'Телефоны'}},
+    {'eng_title':'leisure',
+    'rus_title':u'Досуг',
+     'icon':"glyphicon glyphicon-send",
+    'categs':{'gym':u'Тренажерный (фитнес) зал', 'running':u'Бег', 'cafe_bar':u'Кафе и бары', 'banya':u'Баня и сауна',
+              'billiards':u'Бильярд', 'fishing_hunting':u'Рыбалка и охота' }},
+    {'eng_title':'children',
+    'rus_title':u'Дети',
+     'icon':"fa fa-child fa-fw",
+    'categs':{'kindergarden':u'Детсад', 'childgoods':u'Товары для детей'}, 'developement':u'Развитие'},
+    {'eng_title':'accommodation',
+    'rus_title':u'Жилье',
+     'icon':"fa fa-bed fa-fw",
+    'categs':{'hotel':u'Гостиница', 'private':u'Частники'}},
+    {'eng_title':'celebration',
+    'rus_title':u'На праздник',
+     'icon':"fa fa-birthday-cake fa-fw",
+    'categs':{'flowers':u'Цветы', 'fireworks':u'Фейерверки', 'celebration_goods':u'Товары для праздника'}},
     ]
+categories_callable = [{'eng_title':'callable',
+                        'rus_title':u'Вызов на дом',
+                        'icon':"fa fa-phone fa-fw",
+                        'citaton':(u'', u''),
+                        'categs':{'taxi':u'Такси','pizza':u'Пицца', 'electric':u'Электрик', 'plummer':u'Сантехник',
+                                  'nanny':u'Няня','gasmaster':u'Газовщик','hodman':u'Подсобный','cargo':u'Грузоперевозки'}},
+                       ]
 categories_all = {}
 for i_dict in categories:
     categories_all.update(i_dict['categs'])
-
+for i_dict in categories_callable:
+    categories_all.update(i_dict['categs'])
 
 class OrganizationForm(Form):
     category = StringField()
@@ -81,16 +103,20 @@ class GaeEncoder(json.JSONEncoder):
 
 @app.route('/')
 def index():
-    return render_template("index.html", categories=categories)
+    return render_template("index.html", categories=categories, categories_callable=categories_callable)
 
 @app.route('/category/<category_eng>')
 def category(category_eng):
+
     orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).fetch()
     return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
-                           category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories)
+                           category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories,
+                           categories_callable=categories_callable)
 
 @app.route('/orgs/new', methods = ['GET', 'POST'])
 def new_org():
+    category = request.args.get("category_value")
+    orgs = OrganizationModel.query(OrganizationModel.category == category).fetch()
     form = OrganizationForm()
     if form.validate_on_submit():
         post = OrganizationModel(title = form.title.data,
@@ -110,43 +136,51 @@ def new_org():
             if rus == form.category.data:
                 category_eng = eng
         return redirect(url_for('category', category_eng=category_eng))
-    return render_template('new_org.html', form=form, categories=categories)
+    return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)))
 
 @app.route('/edit_org/<int:id>', methods = ['GET', 'POST'])
 def edit_org(id):
-    form = OrganizationForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            org = OrganizationModel.get_by_id(int(id))
-            org.populate(title = form.title.data,
-                        category = form.category.data,
-                        phonenumber = form.phonenumber.data,
-                        rating = form.rating.data,
-                        owner = form.owner.data,
-                        adres = form.adres.data,
-                        location = ndb.GeoPt(form.lat.data, form.lng.data),
-                        user_modified = users.get_current_user(),
-                        when_modified = datetime.now(),
-                        description = form.description.data,
-                         )
-            org.put()
-            flash(u'Изменения приняты!')
-            for eng, rus in categories_all.iteritems():
-                if rus == form.category.data:
-                    category_eng = eng
-            return redirect(url_for('category', category_eng=category_eng))
     org = OrganizationModel.get_by_id(int(id))
-    form = OrganizationForm()
-    form.category.data = org.category
-    form.title.data = org.title
-    form.phonenumber.data = org.phonenumber
-    form.rating.data = org.rating
-    form.owner.data = org.owner
-    form.adres.data = org.adres
-    form.description.data = org.description
-    form.lat.data = org.location.lat
-    form.lng.data = org.location.lon
-    return render_template("edit_org.html", form=form, id=id)
+    if users.is_current_user_admin() or users.get_current_user() == org.author:
+        form = OrganizationForm()
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                org.populate(title = form.title.data,
+                            category = form.category.data,
+                            phonenumber = form.phonenumber.data,
+                            rating = form.rating.data,
+                            owner = form.owner.data,
+                            adres = form.adres.data,
+                            location = ndb.GeoPt(form.lat.data, form.lng.data),
+                            user_modified = users.get_current_user(),
+                            when_modified = datetime.now(),
+                            description = form.description.data,
+                             )
+                org.put()
+                flash(u'Изменения приняты!')
+                for eng, rus in categories_all.iteritems():
+                    if rus == form.category.data:
+                        category_eng = eng
+                return redirect(url_for('category', category_eng=category_eng))
+        form = OrganizationForm()
+        form.category.data = org.category
+        form.title.data = org.title
+        form.phonenumber.data = org.phonenumber
+        form.rating.data = org.rating
+        form.owner.data = org.owner
+        form.adres.data = org.adres
+        form.description.data = org.description
+        form.lat.data = org.location.lat
+        form.lng.data = org.location.lon
+        orgs = OrganizationModel.query(OrganizationModel.category == org.category).fetch()
+        return render_template("edit_org.html", form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)))
+    else:
+        flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!")
+        for eng, rus in categories_all.iteritems():
+            if rus == org.category:
+                category_eng = eng
+        return redirect(url_for('category', category_eng=category_eng))
+
 
 @app.route('/del_org/<int:id>', methods = ['GET','DELETE'])
 def del_org(id):
