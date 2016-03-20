@@ -22,6 +22,7 @@ class OrganizationModel(EndpointsModel):
     user_modified = ndb.UserProperty()
     owner = ndb.StringProperty()
     description = ndb.TextProperty()
+    asortiment = ndb.StringProperty(repeated=True)
 
 class UserModel(EndpointsModel):
     auth_object = ndb.UserProperty(required = True)
@@ -36,3 +37,5 @@ class UserModel(EndpointsModel):
     false_actions = ndb.IntegerProperty()
     rating = ndb.IntegerProperty()
 
+class TagsModel(EndpointsModel):
+    all_tags = ndb.StringProperty(repeated=True)

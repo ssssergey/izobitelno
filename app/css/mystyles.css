@@ -31,7 +31,7 @@ address{
 }
 
 body{
-    padding:150px 0px 0px 0px;
+    padding:100px 0px 0px 0px;
     z-index:0;
 	background: #e0f8ff;
 	font-family: Roboto, sans-serif;
@@ -126,8 +126,12 @@ body{
     padding: 10px;
 }
 
-li.active > a {
-	background: #ccecff !important;
+ul.nav-tabs > li.active > a {
+	background: #f3fdff !important;
+}
+
+ul.nav-tabs > li:not(.active) > a:hover {
+	background: #eaf8ff !important;
 }
 
 @media (max-width: 767px) {

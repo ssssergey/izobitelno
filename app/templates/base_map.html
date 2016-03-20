@@ -1,12 +1,3 @@
-    <div class="row" id="wrapper">
-        <div id="map">Google Maps</div>
-        <div id="add_button">
-            <a class="btn btn-primary" href="{{ url_for('new_org', category_value=category_rus, category_eng=category_eng) }}" role="button">Добавить объект</a>
-        </div>
-        <div id="selflocate_button">
-                <input id="submit2" type="button" value="Определить свое местоположение на карте">
-        </div>
-    </div>
 
     {#GOOGLE MAPS#}
     <script>
@@ -25,11 +16,20 @@
         });
           // Получает JSON от БД и в цикле добавляет маркер в массив маркеров.
           var posts = {{ posts | tojson | safe }};
+          var geocoder = new google.maps.Geocoder();
             addMarkerstoMap(posts);
           // Определение своего местоположения. Вызывается функция GetLocation
-          document.getElementById('submit2').addEventListener('click', function () {
+          document.getElementById('my_location_button').addEventListener('click', function () {
               navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
               addMarkerstoMap(posts);
+          });
+          document.getElementById('submit').addEventListener('click', function () {
+              geocodeAddress(geocoder, map);
+              addMarkerstoMap(posts)
+          });
+          map.addListener('click', function (event) {
+              geocodeLatLng(event.latLng);
+              addMarkerstoMap(posts)
           });
       }
 
@@ -66,6 +66,49 @@
                                 }
                     }
         }}
+
+      function geocodeAddress(geocoder, resultsMap) {
+        var address = document.getElementById('address').value + ", Изобильный, Ставропольский край, Россия";
+        geocoder.geocode({'address': address}, function(results, status) {
+          if (status === google.maps.GeocoderStatus.OK) {
+            resultsMap.setCenter(results[0].geometry.location);
+            var marker = new google.maps.Marker({
+              map: resultsMap,
+              position: results[0].geometry.location
+            });
+              document.getElementById("adres").value = address;
+              document.getElementById("lat").value = results[0].geometry.location.lat();
+              document.getElementById("lng").value = results[0].geometry.location.lng();
+          } else {
+            alert('Поиск не удался: ' + status);
+          }
+        });
+      }
+
+      function geocodeLatLng(location) {
+          var geocoder = new google.maps.Geocoder();
+          geocoder.geocode({'location': location}, function(results, status) {
+            if (status === google.maps.GeocoderStatus.OK) {
+              if (results[0]) {
+                  var address = results[0].formatted_address;
+                  document.getElementById("adres").value = address;
+                  document.getElementById("lat").value = location.lat();
+                  document.getElementById("lng").value = location.lng();
+                  var marker = new google.maps.Marker({
+                          position: location,
+                          map: map
+                        });
+                  var infowindow = new google.maps.InfoWindow();
+                    infowindow.setContent(address);
+                    infowindow.open(map, marker);
+              } else {
+                console.log('Ничего не найдено');
+              }
+            } else {
+              console.log('Геопоиск не удался из-за: ' + status);
+            }
+          });
+        }
 
       function GetLocation(location) {
             if (location.coords.accuracy > 15) {

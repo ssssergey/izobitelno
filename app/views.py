@@ -4,11 +4,11 @@ from datetime import datetime
 from collections import OrderedDict
 from flask import render_template, redirect, flash, url_for, request
 from app import app
-from models import PostModel, OrganizationModel
+from models import PostModel, OrganizationModel, TagsModel
 from decorators import login_required
 from google.appengine.api import users, datastore_types
 from google.appengine.ext import ndb
-
+from google.appengine.api import memcache
 from flask.ext.wtf import Form
 from wtforms import StringField, FloatField, TextAreaField, IntegerField
 from wtforms.validators import DataRequired,Length,EqualTo
@@ -33,7 +33,7 @@ categories = [
     {'eng_title':'house',
     'rus_title':u'Для дома',
      'icon':"glyphicon glyphicon-home",
-    'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород'}},
+    'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород', 'furniture':u'Мебель', 'security':u'Системы безопасности'}},
     {'eng_title':'finance_state',
     'rus_title':u'Финансовые и госслужбы',
      'icon':"fa fa-bank fa-fw",
@@ -107,7 +107,6 @@ def index():
 
 @app.route('/category/<category_eng>')
 def category(category_eng):
-
     orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).fetch()
     return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
                            category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories,
@@ -207,8 +206,24 @@ def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
     return render_template('list_orgs.html', posts=orgs, categories=categories)
 
+def add_tag(tag_list):
+    new_list = []
+    tags_from_ds = TagsModel.query(TagsModel.id == 'myid')
+    if not tags_from_ds:
+        tags_from_ds = TagsModel(id='myid')
+    old_list = tags_from_ds.all_tags
+    new_list = list(set(old_list+tag_list))
+    memcache.set('all_tags', new_list)
+    tags_from_ds.all_tags = new_list
+    tags_from_ds.put()
 
-
+def get_all_tags(update=False):
+    all_tags = memcache.get('all_tags')
+    if all_tags is None or update:
+        all_tags = TagsModel.query(TagsModel.id == 'myid')
+        all_tags = all_tags.all_tags
+        memcache.set('all_tags', all_tags)
+    return all_tags
 
 @app.route('/contacts')
 def contacts():
