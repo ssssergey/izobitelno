@@ -15,7 +15,7 @@
                             <input id="submit" type="button" value="Искать">
                     </div>
                     <div id="selflocate_button">
-                            <input id="submit2" type="button" value="Определить свое местоположение на карте">
+                            <input id="my_location_button" type="button" value="Определить свое местоположение на карте">
                     </div>
                 </div>
 
@@ -23,8 +23,39 @@
             </div>
 
             <div class="col-sm-6">
+                <div class="row">
+
+                <link rel="stylesheet" href="/css/tags.css">
+                <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+                <script type="text/javascript" src="/js/tags.js"></script>
+                <script type="text/javascript" src="/js/autofill.js"></script>
+                <style type="text/css">
+                    input {
+                        outline: none;
+                    }
+                </style>
+
+                <script>
+                    $(function() {
+                        var tags = "{{ all_tags | safe }}";
+                        tags = tags.split(',');
+                        $("#testInput").tags({
+                            unique: true
+                        }).autofill({data: tags});
+                    });
+                    $(document).ready(function() {
+                      $('form input').keydown(function(event){
+                        if(event.keyCode == 13) {
+                          event.preventDefault();
+                          return false;
+                        }
+                      });
+                    });
+                </script>
+
                 <form action="{{ url_for('new_org', category_eng = category_eng) }}" method="post" accept-charset="utf-8">
                     {{ form.csrf_token }}
+                    <input type="text" name="tags" id="testInput" value=""/>
                     <p>
                         <label for="title">Название</label>
                         {{ form.title|safe }}
@@ -94,9 +125,12 @@
                         </ul>
                         {% endif %}
                     </p>
-                    <input type="text" name="tags" placeholder="Tags" class="tm-input"/>
+
+
                     <p><input type="submit" value="Сохранить"/></p>
                 </form>
+
+                </div>
             </div>
 
         </div>

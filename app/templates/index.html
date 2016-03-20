@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/html">
+{#<html xmlns="http://www.w3.org/1999/html">#}
 <head>
 	<title>Изобильный</title>
 	<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<script src="js/moment.min.js"></script>
+{#	<script src="js/moment.min.js"></script>#}
 	<link href="css/bootstrap.min.css" rel="stylesheet">
   	<link href="css/bootstrap-theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
     <link href="css/mystyles.css" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript" src="js/autofill.js"></script>
+
 </head>
 <style>
     body{
@@ -27,7 +30,7 @@
     <div class="container">
         <div class="row row-header">
             <div class="col-xs-12 col-sm-8">
-                <h1><span style="color:orangered">И</span>зобильный</h1>
+                <h1><span style="color:orangered">И</span>зопоиск</h1>
             </div>
             <div class="col-xs-12 col-sm-4">
                 <i class="fa fa-thumbs-up fa-fw"></i>
@@ -36,6 +39,28 @@
     </div>
 </header>
 <div class="container-fluid">
+    <div class="row row-content">
+        <div class="col-sm-12" align="center">
+
+                <style type="text/css">
+                    input {
+                        outline: none;
+                    }
+                </style>
+
+                <script>
+                    $(function() {
+                        var tags = "{{ all_tags | safe }}";
+                        tags = tags.split(',');
+                        $("#search").autofill({data: tags});
+                    });
+                </script>
+                <form action="{{ url_for('search') }}" method="post" accept-charset="utf-8">
+                    <input id="search" name="search" type="text" value="" placeholder="Вводите сюда"/>
+                    <p><input type="submit" value="Поиск в Изобильном"/></p>
+                </form>
+        </div>
+    </div>
     <h3>Выберите вкладку</h3>
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active">
@@ -117,7 +142,7 @@
 
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>#}
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
 </body>

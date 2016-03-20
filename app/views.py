@@ -83,6 +83,7 @@ class OrganizationForm(Form):
     lat = FloatField()
     lng = FloatField()
     description = TextAreaField()
+    tags = StringField()
 
 
 class GaeEncoder(json.JSONEncoder):
@@ -103,7 +104,14 @@ class GaeEncoder(json.JSONEncoder):
 
 @app.route('/')
 def index():
-    return render_template("index.html", categories=categories, categories_callable=categories_callable)
+    all_tags = get_all_tags()
+    return render_template("index.html", categories=categories, categories_callable=categories_callable, all_tags=','.join(all_tags))
+
+@app.route('/search', methods = ['GET', 'POST'])
+def search():
+    keyword = request.form.get('search').lower()
+    selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword).fetch()
+    return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)))
 
 @app.route('/category/<category_eng>')
 def category(category_eng):
@@ -128,14 +136,17 @@ def new_org():
                                 author = users.get_current_user(),
                                 user_modified = users.get_current_user(),
                                 description = form.description.data,
+                                tags = form.tags.data.split(',')
                                  )
         post.put()
         flash(u'Организация успешно добавлена!')
         for eng, rus in categories_all.iteritems():
             if rus == form.category.data:
                 category_eng = eng
+        add_tag(form.tags.data.lower().split(','))
         return redirect(url_for('category', category_eng=category_eng))
-    return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)))
+    all_tags = get_all_tags()
+    return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
 
 @app.route('/edit_org/<int:id>', methods = ['GET', 'POST'])
 def edit_org(id):
@@ -154,12 +165,14 @@ def edit_org(id):
                             user_modified = users.get_current_user(),
                             when_modified = datetime.now(),
                             description = form.description.data,
+                            tags = form.tags.data.split(',')
                              )
                 org.put()
                 flash(u'Изменения приняты!')
                 for eng, rus in categories_all.iteritems():
                     if rus == form.category.data:
                         category_eng = eng
+                add_tag(form.tags.data.lower().split(','))
                 return redirect(url_for('category', category_eng=category_eng))
         form = OrganizationForm()
         form.category.data = org.category
@@ -171,8 +184,10 @@ def edit_org(id):
         form.description.data = org.description
         form.lat.data = org.location.lat
         form.lng.data = org.location.lon
+        form.tags.data = ",".join(org.tags)
         orgs = OrganizationModel.query(OrganizationModel.category == org.category).fetch()
-        return render_template("edit_org.html", form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)))
+        all_tags = get_all_tags()
+        return render_template("edit_org.html", form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), tags=",".join(org.tags), all_tags=','.join(all_tags))
     else:
         flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!")
         for eng, rus in categories_all.iteritems():
@@ -208,9 +223,10 @@ def list_orgs():
 
 def add_tag(tag_list):
     new_list = []
-    tags_from_ds = TagsModel.query(TagsModel.id == 'myid')
+    tags_from_ds = TagsModel.query(TagsModel.uid == 'myid').get()
+    # Если нет такой записи,то создаем ее
     if not tags_from_ds:
-        tags_from_ds = TagsModel(id='myid')
+        tags_from_ds = TagsModel(uid='myid')
     old_list = tags_from_ds.all_tags
     new_list = list(set(old_list+tag_list))
     memcache.set('all_tags', new_list)
@@ -220,9 +236,12 @@ def add_tag(tag_list):
 def get_all_tags(update=False):
     all_tags = memcache.get('all_tags')
     if all_tags is None or update:
-        all_tags = TagsModel.query(TagsModel.id == 'myid')
-        all_tags = all_tags.all_tags
-        memcache.set('all_tags', all_tags)
+        all_tags = TagsModel.query(TagsModel.uid == 'myid').get()
+        if all_tags:
+            all_tags = all_tags.all_tags
+            memcache.set('all_tags', all_tags)
+        else:
+            all_tags = []
     return all_tags
 
 @app.route('/contacts')

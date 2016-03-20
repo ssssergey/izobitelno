@@ -18,15 +18,18 @@
           var posts = {{ posts | tojson | safe }};
           var geocoder = new google.maps.Geocoder();
             addMarkerstoMap(posts);
+          // Listeners
           // Определение своего местоположения. Вызывается функция GetLocation
           document.getElementById('my_location_button').addEventListener('click', function () {
               navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
               addMarkerstoMap(posts);
           });
+          // Обработка ввода улицы.
           document.getElementById('submit').addEventListener('click', function () {
               geocodeAddress(geocoder, map);
               addMarkerstoMap(posts)
           });
+          // Обработка клика по карте - создание маркера.
           map.addListener('click', function (event) {
               geocodeLatLng(event.latLng);
               addMarkerstoMap(posts)

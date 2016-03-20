@@ -22,7 +22,7 @@ class OrganizationModel(EndpointsModel):
     user_modified = ndb.UserProperty()
     owner = ndb.StringProperty()
     description = ndb.TextProperty()
-    asortiment = ndb.StringProperty(repeated=True)
+    tags = ndb.StringProperty(repeated=True)
 
 class UserModel(EndpointsModel):
     auth_object = ndb.UserProperty(required = True)
@@ -39,3 +39,4 @@ class UserModel(EndpointsModel):
 
 class TagsModel(EndpointsModel):
     all_tags = ndb.StringProperty(repeated=True)
+    uid = ndb.StringProperty()
