@@ -96,8 +96,8 @@ def show_categories_all():
     return render_template("categories.html", categories=categories, categories_callable=categories_callable)
 
 
-@app.route('/search', methods = ['GET', 'POST'])
-def search():
+@app.route('/search_result', methods = ['GET', 'POST'])
+def search_result():
     keyword = request.form.get('search').lower()
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword).fetch()
     return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)))

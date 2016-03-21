@@ -3,6 +3,7 @@
     <script>
       var map;
       var markers = [];
+      var new_markers_array = [];
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 45.367557, lng: 41.711604},
@@ -30,6 +31,7 @@
               addMarkerstoMap(posts)
           });
           // Обработка клика по карте - создание маркера.
+
           map.addListener('click', function (event) {
               geocodeLatLng(event.latLng);
               addMarkerstoMap(posts)
@@ -76,10 +78,15 @@
         geocoder.geocode({'address': address}, function(results, status) {
           if (status === google.maps.GeocoderStatus.OK) {
             resultsMap.setCenter(results[0].geometry.location);
+              map.setZoom(18);
+              clearNewMarkers();
+              var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
             var marker = new google.maps.Marker({
               map: resultsMap,
+                icon: image,
               position: results[0].geometry.location
             });
+              new_markers_array.push(marker_new);
               document.getElementById("adres").value = address;
               document.getElementById("lat").value = results[0].geometry.location.lat();
               document.getElementById("lng").value = results[0].geometry.location.lng();
@@ -98,13 +105,17 @@
                   document.getElementById("adres").value = address;
                   document.getElementById("lat").value = location.lat();
                   document.getElementById("lng").value = location.lng();
-                  var marker = new google.maps.Marker({
+                  var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+                  clearNewMarkers();
+                  var marker_new = new google.maps.Marker({
                           position: location,
+                            icon: image,
                           map: map
                         });
                   var infowindow = new google.maps.InfoWindow();
                     infowindow.setContent(address);
-                    infowindow.open(map, marker);
+                    infowindow.open(map, marker_new);
+                  new_markers_array.push(marker_new);
               } else {
                 console.log('Ничего не найдено');
               }
@@ -121,7 +132,8 @@
 
                 initialLocation = new google.maps.LatLng(location.coords.latitude,location.coords.longitude);
                 map.setCenter(initialLocation);
-                map.setZoom(16);
+                map.setZoom(18);
+                clearNewMarkers();
                 var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                 var marker = new google.maps.Marker({
                   position: initialLocation,
@@ -132,6 +144,7 @@
                 var infowindow = new google.maps.InfoWindow();
                 infowindow.setContent("Вы находитесь здесь!<br>Точность местоопределения: " + location.coords.accuracy);
                 infowindow.open(map, marker);
+                new_markers_array.push(marker_new);
                 var geocoder = new google.maps.Geocoder();
                 geocoder.geocode({'location': initialLocation}, function(results, status) {
                 if (status === google.maps.GeocoderStatus.OK) {
@@ -144,6 +157,12 @@
       // Фунцкия для тотальной замены (в частности, переводов строки в описании маркера)
       String.prototype.replaceAll = function(search, replace){
           return this.split(search).join(replace);
+        };
+
+      function clearNewMarkers() {
+            for (var i = 0; i < new_markers_array.length; i++) {
+                new_markers_array[i].setMap(null);
+            }
         }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"
