@@ -58,10 +58,11 @@ for i_dict in categories_callable:
     categories_all.update(i_dict['categs'])
 
 class OrganizationForm(Form):
-    category = StringField()
+    category = StringField(validators=[DataRequired(message=u'Укажите категорию!')])
     title = StringField(default=u"Без названия")
-    adres = StringField(validators=[DataRequired(message=u'Обязательное поле!')])
-    phonenumber = StringField(render_kw={"placeholder": u"+7 928 1111111"})
+    adres = StringField(validators=[DataRequired(message=u'Укажите местоположение!')])
+    phonenumber = StringField(render_kw={"placeholder": u"(999) 999-9999"})
+    phonenumber_static = StringField(render_kw={"placeholder": u"9-99-99"})
     rating = IntegerField(default=0)
     owner = StringField(render_kw={"placeholder": u"дядя Коля"})
     lat = FloatField(u'Широта',validators=[DataRequired(message=u'Укажите местоположение!')])
@@ -114,28 +115,34 @@ def new_org():
     category = request.args.get("category_value")
     orgs = OrganizationModel.query(OrganizationModel.category == category).fetch()
     form = OrganizationForm()
-    if form.validate_on_submit():
-        post = OrganizationModel(title = form.title.data,
-                                category = form.category.data,
-                                phonenumber = form.phonenumber.data,
-                                rating = form.rating.data,
-                                owner = form.owner.data,
-                                adres = form.adres.data,
-                                location = ndb.GeoPt(form.lat.data, form.lng.data),
-                                author = users.get_current_user(),
-                                user_modified = users.get_current_user(),
-                                description = form.description.data,
-                                tags = form.tags.data.split(',')
-                                 )
-        post.put()
-        flash(u'Организация успешно добавлена!')
-        for eng, rus in categories_all.iteritems():
-            if rus == form.category.data:
-                category_eng = eng
-        add_tag(form.tags.data.lower().split(','))
-        return redirect(url_for('category', category_eng=category_eng))
-    all_tags = get_all_tags()
-    return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+    if request.method == 'GET':
+        all_tags = get_all_tags()
+        return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+    elif request.method == 'POST':
+        if form.validate_on_submit():
+            post = OrganizationModel(title = form.title.data,
+                                    category = form.category.data,
+                                    phonenumber = form.phonenumber.data.split(','),
+                                    phonenumber_static = form.phonenumber_static.data.split(','),
+                                    rating = form.rating.data,
+                                    owner = form.owner.data,
+                                    adres = form.adres.data,
+                                    location = ndb.GeoPt(form.lat.data, form.lng.data),
+                                    author = users.get_current_user(),
+                                    user_modified = users.get_current_user(),
+                                    description = form.description.data,
+                                    tags = form.tags.data.split(',')
+                                     )
+            post.put()
+            flash(u'Организация успешно добавлена!')
+            for eng, rus in categories_all.iteritems():
+                if rus == form.category.data:
+                    category_eng = eng
+            add_tag(form.tags.data.lower().split(','))
+            return redirect(url_for('category', category_eng=category_eng))
+        else:
+            all_tags = get_all_tags()
+            return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
 
 @app.route('/edit_org/<int:id>', methods = ['GET', 'POST'])
 def edit_org(id):
@@ -146,7 +153,8 @@ def edit_org(id):
             if form.validate_on_submit():
                 org.populate(title = form.title.data,
                             category = form.category.data,
-                            phonenumber = form.phonenumber.data,
+                            phonenumber = form.phonenumber.data.split(', '),
+                            phonenumber_static = form.phonenumber_static.data.split(', '),
                             rating = form.rating.data,
                             owner = form.owner.data,
                             adres = form.adres.data,
@@ -166,7 +174,8 @@ def edit_org(id):
         form = OrganizationForm()
         form.category.data = org.category
         form.title.data = org.title
-        form.phonenumber.data = org.phonenumber
+        form.phonenumber.data = ", ".join(org.phonenumber)
+        form.phonenumber_static.data = ", ".join(org.phonenumber_static)
         form.rating.data = org.rating
         form.owner.data = org.owner
         form.adres.data = org.adres

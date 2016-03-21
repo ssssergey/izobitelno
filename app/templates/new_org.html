@@ -52,8 +52,19 @@
                       });
                     });
                 </script>
+                <script src="/js/jquery.maskedinput.min.js"></script>
+                <script>
+                    jQuery(function($){
+                        $("#phonenumber").mask("(999) 999-9999?, (999) 999-9999",{completed:function(){
+{#                            $(this).mask("(999) 999-9999?, (999) 999-9999");#}
+                        }});
+                        $("#phonenumber_static").mask("9-99-99?, 9-99-99",{completed:function(){
+{#                            $(this).mask("9-99-99?, 9-99-99");#}
+                        }});
+                    });
+                </script>
 
-                <form action="{{ url_for('new_org', category_eng = category_eng) }}" method="post" accept-charset="utf-8">
+                <form action="{{ url_for('new_org', category_eng = category_eng, category_value = request.args.get('category_value')) }}" method="post" accept-charset="utf-8">
                     {{ form.csrf_token }}
                     <input type="text" name="tags" id="testInput" value=""/>
                     <p>
@@ -93,11 +104,22 @@
                         {% endif %}
                     </p>
                     <p>
-                        <label for="phonenumber">Номер телефона</label>
-                        {{ form.phonenumber|safe }}
+                        <label for="phonenumber">Мобильные номера (второй номер начинайте печатать сразу за первым)</label>
+                        {{ form.phonenumber(size=70)|safe }}
                         {% if form.phonenumber.errors %}
                         <ul class="errors">
                             {% for error in form.phonenumber.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </p>
+                    <p>
+                        <label for="phonenumber_static">Городские номера (второй номер начинайте печатать сразу за первым)</label>
+                        {{ form.phonenumber_static(size=70)|safe }}
+                        {% if form.phonenumber_static.errors %}
+                        <ul class="errors">
+                            {% for error in form.phonenumber_static.errors %}
                             <li>{{ error }}</li>
                             {% endfor %}
                         </ul>
@@ -125,12 +147,8 @@
                         </ul>
                         {% endif %}
                     </p>
-
-
-                    <p><input type="submit" value="Сохранить"/></p>
+                    <p><input type="submit" value="Сохранить изменения"/></p>
                 </form>
-
-                </div>
             </div>
 
         </div>
@@ -140,4 +158,3 @@
 {% endblock %}
 
 {#TODO: Change form in Bootsrap style#}
-{#TODO: Phonenumber make prefix +7 fixed#}
