@@ -1,146 +1,131 @@
 <!DOCTYPE html>
-{#<html xmlns="http://www.w3.org/1999/html">#}
+<html xmlns="http://www.w3.org/1999/html">
 <head>
 	<title>Изобильный</title>
+    <meta content='Изобильный, изобильный, разливное, пиво, пицца, пица, доставка, купить, Ставропольский край' name='keywords'/>
 	<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-{#	<script src="js/moment.min.js"></script>#}
 	<link href="css/bootstrap.min.css" rel="stylesheet">
   	<link href="css/bootstrap-theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
-    <link href="css/mystyles.css" rel="stylesheet" type="text/css">
+{#    <link href="css/mystyles.css" rel="stylesheet" type="text/css">#}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript" src="js/autofill.js"></script>
-
 </head>
+
 <style>
     body{
-        padding:0px 0px 0px 0px;
-        background: #e0f8ff;
+        background: white;
 }
-    .fa, .glyphicon {
-        font-size: 7em;
+    html, body {
+        height: 100%;
+    }
+    .container-table {
+        height: 50%;
+        display: table;
+    }
+    .vertical-center-row {
+        display: table-cell;
+        vertical-align: middle;
+    }
+    header {
+{#        position: fixed;#}
+{#        width: 100%;#}
+{#        top: 0px;#}
+{#        margin:0;#}
+        background: #315981;
+    }
+    footer {
+        position:fixed;
+        width: 100%;
+        bottom: 0px;
+        margin:0;
+        background: rgba(223, 223, 223, 0.96);
+        color: #315981;
 }
+    input {
+        outline: none;
+        width: 100% !important;
+    }
+    .autofill-bg {
+        position: relative;
+        margin-top: 7px;
+        margin-left: 13px;
+        background-color: white !important;
+        outline: none;
+        float: left;
+        border: 0px solid;
+    }
+    button {
+        position: relative;
+        top:20px
+    }
+{#    @media (max-width: 768px) {#}
+{#    input {#}
+{#        width: 50%!important;#}
+{#    }}#}
+    @media (max-width: 500px) {
+    input {
+        width: 80%!important;
+    }
+    }
 </style>
 
 <body>
-<header class="jumbotron">
-    <div class="container">
-        <div class="row row-header">
-            <div class="col-xs-12 col-sm-8">
-                <h1><span style="color:orangered">И</span>зопоиск</h1>
+    <header>
+        <div class="container">
+            <div class="row row-header">
+                <div class="col-xs-12 col-sm-12">
+                    <h2><span style="color:orangered">И</span><span style="color:white">зопоиск</span></h2>
+                </div>
             </div>
-            <div class="col-xs-12 col-sm-4">
-                <i class="fa fa-thumbs-up fa-fw"></i>
+        </div>
+    </header>
+
+    <div class="container container-table">
+        <div class="row vertical-center-row">
+            <div class="text-center col-md-5 col-md-offset-3">
+                    <h1><span style="color:orangered">И</span>зопоиск</h1>
+                    <form action="{{ url_for('search') }}" method="post" accept-charset="utf-8">
+                        <input class="form-control" id="search" name="search" type="text" value="" placeholder="Введите запрос"/>
+                        <button type="submit" class="btn btn-primary">Поиск в Изобильном</button>
+                    </form>
             </div>
         </div>
     </div>
-</header>
-<div class="container-fluid">
-    <div class="row row-content">
-        <div class="col-sm-12" align="center">
 
-                <style type="text/css">
-                    input {
-                        outline: none;
-                    }
-                </style>
-
-                <script>
-                    $(function() {
-                        var tags = "{{ all_tags | safe }}";
-                        tags = tags.split(',');
-                        $("#search").autofill({data: tags});
-                    });
-                </script>
-                <form action="{{ url_for('search') }}" method="post" accept-charset="utf-8">
-                    <input id="search" name="search" type="text" value="" placeholder="Вводите сюда"/>
-                    <p><input type="submit" value="Поиск в Изобильном"/></p>
-                </form>
-        </div>
-    </div>
-    <h3>Выберите вкладку</h3>
-    <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active">
-        <a href="#intown" aria-controls="intown"
-         role="tab" data-toggle="tab"><h4>В городе</h4></a></li>
-        <li role="presentation">
-        <a href="#callable" aria-controls="callable"
-         role="tab" data-toggle="tab"><h4>Вызов на дом</h4></a></li>
-    </ul>
-
-    <div class="tab-content" style="background: #f3fdff">
-        <div role="tabpanel" class="tab-pane fade in active" id="intown">
-        {% for cat_group in categories %}
-            <div class="row row-content">
-                <div class="col-sm-2" align="center">
-                    <i class="{{ cat_group.icon }}" ></i>
-                    <br>
-                    <h3>{{ cat_group.rus_title }}</h3>
+    <footer>
+        <div class="container" style="margin: 20px 50px">
+            <div class="row">
+                <div class="col-sm-6">
+                    <ul>
+                        <a href="{{ url_for('show_categories_all') }}"><li>Категории</li></a>
+                        <a href="{{ url_for('list_posts') }}"><li>Комментарии, пожелания, отзывы</li></a>
+                        <a href="{{ url_for('contacts') }}"><li>Контакты</li></a>
+                    </ul>
                 </div>
-                <div class="col-sm-10" align="left">
-                    {% for eng, rus in cat_group.categs.items() %}
-                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
-                    {% endfor %}
+                <div class="col-sm-6">
+                    <ul>
+                        <a href="{{ url_for('traffic') }}"><li>Пробки</li></a>
+                        <a href="{{ url_for('list_orgs') }}"><li>Общий список</li></a>
+                        <a href="{{ url_for('contacts') }}"><li>Сотрудничество</li></a>
+                    </ul>
                 </div>
             </div>
-        {% endfor %}
         </div>
-        <div role="tabpanel" class="tab-pane fade in active" id="callable">
-        {% for cat_group in categories_callable %}
-            <div class="row row-content">
-                <div class="col-sm-2" align="center">
-                    <i class="{{ cat_group.icon }}" ></i>
-                    <br>
-                    <h3>{{ cat_group.rus_title }}</h3>
-                </div>
-                <div class="col-sm-10" align="left">
-                    {% for eng, rus in cat_group.categs.items() %}
-                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endfor %}
-        </div>
-    </div>
-
-    <div class="row row-footer">
-        <div class="col-sm-6">
-            <ul>
-                <a href="{{ url_for('list_posts') }}" style="color: floralwhite"><li>Комментарии, пожелания, отзывы</li></a>
-                <a href="{{ url_for('contacts') }}" style="color: floralwhite"><li>Контакты</li></a>
-            </ul>
-        </div>
-        <div class="col-sm-6">
-            <ul>
-                <a href="{{ url_for('traffic') }}" style="color: floralwhite"><li>Пробки</li></a>
-                <a href="{{ url_for('list_orgs') }}" style="color: floralwhite"><li>Общий список</li></a>
-            </ul>
-        </div>
-    </div>
-{#    <div class="row row-content">#}
-{#        <div class="col-sm-6" align="center">#}
-{#            <h3>Где качественно и дешево обслужить свой автомобиль?</h3>#}
-{#        </div>#}
-{#        <div class="col-sm-6 dropup" align="center">#}
-{#            <a class="btn btn-primary btn-centered" href="#" role="button">АВТО</a>#}
-{#            <a href="#" class="btn btn-primary btn-centered dropdown-toggle" data-toggle="dropdown" id="dropdownMenu1"#}
-{#                         role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-car fa-fw"></i>#}
-{#                         АВТО <span class="caret"></span></a>#}
-{#                        <ul class="dropdown-menu dropdown-menu-right label-primary" aria-labelledby="dropdownMenu1">#}
-{#                            <li><a href="#">Шиномонтаж</a></li>#}
-{#                            <li><a href="#">Ходовая</a></li>#}
-{#                            <li><a href="#">Электрика</a></li>#}
-{#                            <li><a href="#">Покраска</a></li>#}
-{#                            <li><a href="#">Мойка</a></li>#}
-{#                        </ul>#}
-{#        </div>#}
-{#    </div>#}
-</div>
+    </footer>
 
 
+
+    <script>
+        $(function() {
+            var tags = "{{ all_tags | safe }}";
+            tags = tags.split(',');
+            $("#search").autofill({data: tags});
+        });
+    </script>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 {#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>#}
     <!-- Include all compiled plugins (below), or include individual files as needed -->
@@ -154,8 +139,7 @@
 target="_blank" rel="nofollow"><img src="https://informer.yandex.ru/informer/36077980/3_1_FFFFFFFF_EFEFEFFF_0_uniques"
 style="width:88px; height:31px; border:0;" alt="Яндекс.Метрика" title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)" /></a>
 </div>
-    <!-- /Yandex.Metrika informer -->
-
+<!-- /Yandex.Metrika informer -->
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript">
     (function (d, w, c) {

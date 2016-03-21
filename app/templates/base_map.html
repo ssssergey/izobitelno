@@ -64,6 +64,7 @@
                                         "<a href='/edit_org/"+post.id+"'>Редактировать</a>" + "<br>" +
                                         "<a href='/del_org/"+post.id+"'>Удалить</a>";
                                 var infowindow1 = new google.maps.InfoWindow({content: content});
+                                infowindow1.setZIndex(10);
                                 marker1.addListener('click', function() {infowindow1.open(map, marker1);});
                                 markers.push(marker1);
                                 }

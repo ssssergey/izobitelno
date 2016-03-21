@@ -21,44 +21,28 @@ categories = [
               'food_shop':u'Продуктовый магазин','dining':u'Столовая'}},
     {'eng_title':'auto',
     'rus_title':u'Авто',
-     'icon':"fa fa-car fa-fw",
+    'icon':"fa fa-car fa-fw",
     'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autoglass':u'Автостекло','autotyres':u'Шиномонтаж',
               'autoshop':u'Автозапчасти','motoroil_change':u'Замена моторного масла', 'chassis':u'Ходовая',
-              'electric':u'Электрик','osago':u'ОСАГО','gasstation':u'АЗС'}},
+              'autoelectric':u'Автоэлектрик','osago':u'ОСАГО','gasstation':u'АЗС'}},
     {'eng_title':'service',
-    'rus_title':u'Бытовые услуги',
-     'icon':"fa fa-group fa-fw",
-    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'grugstore':u'Аптека', 'photo':u'Фото',
-              'repair_gadgets':u'Ремонт техники','salon':u'Салон красоты'}},
-    {'eng_title':'house',
-    'rus_title':u'Для дома',
-     'icon':"glyphicon glyphicon-home",
-    'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород', 'furniture':u'Мебель', 'security':u'Системы безопасности'}},
-    {'eng_title':'finance_state',
-    'rus_title':u'Финансовые и госслужбы',
-     'icon':"fa fa-bank fa-fw",
-    'categs':{'sbercashpoint':u'Банкомат Сбербанка', 'bank':u'Банк', 'state_service':u'Госуслуги'}},
+    'rus_title':u'Услуги',
+    'icon':"fa fa-group fa-fw",
+    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'photo':u'Фото',
+              'repair_gadgets':u'Ремонт техники','salon':u'Салон красоты','sbercashpoint':u'Банкомат Сбербанка',
+              'bank':u'Банк', 'state_service':u'Госуслуги','hotel':u'Гостиница', 'rent_apartment':u'Аренда жилья',
+              'kindergarden':u'Детсад', 'child_developement':u'Развитие детей'}},
     {'eng_title':'goods',
-    'rus_title':u'Бытовые товары',
-     'icon':"fa fa-tablet fa-fw",
-    'categs':{'pc':u'Компьютеры и комплектующие', 'smarphones':u'Телефоны'}},
+    'rus_title':u'Прочие товары',
+    'icon':"glyphicon glyphicon-home",
+    'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород', 'furniture':u'Мебель', 'security':u'Системы безопасности',
+             'gadgets':u'Бытовая электроника', 'fishing_hunting':u'Рыбалка и охота','childgoods':u'Товары для детей','flowers':u'Цветы',
+             'grugstore':u'Аптека'}},
     {'eng_title':'leisure',
     'rus_title':u'Досуг',
-     'icon':"glyphicon glyphicon-send",
+    'icon':"glyphicon glyphicon-send",
     'categs':{'gym':u'Тренажерный (фитнес) зал', 'running':u'Бег', 'cafe_bar':u'Кафе и бары', 'banya':u'Баня и сауна',
-              'billiards':u'Бильярд', 'fishing_hunting':u'Рыбалка и охота' }},
-    {'eng_title':'children',
-    'rus_title':u'Дети',
-     'icon':"fa fa-child fa-fw",
-    'categs':{'kindergarden':u'Детсад', 'childgoods':u'Товары для детей'}, 'developement':u'Развитие'},
-    {'eng_title':'accommodation',
-    'rus_title':u'Жилье',
-     'icon':"fa fa-bed fa-fw",
-    'categs':{'hotel':u'Гостиница', 'private':u'Частники'}},
-    {'eng_title':'celebration',
-    'rus_title':u'На праздник',
-     'icon':"fa fa-birthday-cake fa-fw",
-    'categs':{'flowers':u'Цветы', 'fireworks':u'Фейерверки', 'celebration_goods':u'Товары для праздника'}},
+              'billiards':u'Бильярд'}},
     ]
 categories_callable = [{'eng_title':'callable',
                         'rus_title':u'Вызов на дом',
@@ -76,11 +60,11 @@ for i_dict in categories_callable:
 class OrganizationForm(Form):
     category = StringField()
     title = StringField(default=u"Без названия")
-    adres = StringField()
+    adres = StringField(validators=[DataRequired(message=u'Обязательное поле!')])
     phonenumber = StringField(render_kw={"placeholder": u"+7 928 1111111"})
     rating = IntegerField(default=0)
     owner = StringField(render_kw={"placeholder": u"дядя Коля"})
-    lat = FloatField()
+    lat = FloatField(u'Широта',validators=[DataRequired(message=u'Укажите местоположение!')])
     lng = FloatField()
     description = TextAreaField()
     tags = StringField()
@@ -105,7 +89,12 @@ class GaeEncoder(json.JSONEncoder):
 @app.route('/')
 def index():
     all_tags = get_all_tags()
-    return render_template("index.html", categories=categories, categories_callable=categories_callable, all_tags=','.join(all_tags))
+    return render_template("index.html", all_tags=','.join(all_tags))
+
+@app.route('/categories')
+def show_categories_all():
+    return render_template("categories.html", categories=categories, categories_callable=categories_callable)
+
 
 @app.route('/search', methods = ['GET', 'POST'])
 def search():
@@ -258,7 +247,7 @@ def location():
 
 ######## POST ###########
 class PostForm(Form):
-    content = TextAreaField('Content', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired(message=u'Обязятельное поле')])
 
 @app.route('/posts')
 def list_posts():

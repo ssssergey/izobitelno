@@ -13,7 +13,7 @@
 .row-footer {
 	background: #335D87;
 	color: floralwhite;
-	margin: 30px 0;
+	/*margin: 30px 0;*/
 	padding: 20px 0px 20px 0px;
 }
 
@@ -24,14 +24,9 @@
 	color: floralwhite;
 }
 
-address{
-	font-size: 80%;
-	margin: 0px;
-	color: #0f0f0f;
-}
 
 body{
-    padding:100px 0px 0px 0px;
+    padding:50px 0px 0px 0px;
     z-index:0;
 	background: #e0f8ff;
 	font-family: Roboto, sans-serif;
@@ -102,7 +97,7 @@ body{
 }
 
 #wrapper { position: relative; }
-#add_button { position: absolute; top: -15px; left: 5px; z-index: 99; }
+#add_button { position: absolute; top: -15px; left: 5px; z-index: 9; }
 #map { 
 	height: 450px;
 	width: 95%;
@@ -124,19 +119,5 @@ body{
     border-right: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
     padding: 10px;
-}
-
-ul.nav-tabs > li.active > a {
-	background: #f3fdff !important;
-}
-
-ul.nav-tabs > li:not(.active) > a:hover {
-	background: #eaf8ff !important;
-}
-
-@media (max-width: 767px) {
-	body{
-		padding:50px 0px 0px 0px;
-	}
 }
 

@@ -87,7 +87,7 @@
                         {% if form.adres.errors %}
                         <ul class="errors">
                             {% for error in form.adres.errors %}
-                            <li>{{ error }}</li>
+                            <li><strong style="color: red;">{{ error }}</strong></li>
                             {% endfor %}
                         </ul>
                         {% endif %}
