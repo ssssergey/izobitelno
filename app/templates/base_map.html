@@ -81,7 +81,7 @@
               map.setZoom(18);
               clearNewMarkers();
               var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
-            var marker = new google.maps.Marker({
+            var marker_new = new google.maps.Marker({
               map: resultsMap,
                 icon: image,
               position: results[0].geometry.location
@@ -135,7 +135,7 @@
                 map.setZoom(18);
                 clearNewMarkers();
                 var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
-                var marker = new google.maps.Marker({
+                var marker_new = new google.maps.Marker({
                   position: initialLocation,
                     icon: image,
                     map: map,
@@ -143,7 +143,7 @@
                 });
                 var infowindow = new google.maps.InfoWindow();
                 infowindow.setContent("Вы находитесь здесь!<br>Точность местоопределения: " + location.coords.accuracy);
-                infowindow.open(map, marker);
+                infowindow.open(map, marker_new);
                 new_markers_array.push(marker_new);
                 var geocoder = new google.maps.Geocoder();
                 geocoder.geocode({'location': initialLocation}, function(results, status) {
