@@ -28,21 +28,21 @@ categories = [
     {'eng_title':'service',
     'rus_title':u'Услуги',
     'icon':"fa fa-group fa-fw",
-    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'photo':u'Фото',
+    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'photo':u'Фото', 'manicur':u'Маникюр',
               'repair_gadgets':u'Ремонт техники','salon':u'Салон красоты','sbercashpoint':u'Банкомат Сбербанка',
               'bank':u'Банк', 'state_service':u'Госуслуги','hotel':u'Гостиница', 'rent_apartment':u'Аренда жилья',
               'kindergarden':u'Детсад', 'child_developement':u'Развитие детей'}},
     {'eng_title':'goods',
-    'rus_title':u'Прочие товары',
+    'rus_title':u'Товары',
     'icon':"glyphicon glyphicon-home",
     'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород', 'furniture':u'Мебель', 'security':u'Системы безопасности',
              'gadgets':u'Бытовая электроника', 'fishing_hunting':u'Рыбалка и охота','childgoods':u'Товары для детей','flowers':u'Цветы',
-             'grugstore':u'Аптека'}},
+             'grugstore':u'Аптека','officeshop':u'Канцелярский магазин'}},
     {'eng_title':'leisure',
     'rus_title':u'Досуг',
     'icon':"glyphicon glyphicon-send",
     'categs':{'gym':u'Тренажерный (фитнес) зал', 'running':u'Бег', 'cafe_bar':u'Кафе и бары', 'banya':u'Баня и сауна',
-              'billiards':u'Бильярд'}},
+              'team_sport':u'Командный спорт','billiards':u'Бильярд'}},
     ]
 categories_callable = [{'eng_title':'callable',
                         'rus_title':u'Вызов на дом',
@@ -120,6 +120,11 @@ def new_org():
         return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
     elif request.method == 'POST':
         if form.validate_on_submit():
+            tags = form.tags.data.lower().split(',')
+            if tags:
+                tags.append(category.lower())
+            else:
+                tags = [category.lower()]
             post = OrganizationModel(title = form.title.data,
                                     category = form.category.data,
                                     phonenumber = form.phonenumber.data.split(','),
@@ -131,14 +136,14 @@ def new_org():
                                     author = users.get_current_user(),
                                     user_modified = users.get_current_user(),
                                     description = form.description.data,
-                                    tags = form.tags.data.split(',')
+                                    tags = tags
                                      )
             post.put()
             flash(u'Организация успешно добавлена!')
             for eng, rus in categories_all.iteritems():
                 if rus == form.category.data:
                     category_eng = eng
-            add_tag(form.tags.data.lower().split(','))
+            add_tags_to_overall(tags)
             return redirect(url_for('category', category_eng=category_eng))
         else:
             all_tags = get_all_tags()
@@ -151,6 +156,11 @@ def edit_org(id):
         form = OrganizationForm()
         if request.method == 'POST':
             if form.validate_on_submit():
+                tags = form.tags.data.lower().split(',')
+                if tags:
+                    tags.append(form.category.data.lower())
+                else:
+                    tags = [form.category.data.lower()]
                 org.populate(title = form.title.data,
                             category = form.category.data,
                             phonenumber = form.phonenumber.data.split(', '),
@@ -162,14 +172,14 @@ def edit_org(id):
                             user_modified = users.get_current_user(),
                             when_modified = datetime.now(),
                             description = form.description.data,
-                            tags = form.tags.data.split(',')
+                            tags = list(set(tags))
                              )
                 org.put()
                 flash(u'Изменения приняты!')
                 for eng, rus in categories_all.iteritems():
                     if rus == form.category.data:
                         category_eng = eng
-                add_tag(form.tags.data.lower().split(','))
+                add_tags_to_overall(tags)
                 return redirect(url_for('category', category_eng=category_eng))
         form = OrganizationForm()
         form.category.data = org.category
@@ -219,7 +229,7 @@ def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
     return render_template('list_orgs.html', posts=orgs, categories=categories)
 
-def add_tag(tag_list):
+def add_tags_to_overall(tag_list):
     new_list = []
     tags_from_ds = TagsModel.query(TagsModel.uid == 'myid').get()
     # Если нет такой записи,то создаем ее

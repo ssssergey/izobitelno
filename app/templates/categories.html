@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        .fa, .glyphicon {
+            font-size: 6em;
+    }
+    </style>
+    <h3>Выберите категорию</h3>
+
+    <div class="row" style="background: #f3fdff">
+        <div role="tabpanel" class="tab-pane fade in active" id="intown">
+        {% for cat_group in categories %}
+            <div class="row row-content">
+                <div class="col-sm-2" align="center">
+                    <i class="{{ cat_group.icon }}" ></i>
+                    <br>
+                    <h3>{{ cat_group.rus_title }}</h3>
+                </div>
+                <div class="col-sm-10" align="left">
+                    {% for eng, rus in cat_group.categs.items() %}
+                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+            {% for cat_group in categories_callable %}
+            <div class="row row-content">
+                <div class="col-sm-2" align="center">
+                    <i class="{{ cat_group.icon }}" ></i>
+                    <br>
+                    <h3>{{ cat_group.rus_title }}</h3>
+                </div>
+                <div class="col-sm-10" align="left">
+                    {% for eng, rus in cat_group.categs.items() %}
+                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+
+    </div>
+
+    <div class="row row-footer">
+        <div class="col-sm-6">
+            <ul>
+                <a href="{{ url_for('list_posts') }}" style="color: floralwhite"><li>Комментарии, пожелания, отзывы</li></a>
+                <a href="{{ url_for('contacts') }}" style="color: floralwhite"><li>Контакты</li></a>
+            </ul>
+        </div>
+        <div class="col-sm-6">
+            <ul>
+                <a href="{{ url_for('traffic') }}" style="color: floralwhite"><li>Пробки</li></a>
+                <a href="{{ url_for('list_orgs') }}" style="color: floralwhite"><li>Общий список</li></a>
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
+

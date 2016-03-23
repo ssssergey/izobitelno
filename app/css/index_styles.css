@@ -1,0 +1,47 @@
+    body{
+        background: white;
+}
+    html, body {
+        height: 100%;
+    }
+    .container-table {
+        height: 50%;
+        display: table;
+    }
+    .vertical-center-row {
+        display: table-cell;
+        vertical-align: middle;
+    }
+    header {
+        background: #315981;
+    }
+    footer {
+        position:fixed;
+        width: 100%;
+        bottom: 0px;
+        margin:0;
+        background: rgba(223, 223, 223, 0.96);
+        color: #315981;
+}
+    input {
+        outline: none;
+        width: 100% !important;
+    }
+    .autofill-bg {
+        position: relative;
+        margin-top: 7px;
+        margin-left: 13px;
+        background-color: white !important;
+        outline: none;
+        float: left;
+        border: 0px solid;
+    }
+    button {
+        position: relative;
+        top:20px
+    }
+    @media (max-width: 500px) {
+    input {
+        width: 80%!important;
+    }
+    }

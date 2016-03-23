@@ -17,14 +17,6 @@
 	padding: 20px 0px 20px 0px;
 }
 
-.jumbotron {
-	padding: 30px 30px 30px 30px;
-	margin: 0px auto;
-	background: #315981;
-	color: floralwhite;
-}
-
-
 body{
     padding:50px 0px 0px 0px;
     z-index:0;
@@ -33,27 +25,32 @@ body{
 }
 
 .navbar-inverse {
-     background: #303F9F;
+     background: #315981;
 }
 
-.navbar-inverse .navbar-nav > .active > a,
-.navbar-inverse .navbar-nav > .active > a:hover,
-.navbar-inverse .navbar-nav > .active > a:focus {
-    color: #fff;
-    background: #1A237E;
+/*.navbar-inverse .navbar-nav > .active > a,*/
+/*.navbar-inverse .navbar-nav > .active > a:hover,*/
+/*.navbar-inverse .navbar-nav > .active > a:focus {*/
+    /*color: #fff;*/
+    /*background: #406fa3;*/
+/*}*/
+
+.navbar-inverse .navbar-nav > li> a{
+    color: #fff !important;
+    background: #315981;
 }
 
 .navbar-inverse .navbar-nav > .open > a,
 .navbar-inverse .navbar-nav > .open > a:hover,
 .navbar-inverse .navbar-nav > .open > a:focus {
     color: #fff;
-    background: #1A237E;
+    background: #406fa3;
 }
 
 .navbar-inverse .navbar-nav .open .dropdown-menu > li> a,
 .navbar-inverse .navbar-nav .open .dropdown-menu {
-    background-color: #303F9F;
-    color:#eeeeee;
+    background-color: rgba(58, 88, 134, 0.82);
+    color: #ffffff;
 }
 
 .navbar-inverse .navbar-nav .open .dropdown-menu> li> a:hover {
@@ -62,6 +59,7 @@ body{
 
 .navbar-brand {
     font-size: large;
+	color: #fff !important;
 }
 
 .btn-centered {
