@@ -181,7 +181,6 @@ def edit_org(id):
                         category_eng = eng
                 add_tags_to_overall(tags)
                 return redirect(url_for('category', category_eng=category_eng))
-        form = OrganizationForm()
         form.category.data = org.category
         form.title.data = org.title
         form.phonenumber.data = ", ".join(org.phonenumber)
@@ -202,6 +201,11 @@ def edit_org(id):
             if rus == org.category:
                 category_eng = eng
         return redirect(url_for('category', category_eng=category_eng))
+
+@app.route('/details/<int:id>')
+def details(id):
+    org = OrganizationModel.get_by_id(int(id))
+    return render_template("details.html", posts = json.loads(json.dumps(org, cls=GaeEncoder)))
 
 
 @app.route('/del_org/<int:id>', methods = ['GET','DELETE'])

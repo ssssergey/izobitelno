@@ -12,17 +12,23 @@
         display: table-cell;
         vertical-align: middle;
     }
-    header {
-        background: #315981;
+    /*header {*/
+        /*background: #315981 !important;*/
+    /*}*/
+    /*footer {*/
+        /*position:absolute;*/
+        /*width: 100%;*/
+        /*bottom: 0px;*/
+        /*margin:0;*/
+        /*background: rgba(223, 223, 223, 0.96);*/
+        /*color: #315981;*/
+/*}*/
+    .footer {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
     }
-    footer {
-        position:fixed;
-        width: 100%;
-        bottom: 0px;
-        margin:0;
-        background: rgba(223, 223, 223, 0.96);
-        color: #315981;
-}
     input {
         outline: none;
         width: 100% !important;
