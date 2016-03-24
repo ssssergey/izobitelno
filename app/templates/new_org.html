@@ -11,7 +11,7 @@
                         Google Maps
                     </div>
                     <div id="floating-panel">
-                            <input id="address" type="textbox" value="" placeholder="ул. Ленина, 10">
+                            <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
                             <input id="submit" type="button" value="Искать">
                     </div>
                     <div id="selflocate_button">
@@ -89,7 +89,7 @@
                     </p>
                     <p>
                         <label for="adres">Адрес</label>
-                        {{ form.adres(readonly=true)|safe }}
+                        {{ form.adres(readonly=false)|safe }}
                         <i>Воспользуйтесь интерактивной картой.</i><br>
                         {{ form.lat(readonly=true, size=10)|safe }}
                         {{ form.lng(readonly=true, size=10)|safe }}

@@ -19,6 +19,7 @@
           var posts = {{ posts | tojson | safe }};
           var geocoder = new google.maps.Geocoder();
             addMarkerstoMap(posts);
+
           // Listeners
           // Определение своего местоположения. Вызывается функция GetLocation
           document.getElementById('my_location_button').addEventListener('click', function () {
@@ -43,35 +44,35 @@
                 var post = posts[i];
                 add(post);
                 function add (post) {
-                          if (post.location) {
-                              var myLatLng = {lat: post.location.lat, lng: post.location.lng};
-                                var marker1 = new google.maps.Marker({
-                                  position: myLatLng,
-                                  map: map
-                                });
-                                var adress = post.adres.split(', Изобильный')[0];
-                                var rating = post.rating;
-                                if (post.description) {
-                                    var description = post.description.replaceAll('\n','<br>');
-                                } else {
-                                    var description = ''
-                                }
-                                var content = "<div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>"+post.title+"</h3></div>" +
-                                        "<div class='panel-body'>" +
-                                        "<div>Адрес: "+adress+"</div>" +
-                                        "<div>Телефон: "+post.phonenumber+", "+post.phonenumber_static+"</div>" +
-                                        "<div>Рейтинг: "+post.rating+"</div>" +
-                                        "<div>Изменено: "+moment.unix(post.when_modified).format('LLL')+"</div>" +
-                                        "</div>" +
-                                        "<div class='panel-footer'>" + post.description + "</div></div>" +
-                                        "<a href='/details/"+post.id+"'>Подробнее</a>" + "<br>" +
-                                        "<a href='/edit_org/"+post.id+"'>Редактировать</a>" + "<br>" +
-                                        "<a href='/del_org/"+post.id+"'>Удалить</a>";
-                                var infowindow1 = new google.maps.InfoWindow({content: content});
-                                infowindow1.setZIndex(10);
-                                marker1.addListener('click', function() {infowindow1.open(map, marker1);});
-                                markers.push(marker1);
-                                }
+                      if (post.location) {
+                          var myLatLng = {lat: post.location.lat, lng: post.location.lng};
+                            var marker1 = new google.maps.Marker({
+                              position: myLatLng,
+                              map: map
+                            });
+                            var adress = post.adres.split(', Изобильный')[0];
+                            var rating = post.rating;
+                            if (post.description) {
+                                var description = post.description.replaceAll('\n','<br>');
+                            } else {
+                                var description = ''
+                            }
+                            var content = "<div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>"+post.title+"</h3></div>" +
+                                    "<div class='panel-body'>" +
+                                    "<div>Адрес: "+adress+"</div>" +
+                                    "<div>Телефон: "+post.phonenumber+", "+post.phonenumber_static+"</div>" +
+                                    "<div>Рейтинг: "+post.rating+"</div>" +
+                                    "<div>Изменено: "+moment.unix(post.when_modified).format('LLL')+"</div>" +
+                                    "</div>" +
+                                    "<div class='panel-footer'>" + post.description + "</div></div>" +
+                                    "<a href='/details/"+post.id+"'>Подробнее</a>" + "<br>" +
+                                    "<a href='/edit_org/"+post.id+"'>Редактировать</a>" + "<br>" +
+                                    "<a href='/del_org/"+post.id+"'>Удалить</a>";
+                            var infowindow1 = new google.maps.InfoWindow({content: content});
+                            infowindow1.setZIndex(10);
+                            marker1.addListener('click', function() {infowindow1.open(map, marker1);});
+                            markers.push(marker1);
+                            }
                     }
         }}
 

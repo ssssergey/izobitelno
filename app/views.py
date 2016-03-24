@@ -17,7 +17,7 @@ categories = [
     {'eng_title':'food',
     'rus_title':u'Еда',
     'icon':"fa fa-cutlery fa-fw",
-    'categs':{'beer':u'Пиво','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты',
+    'categs':{'beer':u'Пиво разливное','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты',
               'food_shop':u'Продуктовый магазин','dining':u'Столовая'}},
     {'eng_title':'auto',
     'rus_title':u'Авто',
@@ -86,6 +86,12 @@ class GaeEncoder(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, obj)
 
+@app.route('/details/<int:id>')
+def details(id):
+    org = OrganizationModel.get_by_id(int(id))
+    return render_template("details.html", org = org)
+
+
 
 @app.route('/')
 def index():
@@ -125,6 +131,8 @@ def new_org():
                 tags.append(category.lower())
             else:
                 tags = [category.lower()]
+            if form.title.data != u'Без названия':
+                tags.append(form.title.data.lower())
             post = OrganizationModel(title = form.title.data,
                                     category = form.category.data,
                                     phonenumber = form.phonenumber.data.split(','),
@@ -161,6 +169,8 @@ def edit_org(id):
                     tags.append(form.category.data.lower())
                 else:
                     tags = [form.category.data.lower()]
+                if form.title.data != u'Без названия':
+                    tags.append(form.title.data.lower())
                 org.populate(title = form.title.data,
                             category = form.category.data,
                             phonenumber = form.phonenumber.data.split(', '),
@@ -201,11 +211,6 @@ def edit_org(id):
             if rus == org.category:
                 category_eng = eng
         return redirect(url_for('category', category_eng=category_eng))
-
-@app.route('/details/<int:id>')
-def details(id):
-    org = OrganizationModel.get_by_id(int(id))
-    return render_template("details.html", posts = json.loads(json.dumps(org, cls=GaeEncoder)))
 
 
 @app.route('/del_org/<int:id>', methods = ['GET','DELETE'])

@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from jinja2 import Markup
+from datetime import datetime
 
 class momentjs(object):
     def __init__(self, timestamp):
+        # if isinstance(timestamp, float):
+        #     seconds = (43111.0 - 25569) * 86400.0
+        #     timestamp = datetime.utcfromtimestamp(seconds)
         self.timestamp = timestamp
 
     def render(self, format):
