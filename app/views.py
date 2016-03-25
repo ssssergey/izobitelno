@@ -49,7 +49,7 @@ categories_callable = [{'eng_title':'callable',
                         'citaton':(u'', u''),
                         'categs':{'taxi':u'Такси','pizza':u'Пицца', 'electric':u'Электрик', 'plummer':u'Сантехник',
                                   'nanny':u'Няня','gasmaster':u'Газовщик','hodman':u'Подсобный','cargo':u'Грузоперевозки',
-                                  'others':u'Прочее'}},
+                                  'others':u'Прочее','building':u'Ремонт и строительство'}},
                        ]
 categories_all = {}
 for i_dict in categories:
@@ -150,11 +150,15 @@ def new_org():
                                      )
             post.put()
             flash(u'Организация успешно добавлена!')
+            add_tags_to_overall(tags)
+            category_eng = ''
             for eng, rus in categories_all.iteritems():
                 if rus == form.category.data:
                     category_eng = eng
-            add_tags_to_overall(tags)
-            return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+            if category_eng:
+                return redirect(url_for('category', category_eng=category_eng))
+            else:
+                return redirect(url_for('show_categories_all'))
         else:
             flash(u'Форма не прошла валидацию.')
             all_tags = get_all_tags()
@@ -190,11 +194,15 @@ def edit_org(id):
                              )
                 org.put()
                 flash(u'Изменения приняты!')
+                add_tags_to_overall(tags)
+                category_eng = ''
                 for eng, rus in categories_all.iteritems():
                     if rus == form.category.data:
                         category_eng = eng
-                add_tags_to_overall(tags)
-                return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+                if category_eng:
+                    return redirect(url_for('category', category_eng=category_eng))
+                else:
+                    return redirect(url_for('show_categories_all'))
         form.category.data = org.category
         form.title.data = org.title
         form.phonenumber.data = ", ".join(org.phonenumber)
@@ -215,7 +223,7 @@ def edit_org(id):
         for eng, rus in categories_all.iteritems():
             if rus == org.category:
                 category_eng = eng
-        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+        return redirect(url_for('category', category_eng=category_eng))
 
 
 @app.route('/del_org/<int:id>', methods = ['GET','DELETE'])
@@ -228,14 +236,14 @@ def del_org(id):
     if users.is_current_user_admin():
         flash(u"Вы успешно удалили объект как администратор!")
         org.key.delete()
-        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+        return redirect(url_for('category', category_eng=category_eng))
     if current_user == org.author:
         flash(u"Вы успешно удалили объект как автор!")
         org.key.delete()
-        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+        return redirect(url_for('category', category_eng=category_eng))
     else:
         flash(u"У вас нет права на удаление. Вы не являетесь автором этого объекта!")
-        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+        return redirect(url_for('category', category_eng=category_eng))
 
 @app.route('/orgs')
 def list_orgs():

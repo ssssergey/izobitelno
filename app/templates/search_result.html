@@ -5,14 +5,27 @@
         <h2 align="center">{{ category }}</h2>
         <div class="row" id="wrapper">
             <div id="map">Google Maps</div>
-{#            <div id="add_button">#}
-{#                <a class="btn btn-primary" href="{{ url_for('new_org', category_value=category_rus, category_eng=category_eng) }}" role="button">Добавить объект</a>#}
-{#            </div>#}
             <div id="selflocate_button">
                     <input id="my_location_button" type="button" value="Определить свое местоположение на карте">
             </div>
         </div>
         {% include 'base_map.html' %}
+        <div>
+            <ul>
+                {% for post in posts %}
+                <li>
+                    {{ post.title }} (автор: {{ post.author }})
+                    {{ post.category }}
+                    <br>
+                    {{ momentjs(post.when_added).fromNow() }}
+                    <br>
+                    <a href='/details/{{ post.id }}'>Подробнее</a><br>
+                    <a href='/edit_org/{{ post.id }}'>Редактировать</a><br>
+                    <a href='/del_org/{{ post.id }}'>Удалить</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 
 {% endblock %}
