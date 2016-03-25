@@ -4,9 +4,8 @@ from datetime import datetime
 
 class momentjs(object):
     def __init__(self, timestamp):
-        # if isinstance(timestamp, float):
-        #     seconds = (43111.0 - 25569) * 86400.0
-        #     timestamp = datetime.utcfromtimestamp(seconds)
+        if isinstance(timestamp, float):
+            timestamp = datetime.utcfromtimestamp(timestamp)
         self.timestamp = timestamp
 
     def render(self, format):

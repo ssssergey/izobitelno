@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
 from datetime import datetime
-from collections import OrderedDict
-from flask import render_template, redirect, flash, url_for, request
+from flask import render_template, redirect, flash, url_for, request, jsonify
 from app import app
 from models import PostModel, OrganizationModel, TagsModel
-from decorators import login_required
 from google.appengine.api import users, datastore_types
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
@@ -44,12 +42,14 @@ categories = [
     'categs':{'gym':u'Тренажерный (фитнес) зал', 'running':u'Бег', 'cafe_bar':u'Кафе и бары', 'banya':u'Баня и сауна',
               'team_sport':u'Командный спорт','billiards':u'Бильярд'}},
     ]
+
 categories_callable = [{'eng_title':'callable',
                         'rus_title':u'Вызов на дом',
                         'icon':"fa fa-phone fa-fw",
                         'citaton':(u'', u''),
                         'categs':{'taxi':u'Такси','pizza':u'Пицца', 'electric':u'Электрик', 'plummer':u'Сантехник',
-                                  'nanny':u'Няня','gasmaster':u'Газовщик','hodman':u'Подсобный','cargo':u'Грузоперевозки'}},
+                                  'nanny':u'Няня','gasmaster':u'Газовщик','hodman':u'Подсобный','cargo':u'Грузоперевозки',
+                                  'others':u'Прочее'}},
                        ]
 categories_all = {}
 for i_dict in categories:
@@ -69,7 +69,18 @@ class OrganizationForm(Form):
     lng = FloatField()
     description = TextAreaField()
     tags = StringField()
+    price = IntegerField(default=0)
 
+class AdresslessForm(Form):
+    category = StringField(validators=[DataRequired(message=u'Укажите категорию!')])
+    title = StringField(default=u"Без названия")
+    phonenumber = StringField(render_kw={"placeholder": u"(999) 999-9999"})
+    phonenumber_static = StringField(render_kw={"placeholder": u"9-99-99"})
+    rating = IntegerField(default=0)
+    owner = StringField(render_kw={"placeholder": u"дядя Коля"})
+    description = TextAreaField()
+    tags = StringField()
+    price = IntegerField(default=0)
 
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -89,9 +100,7 @@ class GaeEncoder(json.JSONEncoder):
 @app.route('/details/<int:id>')
 def details(id):
     org = OrganizationModel.get_by_id(int(id))
-    return render_template("details.html", org = org)
-
-
+    return render_template("details.html", org = org, categories=categories, categories_callable=categories_callable)
 
 @app.route('/')
 def index():
@@ -107,7 +116,8 @@ def show_categories_all():
 def search_result():
     keyword = request.form.get('search').lower()
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword).fetch()
-    return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)))
+    return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
+                           categories=categories, categories_callable=categories_callable)
 
 @app.route('/category/<category_eng>')
 def category(category_eng):
@@ -116,6 +126,46 @@ def category(category_eng):
                            category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories,
                            categories_callable=categories_callable)
 
+@app.route('/orgs/new_callable', methods = ['GET', 'POST'])
+def new_org_callable():
+    category = request.args.get("category_value")
+    orgs = OrganizationModel.query(OrganizationModel.category == category).fetch()
+    form = AdresslessForm()
+    if request.method == 'GET':
+        all_tags = get_all_tags()
+        return render_template('new_org_callable.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+    elif request.method == 'POST':
+        if form.validate_on_submit():
+            tags = form.tags.data.lower().split(',')
+            if tags:
+                tags.append(category.lower())
+            else:
+                tags = [category.lower()]
+            if form.title.data != u'Без названия':
+                tags.append(form.title.data.lower())
+            post = OrganizationModel(title = form.title.data,
+                                    category = form.category.data,
+                                    phonenumber = form.phonenumber.data.split(','),
+                                    phonenumber_static = form.phonenumber_static.data.split(','),
+                                    rating = form.rating.data,
+                                    owner = form.owner.data,
+                                    author = users.get_current_user(),
+                                    user_modified = users.get_current_user(),
+                                    description = form.description.data,
+                                    tags = tags
+                                     )
+            post.put()
+            flash(u'Организация успешно добавлена!')
+            for eng, rus in categories_all.iteritems():
+                if rus == form.category.data:
+                    category_eng = eng
+            add_tags_to_overall(tags)
+            return redirect(url_for('category_callable', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+        else:
+            all_tags = get_all_tags()
+            return render_template('new_org_callable.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+
+
 @app.route('/orgs/new', methods = ['GET', 'POST'])
 def new_org():
     category = request.args.get("category_value")
@@ -123,7 +173,7 @@ def new_org():
     form = OrganizationForm()
     if request.method == 'GET':
         all_tags = get_all_tags()
-        return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+        return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
     elif request.method == 'POST':
         if form.validate_on_submit():
             tags = form.tags.data.lower().split(',')
@@ -152,10 +202,61 @@ def new_org():
                 if rus == form.category.data:
                     category_eng = eng
             add_tags_to_overall(tags)
-            return redirect(url_for('category', category_eng=category_eng))
+            return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
         else:
             all_tags = get_all_tags()
-            return render_template('new_org.html', form=form, categories=categories, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+            return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+
+@app.route('/edit_org_callable/<int:id>', methods = ['GET', 'POST'])
+def edit_org_callable(id):
+    org = OrganizationModel.get_by_id(int(id))
+    if users.is_current_user_admin() or users.get_current_user() == org.author:
+        form = AdresslessForm()
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                tags = form.tags.data.lower().split(',')
+                if tags:
+                    tags.append(form.category.data.lower())
+                else:
+                    tags = [form.category.data.lower()]
+                if form.title.data != u'Без названия':
+                    tags.append(form.title.data.lower())
+                org.populate(title = form.title.data,
+                            category = form.category.data,
+                            phonenumber = form.phonenumber.data.split(', '),
+                            phonenumber_static = form.phonenumber_static.data.split(', '),
+                            rating = form.rating.data,
+                            owner = form.owner.data,
+                            user_modified = users.get_current_user(),
+                            when_modified = datetime.now(),
+                            description = form.description.data,
+                            tags = list(set(tags))
+                             )
+                org.put()
+                flash(u'Изменения приняты!')
+                for eng, rus in categories_all.iteritems():
+                    if rus == form.category.data:
+                        category_eng = eng
+                add_tags_to_overall(tags)
+                return redirect(url_for('category_callable', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+        form.category.data = org.category
+        form.title.data = org.title
+        form.phonenumber.data = ", ".join(org.phonenumber)
+        form.phonenumber_static.data = ", ".join(org.phonenumber_static)
+        form.rating.data = org.rating
+        form.owner.data = org.owner
+        form.description.data = org.description
+        form.tags.data = ",".join(org.tags)
+        orgs = OrganizationModel.query(OrganizationModel.category == org.category).fetch()
+        all_tags = get_all_tags()
+        return render_template("edit_org_callable.html", categories=categories, categories_callable=categories_callable, form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), tags=",".join(org.tags), all_tags=','.join(all_tags))
+    else:
+        flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!")
+        for eng, rus in categories_all.iteritems():
+            if rus == org.category:
+                category_eng = eng
+        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
+
 
 @app.route('/edit_org/<int:id>', methods = ['GET', 'POST'])
 def edit_org(id):
@@ -190,7 +291,7 @@ def edit_org(id):
                     if rus == form.category.data:
                         category_eng = eng
                 add_tags_to_overall(tags)
-                return redirect(url_for('category', category_eng=category_eng))
+                return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
         form.category.data = org.category
         form.title.data = org.title
         form.phonenumber.data = ", ".join(org.phonenumber)
@@ -204,13 +305,13 @@ def edit_org(id):
         form.tags.data = ",".join(org.tags)
         orgs = OrganizationModel.query(OrganizationModel.category == org.category).fetch()
         all_tags = get_all_tags()
-        return render_template("edit_org.html", form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), tags=",".join(org.tags), all_tags=','.join(all_tags))
+        return render_template("edit_org.html", categories=categories, categories_callable=categories_callable, form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), tags=",".join(org.tags), all_tags=','.join(all_tags))
     else:
         flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!")
         for eng, rus in categories_all.iteritems():
             if rus == org.category:
                 category_eng = eng
-        return redirect(url_for('category', category_eng=category_eng))
+        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
 
 
 @app.route('/del_org/<int:id>', methods = ['GET','DELETE'])
@@ -223,20 +324,19 @@ def del_org(id):
     if users.is_current_user_admin():
         flash(u"Вы успешно удалили объект как администратор!")
         org.key.delete()
-        return redirect(url_for('category', category_eng=category_eng))
+        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
     if current_user == org.author:
         flash(u"Вы успешно удалили объект как автор!")
         org.key.delete()
-        return redirect(url_for('category', category_eng=category_eng))
+        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
     else:
         flash(u"У вас нет права на удаление. Вы не являетесь автором этого объекта!")
-        return redirect(url_for('category', category_eng=category_eng))
-
+        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
 
 @app.route('/orgs')
 def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
-    return render_template('list_orgs.html', posts=orgs, categories=categories)
+    return render_template('list_orgs.html', posts=orgs, categories=categories, categories_callable=categories_callable)
 
 def add_tags_to_overall(tag_list):
     new_list = []
@@ -263,15 +363,15 @@ def get_all_tags(update=False):
 
 @app.route('/contacts')
 def contacts():
-    return render_template("contacts.html", categories=categories)
+    return render_template("contacts.html", categories=categories, categories_callable=categories_callable)
 
 @app.route('/traffic')
 def traffic():
-    return render_template("traffic.html", categories=categories)
+    return render_template("traffic.html", categories=categories, categories_callable=categories_callable)
 
 @app.route('/location')
 def location():
-    return render_template("location.html")
+    return render_template("location.html", categories=categories, categories_callable=categories_callable)
 
 ######## POST ###########
 class PostForm(Form):
@@ -280,7 +380,7 @@ class PostForm(Form):
 @app.route('/posts')
 def list_posts():
     posts = PostModel.query().order(-PostModel.when)
-    return render_template('list_posts.html', posts=posts, categories=categories)
+    return render_template('list_posts.html', posts=posts, categories=categories, categories_callable=categories_callable)
 
 @app.route('/posts/new', methods = ['GET', 'POST'])
 def new_post():
@@ -292,4 +392,20 @@ def new_post():
         post.put()
         flash(u'Комментарий успешно создан!')
         return redirect(url_for('list_posts'))
-    return render_template('new_post.html', form=form, categories=categories)
+    return render_template('new_post.html', form=form, categories=categories, categories_callable=categories_callable)
+
+@app.route('/add_comment', methods=['POST'])
+def add_comment():
+    post = PostModel(
+            content =  request.form['comment'],
+            category = request.form['category'],
+            organization_id = int(request.form['organization_id']),
+            author = users.get_current_user())
+    post.put()
+    return json.dumps({'status':'OK','comment':request.form['comment']})
+
+@app.route('/get_comments_by_org')
+def get_comments_by_org():
+    comments_org = PostModel.query(PostModel.organization_id == int(request.args.get('organization_id'))).order(-PostModel.when).fetch()
+    return json.dumps({'status':'OK','comments':comments_org}, cls=GaeEncoder)
+

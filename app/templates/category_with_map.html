@@ -2,7 +2,7 @@
 {% block content %}
 
     <div class="container">
-        <h2 align="center">{{ category }}</h2>
+        <h2 align="center">{{ category_rus }}</h2>
         <div class="row" id="wrapper">
             <div id="map">Google Maps</div>
             <div id="add_button">
@@ -15,6 +15,18 @@
             <div id="selflocate_button">
                     <input id="my_location_button" type="button" value="Определить по GPS">
             </div>
+        </div>
+        <div>
+            <ul>
+                {% for post in posts %}
+                <li>
+                    {{ post.title }} (автор: {{ post.author }})
+                    {{ post.category }}
+                    <br>
+                    {{ momentjs(post.when_added).fromNow() }}
+                </li>
+                {% endfor %}
+            </ul>
         </div>
         {% include 'base_map.html' %}
     </div>

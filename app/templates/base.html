@@ -52,7 +52,18 @@
                               {% endfor %}
                             </ul>
                         </li>
-{#                            <li><a href="{{  url_for('category', category_eng='beer') }}"><i class="fa fa-beer fa-fw"></i> Пиво</a></li>#}
+                    {% endfor %}
+                    {% for cat_group in categories_callable %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                             role="button" aria-haspopup="true" aria-expanded="false">
+                             {{ cat_group.rus_title }} <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                              {% for eng, rus in cat_group.categs.items() %}
+                                  <li id="{{ eng }}"><a href="{{  url_for('category', category_eng=eng) }}">{{ rus }}</a></li>
+                              {% endfor %}
+                            </ul>
+                        </li>
                     {% endfor %}
                 </ul>
             </div>

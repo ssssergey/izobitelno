@@ -24,6 +24,7 @@ class OrganizationModel(EndpointsModel):
     owner = ndb.StringProperty()
     description = ndb.TextProperty()
     tags = ndb.StringProperty(repeated=True)
+    price = ndb.IntegerProperty()
 
 class UserModel(EndpointsModel):
     auth_object = ndb.UserProperty(required = True)
