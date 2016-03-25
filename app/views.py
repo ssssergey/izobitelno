@@ -60,27 +60,17 @@ for i_dict in categories_callable:
 class OrganizationForm(Form):
     category = StringField(validators=[DataRequired(message=u'Укажите категорию!')])
     title = StringField(default=u"Без названия")
-    adres = StringField(validators=[DataRequired(message=u'Укажите местоположение!')])
+    adres = StringField(default=u"")
     phonenumber = StringField(render_kw={"placeholder": u"(999) 999-9999"})
     phonenumber_static = StringField(render_kw={"placeholder": u"9-99-99"})
     rating = IntegerField(default=0)
-    owner = StringField(render_kw={"placeholder": u"дядя Коля"})
-    lat = FloatField(u'Широта',validators=[DataRequired(message=u'Укажите местоположение!')])
-    lng = FloatField()
+    owner = StringField(render_kw={"placeholder": u"Иван Иванович"})
+    lat = FloatField(default=0)
+    lng = FloatField(default=0)
     description = TextAreaField()
     tags = StringField()
     price = IntegerField(default=0)
 
-class AdresslessForm(Form):
-    category = StringField(validators=[DataRequired(message=u'Укажите категорию!')])
-    title = StringField(default=u"Без названия")
-    phonenumber = StringField(render_kw={"placeholder": u"(999) 999-9999"})
-    phonenumber_static = StringField(render_kw={"placeholder": u"9-99-99"})
-    rating = IntegerField(default=0)
-    owner = StringField(render_kw={"placeholder": u"дядя Коля"})
-    description = TextAreaField()
-    tags = StringField()
-    price = IntegerField(default=0)
 
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -121,49 +111,10 @@ def search_result():
 
 @app.route('/category/<category_eng>')
 def category(category_eng):
-    orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).fetch()
+    orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).order(-OrganizationModel.when_added).fetch()
     return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
                            category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories,
                            categories_callable=categories_callable)
-
-@app.route('/orgs/new_callable', methods = ['GET', 'POST'])
-def new_org_callable():
-    category = request.args.get("category_value")
-    orgs = OrganizationModel.query(OrganizationModel.category == category).fetch()
-    form = AdresslessForm()
-    if request.method == 'GET':
-        all_tags = get_all_tags()
-        return render_template('new_org_callable.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
-    elif request.method == 'POST':
-        if form.validate_on_submit():
-            tags = form.tags.data.lower().split(',')
-            if tags:
-                tags.append(category.lower())
-            else:
-                tags = [category.lower()]
-            if form.title.data != u'Без названия':
-                tags.append(form.title.data.lower())
-            post = OrganizationModel(title = form.title.data,
-                                    category = form.category.data,
-                                    phonenumber = form.phonenumber.data.split(','),
-                                    phonenumber_static = form.phonenumber_static.data.split(','),
-                                    rating = form.rating.data,
-                                    owner = form.owner.data,
-                                    author = users.get_current_user(),
-                                    user_modified = users.get_current_user(),
-                                    description = form.description.data,
-                                    tags = tags
-                                     )
-            post.put()
-            flash(u'Организация успешно добавлена!')
-            for eng, rus in categories_all.iteritems():
-                if rus == form.category.data:
-                    category_eng = eng
-            add_tags_to_overall(tags)
-            return redirect(url_for('category_callable', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
-        else:
-            all_tags = get_all_tags()
-            return render_template('new_org_callable.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
 
 
 @app.route('/orgs/new', methods = ['GET', 'POST'])
@@ -190,10 +141,11 @@ def new_org():
                                     rating = form.rating.data,
                                     owner = form.owner.data,
                                     adres = form.adres.data,
-                                    location = ndb.GeoPt(form.lat.data, form.lng.data),
                                     author = users.get_current_user(),
+                                    location = ndb.GeoPt(form.lat.data, form.lng.data),
                                     user_modified = users.get_current_user(),
                                     description = form.description.data,
+                                    price = form.price.data,
                                     tags = tags
                                      )
             post.put()
@@ -204,58 +156,9 @@ def new_org():
             add_tags_to_overall(tags)
             return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
         else:
+            flash(u'Форма не прошла валидацию.')
             all_tags = get_all_tags()
             return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
-
-@app.route('/edit_org_callable/<int:id>', methods = ['GET', 'POST'])
-def edit_org_callable(id):
-    org = OrganizationModel.get_by_id(int(id))
-    if users.is_current_user_admin() or users.get_current_user() == org.author:
-        form = AdresslessForm()
-        if request.method == 'POST':
-            if form.validate_on_submit():
-                tags = form.tags.data.lower().split(',')
-                if tags:
-                    tags.append(form.category.data.lower())
-                else:
-                    tags = [form.category.data.lower()]
-                if form.title.data != u'Без названия':
-                    tags.append(form.title.data.lower())
-                org.populate(title = form.title.data,
-                            category = form.category.data,
-                            phonenumber = form.phonenumber.data.split(', '),
-                            phonenumber_static = form.phonenumber_static.data.split(', '),
-                            rating = form.rating.data,
-                            owner = form.owner.data,
-                            user_modified = users.get_current_user(),
-                            when_modified = datetime.now(),
-                            description = form.description.data,
-                            tags = list(set(tags))
-                             )
-                org.put()
-                flash(u'Изменения приняты!')
-                for eng, rus in categories_all.iteritems():
-                    if rus == form.category.data:
-                        category_eng = eng
-                add_tags_to_overall(tags)
-                return redirect(url_for('category_callable', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
-        form.category.data = org.category
-        form.title.data = org.title
-        form.phonenumber.data = ", ".join(org.phonenumber)
-        form.phonenumber_static.data = ", ".join(org.phonenumber_static)
-        form.rating.data = org.rating
-        form.owner.data = org.owner
-        form.description.data = org.description
-        form.tags.data = ",".join(org.tags)
-        orgs = OrganizationModel.query(OrganizationModel.category == org.category).fetch()
-        all_tags = get_all_tags()
-        return render_template("edit_org_callable.html", categories=categories, categories_callable=categories_callable, form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), tags=",".join(org.tags), all_tags=','.join(all_tags))
-    else:
-        flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!")
-        for eng, rus in categories_all.iteritems():
-            if rus == org.category:
-                category_eng = eng
-        return redirect(url_for('category', category_eng=category_eng, categories=categories, categories_callable=categories_callable))
 
 
 @app.route('/edit_org/<int:id>', methods = ['GET', 'POST'])
@@ -300,8 +203,9 @@ def edit_org(id):
         form.owner.data = org.owner
         form.adres.data = org.adres
         form.description.data = org.description
-        form.lat.data = org.location.lat
-        form.lng.data = org.location.lon
+        if org.location:
+            form.lat.data = org.location.lat
+            form.lng.data = org.location.lon
         form.tags.data = ",".join(org.tags)
         orgs = OrganizationModel.query(OrganizationModel.category == org.category).fetch()
         all_tags = get_all_tags()

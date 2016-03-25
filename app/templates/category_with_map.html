@@ -24,6 +24,10 @@
                     {{ post.category }}
                     <br>
                     {{ momentjs(post.when_added).fromNow() }}
+                    <br>
+                    <a href='/details/{{ post.id }}'>Подробнее</a><br>
+                    <a href='/edit_org/{{ post.id }}'>Редактировать</a><br>
+                    <a href='/del_org/{{ post.id }}'>Удалить</a>
                 </li>
                 {% endfor %}
             </ul>

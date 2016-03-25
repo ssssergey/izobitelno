@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {# // Карта#}
+            <div class="col-sm-6" align="center">
+                <h4>{{ org.title }}</h4>
+                <div class="row" id="wrapper">
+                    <div id="map">
+                        Google Maps
+                    </div>
+
+                    <div id="selflocate_button">
+                            <input id="my_location_button" type="button" value="Определить свое местоположение на карте">
+                    </div>
+                </div>
+                <div id="accuracy"></div>
+{#                {% include 'base_map.html' %}#}
+
+                <h4>{{ org.adres }}</h4>
+                {% if org.phonenumber %}
+                    {% set p = org.phonenumber|join(", ") %}
+                        <h4>{{ p }}</h4>
+                {% else %}
+                    <h4>Отсутствует.</h4>
+                {% endif %}
+                {% if org.phonenumber_static %}
+                    {% set p = org.phonenumber_static|join(", ") %}
+                        <h4>{{ p }}</h4>
+                {% else %}
+                    <h4>Отсутствует.</h4>
+                {% endif %}
+                {% if org.tags %}
+                    {% set p = org.tags|join(", ") %}
+                        <h4>{{ p }}</h4>
+                {% else %}
+                    <h4>Отсутствует.</h4>
+                {% endif %}
+                <h4>{{ org.rating }}</h4>
+                <h4>{{ momentjs(org.when_added).fromNow() }}</h4>
+                <h4>{{ momentjs(org.when_added).fromNow() }}</h4>
+                <h4>{{ org.description }}</h4>
+            </div>
+
+            <div class="col-sm-6">
+                 <form class="form-signin" action="{{ url_for('add_comment', category=org.category, organization_id=org.id)}}" method="post" role="form">
+                     <h2 class="form-signin-heading">Комментарии </h2>
+                     <input type="text" name="comment" class="form-control" placeholder="Ваш комментарий" required autofocus>
+                     <input type="hidden" name="category" class="form-control" value={{ org.category }} >
+                     <input type="hidden" name="organization_id" class="form-control" value={{ org.id }}>
+                     <button class="btn btn-lg btn-primary btn-block" type="button">Отправить </button>
+                 </form>
+
+                 <div class="row">
+                     <p id="new_comment"></p>
+                     <span id="comments"></span>
+                 </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            all_comments();
+        });
+
+        var id = {{ org.id | safe }};
+
+        var all_comments = function (){
+            $.ajax({
+                url: '/get_comments_by_org',
+                data: {'organization_id':id},
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    var data = JSON.parse(response);
+                    var string_comments = '';
+                    for (var i=0; i<data.comments.length; i++) {
+                        string_comments += data.comments[i].content + '<br>'
+                    }
+                    document.getElementById("comments").innerHTML = string_comments;
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            })
+        };
+
+        $(function() {
+            $('button').click(function() {
+        {#        var comment = $('#txtUsername').val();#}
+                $.ajax({
+                    url: '/add_comment',
+                    data: $('form').serialize(),
+                    type: 'POST',
+                    success: function(response) {
+                        console.log(response);
+                        var data = JSON.parse(response);
+                        document.getElementById("new_comment").innerHTML = data.comment;
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+                all_comments();
+            });
+        });
+    </script>
+
+{% endblock %}
+

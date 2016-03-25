@@ -57,15 +57,15 @@
                     });
                 </script>
 
-                <form action="{{ url_for('new_org', category_eng = category_eng, category_value = request.args.get('category_value')) }}" method="post" accept-charset="utf-8">
+                <form action="{{ url_for('edit_org', id = id) }}" method="post" accept-charset="utf-8">
                     {{ form.csrf_token }}
                     <div class="form-group">
                         <label for="testInput">Тэги</label>
-                        <input class="form-control" type="text" name="tags" id="testInput" value=""/>
+                        <input class="form-control" type="text" name="tags" id="testInput" value="{{ form.tags.data }}"/>
                     </div>
                     <div class="form-group">
                         <label for="content">Категория</label>
-                        {{ form.category(class_="form-control",value=request.args.get('category_value'))|safe }}
+                        {{ form.category(class_="form-control") }}
                         {% if form.category.errors %}
                         <ul class="errors">
                             {% for error in form.category.errors %}
