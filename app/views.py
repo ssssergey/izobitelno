@@ -90,7 +90,7 @@ class GaeEncoder(json.JSONEncoder):
 @app.route('/details/<int:id>')
 def details(id):
     org = OrganizationModel.get_by_id(int(id))
-    return render_template("details.html", org = org, categories=categories, categories_callable=categories_callable)
+    return render_template("details.html", org = org, posts = json.loads(json.dumps([org], cls=GaeEncoder)), categories=categories, categories_callable=categories_callable)
 
 @app.route('/')
 def index():

@@ -6,17 +6,19 @@
             {# // Карта#}
             <div class="col-sm-6" align="center">
                 <h4>{{ org.title }}</h4>
-                <div class="row" id="wrapper">
-                    <div id="map">
-                        Google Maps
-                    </div>
+                {% if org.location.lat %}
+                    <div class="row" id="wrapper">
+                        <div id="map">
+                            Google Maps
+                        </div>
 
-                    <div id="selflocate_button">
-                            <input id="my_location_button" type="button" value="Определить свое местоположение на карте">
+                        <div id="selflocate_button">
+                                <input id="my_location_button" type="button" value="Определить свое местоположение на карте">
+                        </div>
                     </div>
-                </div>
-                <div id="accuracy"></div>
-{#                {% include 'base_map.html' %}#}
+                    <div id="accuracy"></div>
+                    {% include 'base_map.html' %}
+                {% endif %}
 
                 <h4>{{ org.adres }}</h4>
                 {% if org.phonenumber %}
