@@ -8,6 +8,7 @@ class PostModel(EndpointsModel):
     author = ndb.UserProperty(required = True)
     category = ndb.StringProperty()
     organization_id = ndb.IntegerProperty()
+    complain = ndb.BooleanProperty(default=False)
 
 class OrganizationModel(EndpointsModel):
     category = ndb.StringProperty(default=u'Другие')
@@ -16,7 +17,7 @@ class OrganizationModel(EndpointsModel):
     adres = ndb.StringProperty()
     phonenumber = ndb.StringProperty(repeated=True)
     phonenumber_static = ndb.StringProperty(repeated=True)
-    rating = ndb.IntegerProperty()
+    rating = ndb.IntegerProperty(default=0)
     when_added = ndb.DateTimeProperty(auto_now_add = True)
     when_modified = ndb.DateTimeProperty(auto_now_add = True)
     author = ndb.UserProperty(required = True)
@@ -24,7 +25,10 @@ class OrganizationModel(EndpointsModel):
     owner = ndb.StringProperty()
     description = ndb.TextProperty()
     tags = ndb.StringProperty(repeated=True)
-    price = ndb.IntegerProperty()
+    price = ndb.IntegerProperty(default=0)
+    size = ndb.IntegerProperty(default=2)
+    quality = ndb.BooleanProperty(default=False)
+
 
 class UserModel(EndpointsModel):
     auth_object = ndb.UserProperty(required = True)

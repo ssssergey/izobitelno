@@ -15,6 +15,7 @@
           scrollwheel: true,
         });
           // Получает JSON от БД и в цикле добавляет маркер в массив маркеров.
+
           var posts = {{ posts | tojson | safe }};
           var geocoder = new google.maps.Geocoder();
             addMarkerstoMap(posts);
@@ -45,9 +46,15 @@
                 function add (post) {
                       if (post.location) {
                           var myLatLng = {lat: post.location.lat, lng: post.location.lng};
+                          var image = {
+                            url: '/images/quality.png',
+                            scaledSize: new google.maps.Size(50, 50)
+                          };
                             var marker1 = new google.maps.Marker({
-                              position: myLatLng,
-                              map: map
+                                position: myLatLng,
+{#                                icon: image,#}
+                                map: map,
+
                             });
                             var adress = post.adres.split(', Изобильный')[0];
                             var rating = post.rating;

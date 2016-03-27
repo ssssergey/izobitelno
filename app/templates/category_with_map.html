@@ -21,7 +21,12 @@
                 {% for post in posts %}
                 <li>
                     {{ post.title }} (автор: {{ post.author }})
+                    <br>
                     {{ post.category }}
+                    <br>
+                    {{ post.phonenumber|join(", ") }}
+                    <br>
+                    {{ post.phonenumber_static|join(", ") }}
                     <br>
                     {{ momentjs(post.when_added).fromNow() }}
                     <br>

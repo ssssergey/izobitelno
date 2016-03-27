@@ -8,34 +8,36 @@ from google.appengine.api import users, datastore_types
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
 from flask.ext.wtf import Form
-from wtforms import StringField, FloatField, TextAreaField, IntegerField
-from wtforms.validators import DataRequired,Length,EqualTo
+from wtforms import StringField, FloatField, TextAreaField, IntegerField, BooleanField, widgets
+from wtforms.validators import DataRequired,NumberRange
 
 categories = [
     {'eng_title':'food',
     'rus_title':u'Еда',
     'icon':"fa fa-cutlery fa-fw",
     'categs':{'beer':u'Пиво разливное','pizza':u'Пицца','meat':u'Мясо','fish':u'Рыба','vegets_fruits':u'Овощи и фрукты',
-              'food_shop':u'Продуктовый магазин','dining':u'Столовая'}},
+              'food_shop':u'Продуктовый магазин','dining':u'Столовая','alcohol':u'Алкоголь','sweets':u'Сладости'}},
     {'eng_title':'auto',
     'rus_title':u'Авто',
     'icon':"fa fa-car fa-fw",
     'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autoglass':u'Автостекло','autotyres':u'Шиномонтаж',
-              'autoshop':u'Автозапчасти','motoroil_change':u'Замена моторного масла', 'chassis':u'Ходовая',
+              'autoshop':u'Автозапчасти','motoroil_change':u'Замена моторного масла','chassis':u'Ходовая','sto':u'СТО',
               'autoelectric':u'Автоэлектрик','osago':u'ОСАГО','gasstation':u'АЗС'}},
     {'eng_title':'service',
     'rus_title':u'Услуги',
     'icon':"fa fa-group fa-fw",
     'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'photo':u'Фото', 'manicur':u'Маникюр',
-              'repair_gadgets':u'Ремонт техники','salon':u'Салон красоты','sbercashpoint':u'Банкомат Сбербанка',
+              'repair_gadgets':u'Ремонт','salon':u'Салон красоты','sbercashpoint':u'Банкомат Сбербанка',
               'bank':u'Банк', 'state_service':u'Госуслуги','hotel':u'Гостиница', 'rent_apartment':u'Аренда жилья',
-              'kindergarden':u'Детсад', 'child_developement':u'Развитие детей'}},
+              'kindergarden':u'Детсад', 'child_developement':u'Развитие детей', 'toilet':u'Туалет',
+              'service_charge':u'Оплата услуг','jurist':u'Юридические'}},
     {'eng_title':'goods',
     'rus_title':u'Товары',
     'icon':"glyphicon glyphicon-home",
-    'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород', 'furniture':u'Мебель', 'security':u'Системы безопасности',
-             'gadgets':u'Бытовая электроника', 'fishing_hunting':u'Рыбалка и охота','childgoods':u'Товары для детей','flowers':u'Цветы',
-             'grugstore':u'Аптека','officeshop':u'Канцелярский магазин'}},
+    'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород', 'furniture':u'Мебель', 'security':u'Безопасность',
+             'gadgets':u'Электроника', 'fishing_hunting':u'Рыбалка и охота','childgoods':u'Товары для детей','flowers':u'Цветы',
+             'grugstore':u'Аптека','officeshop':u'Канцелярский магазин','clothes':u'Одежда','household_goods':u'Бытовые товары',
+                'celebration':u'Праздники','animals':u'Животные','ritual':u'Ритуальные'}},
     {'eng_title':'leisure',
     'rus_title':u'Досуг',
     'icon':"glyphicon glyphicon-send",
@@ -61,21 +63,24 @@ class OrganizationForm(Form):
     category = StringField(validators=[DataRequired(message=u'Укажите категорию!')])
     title = StringField(default=u"Без названия")
     adres = StringField(default=u"")
-    phonenumber = StringField(render_kw={"placeholder": u"(999) 999-9999"})
-    phonenumber_static = StringField(render_kw={"placeholder": u"9-99-99"})
-    rating = IntegerField(default=0)
+    phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
+    phonenumber_static = StringField(widget=widgets.Input(input_type="tel"),render_kw={"placeholder": u"9-99-99"})
+    rating = IntegerField(widget=widgets.Input(input_type="tel"),default=0)
     owner = StringField(render_kw={"placeholder": u"Иван Иванович"})
     lat = FloatField(default=0)
     lng = FloatField(default=0)
     description = TextAreaField()
     tags = StringField()
-    price = IntegerField(default=0)
-
+    price = IntegerField(widget=widgets.Input(input_type="tel"),default=0)
+    size = IntegerField(u'Размер объекта(1-5)', widget=widgets.Input(input_type="tel"),default=2, validators=[NumberRange(message=u'От 1 до 5', min=1, max=5)])
+    quality = BooleanField(default=False)
 
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
             return (obj - datetime(1970,1,1)).total_seconds()
+        # elif isinstance(obj, list):
+        #     return ', '.join([i for i in obj if i])
         elif isinstance(obj, ndb.Model):
             result = obj.to_dict()
             result['id'] = obj.key.id()
@@ -134,6 +139,8 @@ def new_org():
                 tags = [category.lower()]
             if form.title.data != u'Без названия':
                 tags.append(form.title.data.lower())
+            tags = [t.strip() for t in tags if t]
+            tags = list(set(tags))
             post = OrganizationModel(title = form.title.data,
                                     category = form.category.data,
                                     phonenumber = form.phonenumber.data.split(','),
@@ -146,6 +153,7 @@ def new_org():
                                     user_modified = users.get_current_user(),
                                     description = form.description.data,
                                     price = form.price.data,
+                                     size = form.size.data,
                                     tags = tags
                                      )
             post.put()
@@ -179,6 +187,8 @@ def edit_org(id):
                     tags = [form.category.data.lower()]
                 if form.title.data != u'Без названия':
                     tags.append(form.title.data.lower())
+                tags = [t.strip() for t in tags if t]
+                tags = list(set(tags))
                 org.populate(title = form.title.data,
                             category = form.category.data,
                             phonenumber = form.phonenumber.data.split(', '),
@@ -190,7 +200,8 @@ def edit_org(id):
                             user_modified = users.get_current_user(),
                             when_modified = datetime.now(),
                             description = form.description.data,
-                            tags = list(set(tags))
+                             size = form.size.data,
+                            tags = tags
                              )
                 org.put()
                 flash(u'Изменения приняты!')
@@ -210,6 +221,7 @@ def edit_org(id):
         form.rating.data = org.rating
         form.owner.data = org.owner
         form.adres.data = org.adres
+        form.size.data = org.size
         form.description.data = org.description
         if org.location:
             form.lat.data = org.location.lat
@@ -321,3 +333,40 @@ def get_comments_by_org():
     comments_org = PostModel.query(PostModel.organization_id == int(request.args.get('organization_id'))).order(-PostModel.when).fetch()
     return json.dumps({'status':'OK','comments':comments_org}, cls=GaeEncoder)
 
+class SecretForm(Form):
+    phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
+    phonenumber_static = StringField(widget=widgets.Input(input_type="tel"),render_kw={"placeholder": u"9-99-99"})
+
+@app.route('/secret_query', methods=['GET','POST'])
+def secret_query():
+    formS = SecretForm()
+    if request.method == 'POST':
+        if formS.validate_on_submit():
+            phonenumber = formS.phonenumber.data
+            phonenumber_static = formS.phonenumber_static.data
+            if request.form['btn'] == u'Мобильный':
+                selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber == phonenumber).fetch()
+            else:
+                selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber_static == phonenumber_static).fetch()
+            if selected_orgs:
+                return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
+                           categories=categories, categories_callable=categories_callable)
+            else:
+                all_tags = get_all_tags()
+                form = OrganizationForm()
+                form.phonenumber.data = phonenumber
+                return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable,
+                                       posts = json.loads(json.dumps({}, cls=GaeEncoder)), all_tags=','.join(all_tags))
+    return render_template('secret_query.html', form=formS)
+
+def get_nearby_objects(lat,lon):
+    area = .0005
+    # lat = float(self.request.get('lat'))
+    # lon = float(self.request.get('lon'))
+    minLat = lat - area
+    minLon = lon - area
+    maxLat = lat + area
+    maxLon = lon + area
+    query = ndb.gql("SELECT * FROM OrganizationModel WHERE location >= :1 AND location <=:2",
+                         ndb.GeoPt(lat=minLat, lon=minLon), ndb.GeoPt(lat=maxLat, lon=maxLon)).fetch()
+    return query
