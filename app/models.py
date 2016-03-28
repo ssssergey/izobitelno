@@ -28,6 +28,7 @@ class OrganizationModel(EndpointsModel):
     price = ndb.IntegerProperty(default=0)
     size = ndb.IntegerProperty(default=2)
     quality = ndb.BooleanProperty(default=False)
+    delivery = ndb.IntegerProperty(default=1)
 
 
 class UserModel(EndpointsModel):

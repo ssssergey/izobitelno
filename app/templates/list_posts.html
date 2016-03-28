@@ -10,17 +10,16 @@
                 <a class="btn btn-primary" href="{{ url_for('new_post') }}" role="button">Добавить комментарий</a>
             </div>
         </div>
-        <ul>
+        <table class="table table-striped">
             {% for post in posts %}
-            <li>
-                {{ post.content }}
-                <br>
-                (автор: {{ post.author.nickname() }})
-                <br>
-                {{ momentjs(post.when).fromNow() }}
-                ({{ momentjs(post.when).format('LLLL') }})
-            </li>
+            <tr>
+                <td>{{ post.content }}</td>
+                <td>{{ post.author.nickname() }}</td>
+                <td>{{ post.category }}</td>
+                <td>{{ momentjs(post.when).fromNow() }}</td>
+                <td>{{ momentjs(post.when).format('LLLL') }}</td>
+            </tr>
             {% endfor %}
-        </ul>
+        </table>
     </div>
 {% endblock %}

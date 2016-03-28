@@ -16,27 +16,26 @@
                     <input id="my_location_button" type="button" value="Определить по GPS">
             </div>
         </div>
-        <div>
-            <ul>
+        <div class="row">
+            <table class="table table-striped">
                 {% for post in posts %}
-                <li>
-                    {{ post.title }} (автор: {{ post.author }})
-                    <br>
-                    {{ post.category }}
-                    <br>
-                    {{ post.phonenumber|join(", ") }}
-                    <br>
-                    {{ post.phonenumber_static|join(", ") }}
-                    <br>
-                    {{ momentjs(post.when_added).fromNow() }}
-                    <br>
-                    <a href='/details/{{ post.id }}'>Подробнее</a><br>
-                    <a href='/edit_org/{{ post.id }}'>Редактировать</a><br>
-                    <a href='/del_org/{{ post.id }}'>Удалить</a>
-                </li>
+                <tr>
+                    <td>{{ post.title }}</td>
+                    <td>{{ post.adres }}</td>
+                    <td>{{ post.category }}</td>
+                    <td>{{ post.phonenumber|join(", ") }}</td>
+                    <td>{{ post.phonenumber_static|join(", ") }}</td>
+                    <td>{{ momentjs(post.when_added).fromNow() }}</td>
+                    <td>
+                        <a href='/details/{{ post.id }}'>Подробнее</a><br>
+                        <a href='/edit_org/{{ post.id }}'>Редактировать</a><br>
+                        <a href='/del_org/{{ post.id }}'>Удалить</a>
+                    </td>
+                </tr>
                 {% endfor %}
-            </ul>
+            </table>
         </div>
+
         {% include 'base_map.html' %}
     </div>
 

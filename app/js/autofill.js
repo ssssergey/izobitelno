@@ -52,7 +52,11 @@
 			
 			// add listeners for data
 			if(opts.data) {
-				
+				// if input field is not focused the autofill must disaprear
+				$(self).blur("keydown",function(e) {
+					bg.value = "";
+				});
+
 				// we have to do this here because of tab
 				$(self).on("keydown",function(e) {
 					if(!!~[39,13,9].indexOf(e.keyCode)) {

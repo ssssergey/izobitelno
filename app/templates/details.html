@@ -19,30 +19,42 @@
                     <div id="accuracy"></div>
                     {% include 'base_map.html' %}
                 {% endif %}
-
-                <h4>{{ org.adres }}</h4>
-                {% if org.phonenumber %}
-                    {% set p = org.phonenumber|join(", ") %}
-                        <h4>{{ p }}</h4>
-                {% else %}
-                    <h4>Отсутствует.</h4>
-                {% endif %}
-                {% if org.phonenumber_static %}
-                    {% set p = org.phonenumber_static|join(", ") %}
-                        <h4>{{ p }}</h4>
-                {% else %}
-                    <h4>Отсутствует.</h4>
-                {% endif %}
-                {% if org.tags %}
-                    {% set p = org.tags|join(", ") %}
-                        <h4>{{ p }}</h4>
-                {% else %}
-                    <h4>Отсутствует.</h4>
-                {% endif %}
-                <h4>{{ org.rating }}</h4>
-                <h4>{{ momentjs(org.when_added).fromNow() }}</h4>
-                <h4>{{ momentjs(org.when_added).fromNow() }}</h4>
-                <h4>{{ org.description }}</h4>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{ org.title }}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <dl class="dl-vertical">
+                            <dt>Адрес</dt>
+                            {% if org.adres %}
+                                <dd>{{ org.adres }}</dd>
+                            {% else %}
+                                <dd>Отсутствует.</dd>
+                            {% endif %}
+                            <dt>Телефоны (моб.)</dt>
+                            {% if org.phonenumber|join(", ") %}
+                                <dd>{{ org.phonenumber|join(", ") }}</dd>
+                            {% else %}
+                                <dd>Отсутствует.</dd>
+                            {% endif %}
+                            <dt>Телефоны (гор.)</dt>
+                            {% if org.phonenumber_static|join(", ") %}
+                                <dd>{{ org.phonenumber_static|join(", ") }}</dd>
+                            {% else %}
+                                <dd>Отсутствует.</dd>
+                            {% endif %}
+                            <dt>Дата добавления</dt>
+                            <dd>{{ momentjs(org.when_added).fromNow() }}</dd>
+                            <dt>Дата изменения</dt>
+                            <dd>{{ momentjs(org.when_modified).fromNow() }}</dd>
+                            <dt>Рейтинг</dt>
+                            <dd>{{ org.rating }}</dd>
+                       </dl>
+                    </div>
+                    <div class="panel-footer">
+                        <h4>{{ org.description }}</h4>
+                    </div>
+                </div>
             </div>
 
             <div class="col-sm-6">

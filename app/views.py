@@ -30,7 +30,7 @@ categories = [
               'repair_gadgets':u'Ремонт','salon':u'Салон красоты','sbercashpoint':u'Банкомат Сбербанка',
               'bank':u'Банк', 'state_service':u'Госуслуги','hotel':u'Гостиница', 'rent_apartment':u'Аренда жилья',
               'kindergarden':u'Детсад', 'child_developement':u'Развитие детей', 'toilet':u'Туалет',
-              'service_charge':u'Оплата услуг','jurist':u'Юридические'}},
+              'service_charge':u'Оплата услуг','jurist':u'Юридические','health':u'Здоровье','tricot':u'Трикотаж'}},
     {'eng_title':'goods',
     'rus_title':u'Товары',
     'icon':"glyphicon glyphicon-home",
@@ -109,7 +109,7 @@ def show_categories_all():
 
 @app.route('/search_result', methods = ['GET', 'POST'])
 def search_result():
-    keyword = request.form.get('search').lower()
+    keyword = request.form.get('search').lower().strip()
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword).fetch()
     return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
                            categories=categories, categories_callable=categories_callable)
@@ -134,7 +134,7 @@ def new_org():
         if form.validate_on_submit():
             tags = form.tags.data.lower().split(',')
             if tags:
-                tags.append(category.lower())
+                tags.append(form.category.data.lower())
             else:
                 tags = [category.lower()]
             if form.title.data != u'Без названия':
@@ -339,25 +339,30 @@ class SecretForm(Form):
 
 @app.route('/secret_query', methods=['GET','POST'])
 def secret_query():
-    formS = SecretForm()
-    if request.method == 'POST':
-        if formS.validate_on_submit():
-            phonenumber = formS.phonenumber.data
-            phonenumber_static = formS.phonenumber_static.data
-            if request.form['btn'] == u'Мобильный':
-                selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber == phonenumber).fetch()
-            else:
-                selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber_static == phonenumber_static).fetch()
-            if selected_orgs:
-                return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
-                           categories=categories, categories_callable=categories_callable)
-            else:
-                all_tags = get_all_tags()
-                form = OrganizationForm()
-                form.phonenumber.data = phonenumber
-                return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable,
-                                       posts = json.loads(json.dumps({}, cls=GaeEncoder)), all_tags=','.join(all_tags))
-    return render_template('secret_query.html', form=formS)
+    if users.is_current_user_admin():
+        formS = SecretForm()
+        if request.method == 'POST':
+            if formS.validate_on_submit():
+                phonenumber = formS.phonenumber.data
+                phonenumber_static = formS.phonenumber_static.data
+                if request.form['btn'] == u'Мобильный':
+                    selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber == phonenumber).fetch()
+                else:
+                    selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber_static == phonenumber_static).fetch()
+                if selected_orgs:
+                    return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
+                               categories=categories, categories_callable=categories_callable)
+                else:
+                    all_tags = get_all_tags()
+                    form = OrganizationForm()
+                    form.phonenumber.data = phonenumber
+                    return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable,
+                                           posts = json.loads(json.dumps({}, cls=GaeEncoder)), all_tags=','.join(all_tags))
+        return render_template('secret_query.html', form=formS)
+    else:
+        flash(u"У вас нет права доступа!")
+        return redirect(url_for('index'))
+
 
 def get_nearby_objects(lat,lon):
     area = .0005
