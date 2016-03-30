@@ -31,17 +31,23 @@
                             {% else %}
                                 <dd>Отсутствует.</dd>
                             {% endif %}
+                            <dt>Тэги</dt>
+                            {% if org.tags|join(", ") %}
+                                <dd>{{ org.tags|join(", ") }}</dd>
+                            {% else %}
+                                <dd>Отсутствуют.</dd>
+                            {% endif %}
                             <dt>Телефоны (моб.)</dt>
                             {% if org.phonenumber|join(", ") %}
                                 <dd>{{ org.phonenumber|join(", ") }}</dd>
                             {% else %}
-                                <dd>Отсутствует.</dd>
+                                <dd>Отсутствуют.</dd>
                             {% endif %}
                             <dt>Телефоны (гор.)</dt>
                             {% if org.phonenumber_static|join(", ") %}
                                 <dd>{{ org.phonenumber_static|join(", ") }}</dd>
                             {% else %}
-                                <dd>Отсутствует.</dd>
+                                <dd>Отсутствуют.</dd>
                             {% endif %}
                             <dt>Дата добавления</dt>
                             <dd>{{ momentjs(org.when_added).fromNow() }}</dd>

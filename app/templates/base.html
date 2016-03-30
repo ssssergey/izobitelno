@@ -48,7 +48,7 @@
                              {{ cat_group.rus_title }} <span class="caret"></span></a>
                             <ul class="dropdown-menu">
                               {% for eng, rus in cat_group.categs.items() %}
-                                  <li id="{{ eng }}"><a href="{{  url_for('category', category_eng=eng) }}">{{ rus }}</a></li>
+                                  <li id="{{ eng }}"><a href="{{  url_for('search_result', category_rus=rus) }}">{{ rus }}</a></li>
                               {% endfor %}
                             </ul>
                         </li>
@@ -60,7 +60,7 @@
                              {{ cat_group.rus_title }} <span class="caret"></span></a>
                             <ul class="dropdown-menu">
                               {% for eng, rus in cat_group.categs.items() %}
-                                  <li id="{{ eng }}"><a href="{{  url_for('category', category_eng=eng) }}">{{ rus }}</a></li>
+                                  <li id="{{ eng }}"><a href="{{ url_for('search_result', category_rus=rus) }}">{{ rus }}</a></li>
                               {% endfor %}
                             </ul>
                         </li>

@@ -20,24 +20,23 @@ categories = [
     {'eng_title':'auto',
     'rus_title':u'Авто',
     'icon':"fa fa-car fa-fw",
-    'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autoglass':u'Автостекло','autotyres':u'Шиномонтаж',
-              'autoshop':u'Автозапчасти','motoroil_change':u'Замена моторного масла','chassis':u'Ходовая','sto':u'СТО',
-              'autoelectric':u'Автоэлектрик','osago':u'ОСАГО','gasstation':u'АЗС'}},
+    'categs':{'autowash':u'Автомойка','autopaint':u'Автопокраска','autotyres':u'Шиномонтаж',
+              'autoshop':u'Автозапчасти','sto':u'СТО','osago':u'ОСАГО','gasstation':u'АЗС'}},
     {'eng_title':'service',
     'rus_title':u'Услуги',
     'icon':"fa fa-group fa-fw",
-    'categs':{'hair':u'Парикмахерская', 'atelye':u'Ателье', 'photo':u'Фото', 'manicur':u'Маникюр',
-              'repair_gadgets':u'Ремонт','salon':u'Салон красоты','sbercashpoint':u'Банкомат Сбербанка',
-              'bank':u'Банк', 'state_service':u'Госуслуги','hotel':u'Гостиница', 'rent_apartment':u'Аренда жилья',
+    'categs':{'atelye':u'Ателье', 'photo':u'Фото', 'repair_gadgets':u'Ремонт вещей',
+              'salon':u'Салон красоты','sbercashpoint':u'Банкомат Сбербанка',
+              'bank':u'Банк', 'state_service':u'Госуслуги','hotel':u'Гостиница',
               'kindergarden':u'Детсад', 'child_developement':u'Развитие детей', 'toilet':u'Туалет',
-              'service_charge':u'Оплата услуг','jurist':u'Юридические','health':u'Здоровье','tricot':u'Трикотаж'}},
+              'service_charge':u'Оплата услуг','jurist':u'Юридические','health':u'Здоровье'}},
     {'eng_title':'goods',
     'rus_title':u'Товары',
     'icon':"glyphicon glyphicon-home",
     'categs':{'construction':u'Строительный магазин', 'garden':u'Сад и огород', 'furniture':u'Мебель', 'security':u'Безопасность',
              'gadgets':u'Электроника', 'fishing_hunting':u'Рыбалка и охота','childgoods':u'Товары для детей','flowers':u'Цветы',
              'grugstore':u'Аптека','officeshop':u'Канцелярский магазин','clothes':u'Одежда','household_goods':u'Бытовые товары',
-                'celebration':u'Праздники','animals':u'Животные','ritual':u'Ритуальные'}},
+                'celebration':u'Праздничные','animals':u'Животным','ritual':u'Ритуальные','textile':u'Текстиль'}},
     {'eng_title':'leisure',
     'rus_title':u'Досуг',
     'icon':"glyphicon glyphicon-send",
@@ -60,7 +59,7 @@ for i_dict in categories_callable:
     categories_all.update(i_dict['categs'])
 
 class OrganizationForm(Form):
-    category = StringField(validators=[DataRequired(message=u'Укажите категорию!')])
+    category = StringField()
     title = StringField(default=u"Без названия")
     adres = StringField(default=u"")
     phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
@@ -109,17 +108,20 @@ def show_categories_all():
 
 @app.route('/search_result', methods = ['GET', 'POST'])
 def search_result():
-    keyword = request.form.get('search').lower().strip()
-    selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword).fetch()
+    if request.method == 'GET':
+        keyword = request.args.get('category_rus')
+    elif request.method == 'POST':
+        keyword = request.form.get('search')
+    selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
     return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
-                           categories=categories, categories_callable=categories_callable)
+                           categories=categories, categories_callable=categories_callable, keyword=keyword)
 
-@app.route('/category/<category_eng>')
-def category(category_eng):
-    orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).order(-OrganizationModel.when_added).fetch()
-    return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
-                           category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories,
-                           categories_callable=categories_callable)
+# @app.route('/category/<category_eng>')
+# def category(category_eng):
+#     orgs = OrganizationModel.query(OrganizationModel.category == categories_all[category_eng]).order(-OrganizationModel.when_added).fetch()
+#     return render_template("category_with_map.html", posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
+#                            category_rus=categories_all[category_eng], category_eng=category_eng, categories=categories,
+#                            categories_callable=categories_callable)
 
 
 @app.route('/orgs/new', methods = ['GET', 'POST'])
@@ -150,7 +152,6 @@ def new_org():
                                     adres = form.adres.data,
                                     author = users.get_current_user(),
                                     location = ndb.GeoPt(form.lat.data, form.lng.data),
-                                    user_modified = users.get_current_user(),
                                     description = form.description.data,
                                     price = form.price.data,
                                      size = form.size.data,
@@ -168,7 +169,7 @@ def new_org():
             else:
                 return redirect(url_for('show_categories_all'))
         else:
-            flash(u'Форма не прошла валидацию.')
+            flash(u'Форма не прошла валидацию.', 'error')
             all_tags = get_all_tags()
             return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
 
@@ -197,7 +198,6 @@ def edit_org(id):
                             owner = form.owner.data,
                             adres = form.adres.data,
                             location = ndb.GeoPt(form.lat.data, form.lng.data),
-                            user_modified = users.get_current_user(),
                             when_modified = datetime.now(),
                             description = form.description.data,
                              size = form.size.data,
@@ -231,7 +231,7 @@ def edit_org(id):
         all_tags = get_all_tags()
         return render_template("edit_org.html", categories=categories, categories_callable=categories_callable, form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), tags=",".join(org.tags), all_tags=','.join(all_tags))
     else:
-        flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!")
+        flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!", 'error')
         for eng, rus in categories_all.iteritems():
             if rus == org.category:
                 category_eng = eng
@@ -254,7 +254,7 @@ def del_org(id):
         org.key.delete()
         return redirect(url_for('category', category_eng=category_eng))
     else:
-        flash(u"У вас нет права на удаление. Вы не являетесь автором этого объекта!")
+        flash(u"У вас нет права на удаление. Вы не являетесь автором этого объекта!", 'error')
         return redirect(url_for('category', category_eng=category_eng))
 
 @app.route('/orgs')
@@ -293,9 +293,6 @@ def contacts():
 def traffic():
     return render_template("traffic.html", categories=categories, categories_callable=categories_callable)
 
-@app.route('/location')
-def location():
-    return render_template("location.html", categories=categories, categories_callable=categories_callable)
 
 ######## POST ###########
 class PostForm(Form):
@@ -360,9 +357,31 @@ def secret_query():
                                            posts = json.loads(json.dumps({}, cls=GaeEncoder)), all_tags=','.join(all_tags))
         return render_template('secret_query.html', form=formS)
     else:
-        flash(u"У вас нет права доступа!")
+        flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
 
+class AllTagsForm(Form):
+    tags = StringField()
+    uid = StringField()
+
+@app.route('/secret_allTags', methods=['GET','POST'])
+def secret_allTags():
+    if users.is_current_user_admin():
+        form = AllTagsForm()
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                tags = form.tags.data.lower().split(',')
+                all_tags = TagsModel.query(TagsModel.uid == 'myid').get()
+                all_tags.all_tags = tags
+                all_tags.put()
+                flash(u"Изменения приняты!")
+                return render_template("secret_allTags.html", form=form)
+        all_tags = TagsModel.query(TagsModel.uid == 'myid').get()
+        form.tags.data = ",".join(all_tags.all_tags)
+        return render_template('secret_allTags.html', form=form)
+    else:
+        flash(u"У вас нет права доступа!", 'error')
+        return redirect(url_for('index'))
 
 def get_nearby_objects(lat,lon):
     area = .0005

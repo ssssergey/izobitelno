@@ -19,7 +19,7 @@
                 </div>
                 <div class="col-sm-10" align="left">
                     {% for eng, rus in cat_group.categs.items() %}
-                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('search_result', category_rus=rus) }}" role="button"> {{ rus }}</a>
                     {% endfor %}
                 </div>
             </div>
@@ -33,7 +33,7 @@
                 </div>
                 <div class="col-sm-10" align="left">
                     {% for eng, rus in cat_group.categs.items() %}
-                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('category', category_eng=eng) }}" role="button"> {{ rus }}</a>
+                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('search_result', category_rus=rus) }}" role="button"> {{ rus }}</a>
                     {% endfor %}
                 </div>
             </div>

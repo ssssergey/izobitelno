@@ -23,7 +23,7 @@
 				$self = $(this),
 				$wrapper = $("<div class='tags-wrapper'><ul></ul></div");
 				tags = $self.val(),
-				tagsArray = tags.split(","),
+				tagsArray = tags.split(",").sort(),
 				$ul = $wrapper.find("ul");
 
 				// make sure have opts

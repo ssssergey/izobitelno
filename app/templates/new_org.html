@@ -60,21 +60,6 @@
                 <form action="{{ url_for('new_org', category_eng = category_eng, category_value = request.args.get('category_value')) }}" method="post" accept-charset="utf-8">
                     {{ form.csrf_token }}
                     <div class="form-group">
-                        <label for="testInput">Тэги</label>
-                        <input class="form-control" type="text" name="tags" id="testInput" value=""/>
-                    </div>
-                    <div class="form-group">
-                        <label for="content">Категория</label>
-                        {{ form.category(class_="form-control",value=request.args.get('category_value'))|safe }}
-                        {% if form.category.errors %}
-                        <ul class="errors">
-                            {% for error in form.category.errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
                         <label for="title">Название учреждения</label>
                         {{ form.title(class_="form-control")|safe }}
                         {% if form.title.errors %}
@@ -86,40 +71,8 @@
                         {% endif %}
                     </div>
                     <div class="form-group">
-                        <label for="owner">Контактное лицо</label>
-                        {{ form.owner(class_="form-control")|safe }}
-                        {% if form.owner.errors %}
-                        <ul class="errors">
-                            {% for error in form.owner.errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="adres">Адрес</label>
-                        {{ form.adres(class_="form-control",readonly=false)|safe }}
-                        <i>Воспользуйтесь интерактивной картой.</i><br>
-                        {{ form.lat(class_="hidden",readonly=true, size=10)|safe }}
-                        {{ form.lng(class_="hidden",readonly=true, size=10)|safe }}
-                        {% if form.adres.errors %}
-                        <ul class="errors">
-                            {% for error in form.adres.errors %}
-                            <li><strong style="color: red;">{{ error }}</strong></li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="content">Цена</label>
-                        {{ form.price(class_="form-control")|safe }}
-                        {% if form.price.errors %}
-                        <ul class="errors">
-                            {% for error in form.price.errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
+                        <label for="testInput">Тэги</label>
+                        <input class="form-control" type="text" name="tags" id="testInput" value=""/>
                     </div>
                     <div class="form-group">
                         <label for="phonenumber">Мобильные номера <i>(можно вбить до двух номеров)</i></label>
@@ -150,12 +103,15 @@
                         {% endif %}
                     </div>
                     <div class="form-group">
-                        <label for="rating">Рейтинг</label>
-                        {{ form.rating(class_="form-control")|safe }}
-                        {% if form.rating.errors %}
+                        <label for="adres">Адрес</label>
+                        {{ form.adres(class_="form-control",readonly=false)|safe }}
+                        <i>Воспользуйтесь интерактивной картой.</i><br>
+                        {{ form.lat(class_="hidden",readonly=true, size=10)|safe }}
+                        {{ form.lng(class_="hidden",readonly=true, size=10)|safe }}
+                        {% if form.adres.errors %}
                         <ul class="errors">
-                            {% for error in form.rating.errors %}
-                            <li>{{ error }}</li>
+                            {% for error in form.adres.errors %}
+                            <li><strong style="color: red;">{{ error }}</strong></li>
                             {% endfor %}
                         </ul>
                         {% endif %}
@@ -171,6 +127,53 @@
                         </ul>
                         {% endif %}
                     </div>
+                    <div class="form-group">
+                        <label for="content">Категория</label>
+                        {{ form.category(class_="form-control",value=request.args.get('category_value'))|safe }}
+                        {% if form.category.errors %}
+                        <ul class="errors">
+                            {% for error in form.category.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="owner">Контактное лицо</label>
+                        {{ form.owner(class_="form-control")|safe }}
+                        {% if form.owner.errors %}
+                        <ul class="errors">
+                            {% for error in form.owner.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="content">Цена</label>
+                        {{ form.price(class_="form-control")|safe }}
+                        {% if form.price.errors %}
+                        <ul class="errors">
+                            {% for error in form.price.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rating">Рейтинг</label>
+                        {{ form.rating(class_="form-control")|safe }}
+                        {% if form.rating.errors %}
+                        <ul class="errors">
+                            {% for error in form.rating.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+
                     <div class="form-group">
                         <label for="description">Описание</label>
                         {{ form.description(class_="form-control",cols="40", rows="10")|safe }}

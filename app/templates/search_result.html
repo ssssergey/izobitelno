@@ -2,11 +2,19 @@
 {% block content %}
 
     <div class="container">
-        <h2 align="center">{{ category }}</h2>
+        <h2 align="center">По Вашему запросу "{{ keyword }}" найдено {{posts|length}} варианта(ов).</h2>
+        <h4>Обратите внимание, возможно не все они представлены на карте. Более полный список смотрите в таблице ниже.</h4>
         <div class="row" id="wrapper">
             <div id="map">Google Maps</div>
+            <div id="add_button">
+                <a class="btn btn-primary" href="{{ url_for('new_org', category_value=category_rus, category_eng=category_eng) }}" role="button">Добавить объект</a>
+            </div>
+            <div id="floating-panel" style="top: auto; bottom: 50px">
+                    <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
+                    <input id="submit" type="button" value="Искать">
+            </div>
             <div id="selflocate_button">
-                    <input id="my_location_button" type="button" value="Определить свое местоположение на карте">
+                    <input id="my_location_button" type="button" value="Определить по GPS">
             </div>
         </div>
         {% include 'base_map.html' %}
@@ -15,7 +23,12 @@
                 {% for post in posts %}
                 <tr>
                     <td>{{ post.title }}</td>
-                    <td>{{ post.adres }}</td>
+                    {% if post.adres %}
+                    {% set adres_list = post.adres.split(', Изобильный') %}
+                    {% else %}
+                    {% set adres_list = [] %}
+                    {% endif %}
+                    <td>{{ adres_list[0] }}</td>
                     <td>{{ post.category }}</td>
                     <td>{{ post.phonenumber|join(", ") }}</td>
                     <td>{{ post.phonenumber_static|join(", ") }}</td>
