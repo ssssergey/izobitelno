@@ -24,11 +24,11 @@
                 <tr>
                     <td>{{ post.title }}</td>
                     {% if post.adres %}
-                    {% set adres_list = post.adres.split(', Изобильный') %}
+                    {% set adres_short = post.adres.split(', Изобильный')[0] %}
                     {% else %}
-                    {% set adres_list = [] %}
+                    {% set adres_short = "Отсутствует" %}
                     {% endif %}
-                    <td>{{ adres_list[0] }}</td>
+                    <td>{{ adres_short }}</td>
                     <td>{{ post.category }}</td>
                     <td>{{ post.phonenumber|join(", ") }}</td>
                     <td>{{ post.phonenumber_static|join(", ") }}</td>

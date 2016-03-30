@@ -45,14 +45,18 @@
     <div class="row row-footer">
         <div class="col-sm-6">
             <ul>
-                <a href="{{ url_for('list_posts') }}" style="color: floralwhite"><li>Комментарии, пожелания, отзывы</li></a>
-                <a href="{{ url_for('contacts') }}" style="color: floralwhite"><li>Контакты</li></a>
+                <a href="{{ url_for('show_categories_all') }}"><li>Категории</li></a>
+                <a href="{{ url_for('list_posts') }}"><li>Комментарии, пожелания, отзывы</li></a>
+                <a href="{{ url_for('contacts') }}"><li>Контакты</li></a>
             </ul>
         </div>
         <div class="col-sm-6">
             <ul>
-                <a href="{{ url_for('traffic') }}" style="color: floralwhite"><li>Пробки</li></a>
-                <a href="{{ url_for('list_orgs') }}" style="color: floralwhite"><li>Общий список</li></a>
+                <a href="{{ url_for('list_orgs') }}"><li>Общий список</li></a>
+                <a href="{{ url_for('contacts') }}"><li>Сотрудничество</li></a>
+                <a href="{{ url_for('secret_query') }}"><li>Поиск по номеру</li></a>
+                <a href="{{ url_for('secret_allTags') }}"><li>Тэги</li></a>
+
             </ul>
         </div>
     </div>

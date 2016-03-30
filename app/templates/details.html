@@ -27,7 +27,7 @@
                         <dl class="dl-vertical">
                             <dt>Адрес</dt>
                             {% if org.adres %}
-                                <dd>{{ org.adres }}</dd>
+                                <dd>{{ org.adres }} {{ org.adres_details }}</dd>
                             {% else %}
                                 <dd>Отсутствует.</dd>
                             {% endif %}

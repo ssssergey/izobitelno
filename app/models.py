@@ -27,8 +27,9 @@ class OrganizationModel(EndpointsModel):
     tags = ndb.StringProperty(repeated=True)
     price = ndb.IntegerProperty(default=0)
     size = ndb.IntegerProperty(default=2)
-    quality = ndb.BooleanProperty(default=False)
+    high_quality = ndb.BooleanProperty(default=False)
     delivery = ndb.IntegerProperty(default=1)
+    assortiment = ndb.PickleProperty()
 
 
 class UserModel(EndpointsModel):
