@@ -90,7 +90,7 @@ def search_result():
 
 @app.route('/orgs/new', methods = ['GET', 'POST'])
 def new_org():
-    category = request.args.get("category_value") # Delete
+    # category = request.args.get("category_value") # Delete
     orgs = OrganizationModel.query().fetch()
     form = OrganizationForm()
     if request.method == 'GET':

@@ -35,8 +35,9 @@
           // Обработка клика по карте - создание маркера.
 
           map.addListener('click', function (event) {
-              geocodeLatLng(event.latLng);
               addMarkerstoMap(posts)
+              geocodeLatLng(event.latLng);
+
           });
       }
 
@@ -113,9 +114,11 @@
             if (status === google.maps.GeocoderStatus.OK) {
               if (results[0]) {
                   var address = results[0].formatted_address;
-                  document.getElementById("adres").value = address;
-                  document.getElementById("lat").value = location.lat();
-                  document.getElementById("lng").value = location.lng();
+                  if (document.getElementById("adres")) {
+                      document.getElementById("adres").value = address;
+                      document.getElementById("lat").value = location.lat();
+                      document.getElementById("lng").value = location.lng();
+                  }
                   var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                   clearNewMarkers();
                   var marker_new = new google.maps.Marker({

@@ -81,7 +81,7 @@ body{
 	padding-left: 10px;
 }
 
-#selflocate_button {
+#gps_button {
 	position: absolute;
 	bottom: 1%;
 	left: 1%;
@@ -120,3 +120,11 @@ body{
     padding: 10px;
 }
 
+@media (max-width: 500px) {
+    .hidden-500 {
+        display:none !important;
+    }
+	.table-500 {
+        font-size:12px !important;
+    }
+}

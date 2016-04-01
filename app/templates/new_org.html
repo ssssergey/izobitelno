@@ -13,7 +13,7 @@
                             <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
                             <input id="submit" type="button" value="Искать">
                     </div>
-                    <div id="selflocate_button">
+                    <div id="gps_button">
                             <input id="my_location_button" type="button" value="Определить по GPS">
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                     });
                 </script>
 
-                <form action="{{ url_for('new_org', category_eng = category_eng, category_value = request.args.get('category_value')) }}" method="post" accept-charset="utf-8">
+                <form action="{{ url_for('new_org', category_eng = category_eng, keyword=keyword) }}" method="post" accept-charset="utf-8">
                     {{ form.csrf_token }}
                     <div class="form-group">
                         <label for="title">Название учреждения</label>
@@ -139,7 +139,7 @@
                     </div>
                     <div class="form-group">
                         <label for="content">Категория</label>
-                        {{ form.category(class_="form-control",value=request.args.get('category_value'))|safe }}
+                        {{ form.category(class_="form-control")|safe }}
                         {% if form.category.errors %}
                         <ul class="errors">
                             {% for error in form.category.errors %}
