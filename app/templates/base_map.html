@@ -25,29 +25,32 @@
           // Определение своего местоположения. Вызывается функция GetLocation
           document.getElementById('my_location_button').addEventListener('click', function () {
               navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
-              addMarkerstoMap(posts);
+{#              addMarkerstoMap(posts);#}
           });
           // Обработка ввода улицы.
           document.getElementById('submit').addEventListener('click', function () {
               geocodeAddress(geocoder, map);
-              addMarkerstoMap(posts)
+{#              addMarkerstoMap(posts)#}
           });
           // Обработка клика по карте - создание маркера.
 
           map.addListener('click', function (event) {
-              addMarkerstoMap(posts)
+{#              addMarkerstoMap(posts);#}
               geocodeLatLng(event.latLng);
 
           });
       }
 
       var keyword = "{{ keyword | safe }}";
+      var id = "{{ id | safe }}";
+      id = parseInt(id);
         function addMarkerstoMap(posts) {
             for (var i = 0; i < posts.length; i++) {
                 var post = posts[i];
-                add(post);
+                add(post, i * 100);
         }}
-        function add (post) {
+        function add (post, timeout) {
+            window.setTimeout(function() {
               if (post.location) {
                   var myLatLng = {lat: post.location.lat, lng: post.location.lng};
 {#                  var image = {#}
@@ -58,8 +61,11 @@
                         position: myLatLng,
 {#                                icon: image,#}
                         map: map,
-
+                        animation: google.maps.Animation.DROP
                     });
+                    if (post.id === id) {
+                        marker1.setAnimation(google.maps.Animation.BOUNCE);
+                    }
                     var adress = post.adres.split(', Изобильный')[0];
                     var rating = post.rating;
                     if (post.description) {
@@ -83,6 +89,8 @@
                     marker1.addListener('click', function() {infowindow1.open(map, marker1);});
                     markers.push(marker1);
                     }
+                  }, timeout);
+
             }
 
       function geocodeAddress(geocoder, resultsMap) {

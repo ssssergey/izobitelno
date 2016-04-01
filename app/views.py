@@ -133,7 +133,8 @@ def new_org():
         else:
             flash(u'Форма не прошла валидацию.', 'error')
             all_tags = get_all_tags()
-            return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+            return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable,
+                                   posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
 
 
 @app.route('/edit_org/<int:id>', methods = ['GET', 'POST'])
@@ -192,7 +193,7 @@ def edit_org(id):
         if keyword:
             orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
         else:
-            orgs = []
+            orgs = [OrganizationModel.get_by_id(int(id))]
         all_tags = get_all_tags()
         return render_template("edit_org.html", categories=categories, categories_callable=categories_callable,
                                form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
