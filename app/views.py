@@ -21,7 +21,7 @@ for i_dict in categories_callable:
     categories_all.update(i_dict['categs'])
 
 class OrganizationForm(Form):
-    category = StringField()
+    category = StringField(default=u"")
     title = StringField(default=u"Без названия")
     adres = StringField(default=u"")
     adres_details = StringField(default=u"")
@@ -35,7 +35,8 @@ class OrganizationForm(Form):
     tags = StringField()
     price = IntegerField(widget=widgets.Input(input_type="tel"),default=0)
     size = IntegerField(u'Размер объекта(1-5)', widget=widgets.Input(input_type="tel"),default=2, validators=[NumberRange(message=u'От 1 до 5', min=1, max=5)])
-    quality = BooleanField(default=False)
+    high_quality = BooleanField(default=False)
+    delivery = BooleanField(default=False)
 
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -89,38 +90,43 @@ def search_result():
 
 @app.route('/orgs/new', methods = ['GET', 'POST'])
 def new_org():
-    category = request.args.get("category_value")
-    orgs = OrganizationModel.query(OrganizationModel.category == category).fetch()
+    category = request.args.get("category_value") # Delete
+    orgs = OrganizationModel.query().fetch()
     form = OrganizationForm()
     if request.method == 'GET':
         all_tags = get_all_tags()
+        if request.args.get('keyword'):
+            form.tags.data = request.args.get('keyword')
         return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
     elif request.method == 'POST':
         if form.validate_on_submit():
             tags = form.tags.data.lower().split(',')
-            if tags:
-                tags.append(form.category.data.lower())
-            else:
-                tags = [category.lower()]
+            # if tags:
+            #     tags.append(form.category.data.lower()) # Delete
+            # else:
+            #     tags = [category.lower()]
             if form.title.data != u'Без названия':
                 tags.append(form.title.data.lower())
             tags = [t.strip() for t in tags if t]
             tags = list(set(tags))
+            add_tags_to_overall(tags)
             post = OrganizationModel(title = form.title.data,
-                                    category = form.category.data,
-                                    phonenumber = form.phonenumber.data.split(','),
-                                    phonenumber_static = form.phonenumber_static.data.split(','),
-                                    rating = form.rating.data,
-                                    owner = form.owner.data,
-                                    adres = form.adres.data,
-                                    adres_details = form.adres_details.data,
-                                    author = users.get_current_user(),
-                                    location = ndb.GeoPt(form.lat.data, form.lng.data),
-                                    description = form.description.data,
-                                    price = form.price.data,
-                                     size = form.size.data,
-                                    tags = tags
-                                     )
+                                        tags = tags,
+                                        category = form.category.data,
+                                        phonenumber = form.phonenumber.data.split(','),
+                                        phonenumber_static = form.phonenumber_static.data.split(','),
+                                        rating = form.rating.data,
+                                        owner = form.owner.data,
+                                        adres = form.adres.data,
+                                        adres_details = form.adres_details.data,
+                                        author = users.get_current_user(),
+                                        location = ndb.GeoPt(form.lat.data, form.lng.data),
+                                        description = form.description.data,
+                                        price = form.price.data,
+                                        size = form.size.data,
+                                        delivery = form.delivery.data,
+                                        high_quality = form.high_quality.data
+                                         )
             post.put()
             flash(u'Организация успешно добавлена!')
             return redirect(url_for('show_categories_all'))
@@ -138,14 +144,15 @@ def edit_org(id):
         if request.method == 'POST':
             if form.validate_on_submit():
                 tags = form.tags.data.lower().split(',')
-                if tags:
-                    tags.append(form.category.data.lower())
-                else:
-                    tags = [form.category.data.lower()]
+                # if tags:
+                #     tags.append(form.category.data.lower())
+                # else:
+                #     tags = [form.category.data.lower()]
                 if form.title.data != u'Без названия':
                     tags.append(form.title.data.lower())
                 tags = [t.strip() for t in tags if t]
                 tags = list(set(tags))
+                add_tags_to_overall(tags)
                 org.populate(title = form.title.data,
                             category = form.category.data,
                             phonenumber = form.phonenumber.data.split(', '),
@@ -157,8 +164,10 @@ def edit_org(id):
                             location = ndb.GeoPt(form.lat.data, form.lng.data),
                             when_modified = datetime.now(),
                             description = form.description.data,
-                             size = form.size.data,
-                            tags = tags
+                            size = form.size.data,
+                            tags = tags,
+                            delivery = form.delivery.data,
+                            high_quality = form.high_quality.data
                              )
                 org.put()
                 flash(u'Изменения приняты!')
@@ -177,9 +186,17 @@ def edit_org(id):
             form.lat.data = org.location.lat
             form.lng.data = org.location.lon
         form.tags.data = ",".join(org.tags)
-        orgs = OrganizationModel.query(OrganizationModel.category == org.category).fetch()
+        form.delivery.data = org.delivery
+        form.high_quality.data = org.high_quality
+        keyword = request.args.get('keyword')
+        if keyword:
+            orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
+        else:
+            orgs = []
         all_tags = get_all_tags()
-        return render_template("edit_org.html", categories=categories, categories_callable=categories_callable, form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), tags=",".join(org.tags), all_tags=','.join(all_tags))
+        return render_template("edit_org.html", categories=categories, categories_callable=categories_callable,
+                               form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
+                               tags=",".join(org.tags), all_tags=','.join(all_tags),keyword=keyword)
     else:
         flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!", 'error')
         return redirect(url_for('index'))
@@ -206,6 +223,7 @@ def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
     return render_template('list_orgs.html', posts=orgs, categories=categories, categories_callable=categories_callable)
 
+### Edit all_Tags
 def add_tags_to_overall(tag_list):
     new_list = []
     tags_from_ds = TagsModel.query(TagsModel.uid == 'myid').get()
@@ -228,6 +246,23 @@ def get_all_tags(update=False):
         else:
             all_tags = []
     return all_tags
+
+### Edit tags in entities
+@app.route('/secret_edit_tags')
+def secret_edit_tags():
+    pass
+
+def delete_some_tags(tag_to_delete):
+    selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_delete.lower().strip()).fetch()
+    updated = []
+    for entity in selected_orgs:
+        entity.tags.remove(tag_to_delete)
+        updated.append(entity)
+    ndb.put_multi(updated)
+    all_tags = TagsModel.query(TagsModel.uid == 'myid').fetch()
+    all_tags.all_tags.remove(tag_to_delete)
+    all_tags.put()
+    get_all_tags(True)
 
 @app.route('/contacts')
 def contacts():

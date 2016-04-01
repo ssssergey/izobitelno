@@ -27,34 +27,50 @@
                         <dl class="dl-vertical">
                             <dt>Адрес</dt>
                             {% if org.adres %}
-                                <dd>{{ org.adres }} {{ org.adres_details }}</dd>
+                                {% set adres_short = org.adres.split(', Изобильный')[0] %}
+                                <dd>{{ adres_short }}
+                                    {% if org.adres_details %}
+                                        <strong><i> ({{ org.adres_details }})</i></strong>
+                                    {% endif %}
+                                </dd>
                             {% else %}
                                 <dd>Отсутствует.</dd>
                             {% endif %}
+
                             <dt>Тэги</dt>
                             {% if org.tags|join(", ") %}
                                 <dd>{{ org.tags|join(", ") }}</dd>
                             {% else %}
                                 <dd>Отсутствуют.</dd>
                             {% endif %}
+
                             <dt>Телефоны (моб.)</dt>
                             {% if org.phonenumber|join(", ") %}
                                 <dd>{{ org.phonenumber|join(", ") }}</dd>
                             {% else %}
                                 <dd>Отсутствуют.</dd>
                             {% endif %}
+
                             <dt>Телефоны (гор.)</dt>
                             {% if org.phonenumber_static|join(", ") %}
                                 <dd>{{ org.phonenumber_static|join(", ") }}</dd>
                             {% else %}
                                 <dd>Отсутствуют.</dd>
                             {% endif %}
+
                             <dt>Дата добавления</dt>
                             <dd>{{ momentjs(org.when_added).fromNow() }}</dd>
                             <dt>Дата изменения</dt>
                             <dd>{{ momentjs(org.when_modified).fromNow() }}</dd>
+
                             <dt>Рейтинг</dt>
                             <dd>{{ org.rating }}</dd>
+                            <dt>Доставка</dt>
+                            {% if org.delivery %}
+                                <dd>Есть</dd>
+                            {% else %}
+                                <dd>Нет</dd>
+                            {% endif %}
                        </dl>
                     </div>
                     <div class="panel-footer">
@@ -64,12 +80,14 @@
             </div>
 
             <div class="col-sm-6">
-                 <form class="form-signin" action="{{ url_for('add_comment', category=org.category, organization_id=org.id)}}" method="post" role="form">
-                     <h2 class="form-signin-heading">Комментарии </h2>
-                     <input type="text" name="comment" class="form-control" placeholder="Ваш комментарий" required autofocus>
-                     <input type="hidden" name="category" class="form-control" value={{ org.category }} >
-                     <input type="hidden" name="organization_id" class="form-control" value={{ org.id }}>
-                     <button class="btn btn-lg btn-primary btn-block" type="button">Отправить </button>
+                 <form class="form" style="margin-top: 20px" action="{{ url_for('add_comment', category=org.category, organization_id=org.id)}}" method="post" role="form">
+                     <div class="form-group" align="center">
+                         <label style="font-size: 20px" for="comment">Комментарии</label>
+                         <input type="text" id="comment" name="comment" class="form-control" placeholder="Ваш комментарий" required>
+                         <input type="hidden" name="category" class="form-control" value={{ org.category }} >
+                         <input type="hidden" name="organization_id" class="form-control" value={{ org.id }}>
+                         <button class="btn btn-lg btn-primary btn-block" type="button">Отправить </button>
+                     </div>
                  </form>
 
                  <div class="row">

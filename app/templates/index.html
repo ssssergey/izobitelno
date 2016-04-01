@@ -30,17 +30,17 @@
         {% endif %}
     {% endwith %}
     <div class="container-fluid" style="height: 100%">
-        <div class="row" style="background: #315981; height: 20%; min-height: 50px">
+        <div class="row" style="background: #315981; height: 20%; min-height: 100px">
             <div class="col-xs-12 col-sm-6">
-                <h2><span style="color:orangered">И</span><span style="color:white">зопоиск</span></h2>
+                <div style="margin-top: 10px; font-size: 20px"><span style="color:orangered">И</span><span style="color:white">зопоиск</span></div>
             </div>
             <div class="col-xs-12 col-sm-6">
-                <a style="float: right; margin: 20px" class="btn btn-lg btn-info" href="{{ url_for('show_categories_all') }}" role="button">Категории</a>
+                <a style="float: right; margin: 10px" class="btn btn-lg btn-info" href="{{ url_for('show_categories_all') }}" role="button">Категории</a>
             </div>
         </div>
 
 
-        <div class="row" style="height: 60%; min-height: 200px">
+        <div class="row" style="height: 60%; min-height: 300px">
             <div class="container container-table">
                 <div class="row vertical-center-row">
                     <div class="text-center col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4">

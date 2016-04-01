@@ -66,9 +66,10 @@ body{
     margin-top: 15px;
 }
 
-#floating-panel {
+#find_by_adres {
 	position: absolute;
-	top: 1%;
+	top: auto;
+	bottom: 52px;
 	left: 1%;
 	z-index: 5;
 	background-color: #fff;

@@ -28,7 +28,7 @@ class OrganizationModel(EndpointsModel):
     price = ndb.IntegerProperty(default=0)
     size = ndb.IntegerProperty(default=2)
     high_quality = ndb.BooleanProperty(default=False)
-    delivery = ndb.IntegerProperty(default=1)
+    delivery = ndb.BooleanProperty(default=False)
     assortiment = ndb.PickleProperty()
 
 
