@@ -1,130 +1,157 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
 <head>
-	<title>Изобильный</title>
-    <meta content='изопоиск, izopoisk, магазины, услуги, товары, цены, Изобильный, изобильный, пиво, пицца, пица, доставка, купить, Ставропольский край' name='keywords'/>
-	<meta charset="utf-8">
+    <title>Изобильный</title>
+    <meta content='изопоиск, izopoisk, магазины, услуги, товары, цены, Изобильный, изобильный, пиво, пицца, пица, доставка, купить, Ставропольский край'
+          name='keywords'/>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link href="css/bootstrap.min.css" rel="stylesheet">
-  	<link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link href='https://fonts.googleapis.com/css?family=Roboto&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/index_styles.css">
-{#    <link href="css/mystyles.css" rel="stylesheet" type="text/css">#}
+    {#    <link href="css/mystyles.css" rel="stylesheet" type="text/css">#}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript" src="js/autofill.js"></script>
 </head>
 
 <body>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-warning alert-dismissible" role="alert">
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissible" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
-                    {{message}}
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    <div class="container-fluid" style="height: 100%">
-        <div class="row" style="background: #315981; height: 20%; min-height: 100px">
-            <div class="col-xs-12 col-sm-6">
-                <div style="margin-top: 10px; font-size: 20px"><span style="color:orangered">И</span><span style="color:white">зопоиск</span></div>
+                {{ message }}
             </div>
-            <div class="col-xs-12 col-sm-6">
-                <a style="float: right; margin: 10px" class="btn btn-lg btn-info" href="{{ url_for('show_categories_all') }}" role="button">Категории</a>
-            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+<div class="container-fluid" style="height: 100%">
+    <div class="row" style="background: #315981; height: 20%; min-height: 100px">
+        <div class="col-xs-12 col-sm-6">
+            <div style="margin-top: 10px; font-size: 20px"><span style="color:orangered">И</span><span
+                    style="color:white">зопоиск</span></div>
         </div>
-
-
-        <div class="row" style="height: 60%; min-height: 300px">
-            <div class="container container-table">
-                <div class="row vertical-center-row">
-                    <div class="text-center col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4">
-                            <h1><span style="color:orangered">И</span>зопоиск</h1>
-                            <form action="{{ url_for('search_result') }}" method="post" accept-charset="utf-8">
-                                <input class="form-control" id="search" name="search" type="text" value="" placeholder="Введите запрос" required autofocus/>
-                                <button type="submit" class="btn btn-primary">Поиск в Изобильном</button>
-                            </form>
-                    </div>
-                </div>
-            </div>
+        <div class="col-xs-12 col-sm-6">
+            <a style="float: right; margin: 10px" class="btn btn-lg btn-info"
+               href="{{ url_for('show_categories_all') }}" role="button">Категории</a>
         </div>
-
-        <div class="row" style="background: #DFDFDF; padding-top: 10px; bottom: 0">
-            <div class="col-sm-6">
-                <ul>
-                    <a href="{{ url_for('show_categories_all') }}"><li>Категории</li></a>
-                    <a href="{{ url_for('list_posts') }}"><li>Комментарии, пожелания, отзывы</li></a>
-                    <a href="{{ url_for('contacts') }}"><li>Контакты</li></a>
-                </ul>
-            </div>
-            <div class="col-sm-6">
-                <ul>
-                    <a href="{{ url_for('list_orgs') }}"><li>Общий список</li></a>
-                    <a href="{{ url_for('contacts') }}"><li>Сотрудничество</li></a>
-                    <a href="{{ url_for('secret_query') }}"><li>Поиск по номеру</li></a>
-                    <a href="{{ url_for('secret_allTags') }}"><li>Тэги</li></a>
-
-                </ul>
-            </div>
-        </div>
-
-
-
-        <script>
-            $(function() {
-                var tags = "{{ all_tags | safe }}";
-                tags = tags.split(',');
-                $("#search").autofill({data: tags});
-            });
-        </script>
-        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    {#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>#}
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="js/bootstrap.min.js"></script>
     </div>
+
+
+    <div class="row" style="height: 60%; min-height: 300px">
+        <div class="container container-table">
+            <div class="row vertical-center-row">
+                <div class="text-center col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4">
+                    <h1><span style="color:orangered">И</span>зопоиск</h1>
+
+                    <form action="{{ url_for('search_result') }}" method="post" accept-charset="utf-8">
+                        <input class="form-control" id="search" name="search" type="text" value=""
+                               placeholder="Введите запрос" required autofocus/>
+                        <button type="submit" class="btn btn-primary">Поиск в Изобильном</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="background: #DFDFDF; padding-top: 10px; bottom: 0">
+        <div class="col-sm-6">
+            <ul>
+                <a href="{{ url_for('show_categories_all') }}">
+                    <li>Категории</li>
+                </a>
+                <a href="{{ url_for('list_posts') }}">
+                    <li>Комментарии, пожелания, отзывы</li>
+                </a>
+                <a href="{{ url_for('contacts') }}">
+                    <li>Контакты</li>
+                </a>
+            </ul>
+        </div>
+        <div class="col-sm-6">
+            <ul>
+                <a href="{{ url_for('list_orgs') }}">
+                    <li>Общий список</li>
+                </a>
+                <a href="{{ url_for('contacts') }}">
+                    <li>Сотрудничество</li>
+                </a>
+                <a href="{{ url_for('secret_query_by_phonenumber') }}">
+                    <li>Поиск по номеру</li>
+                </a>
+                <a href="{{ url_for('secret_allTags') }}">
+                    <li>Тэги</li>
+                </a>
+
+            </ul>
+        </div>
+    </div>
+
+
+    <script>
+        $(function () {
+            var tags = "{{ all_tags | safe }}";
+            tags = tags.split(',');
+            $("#search").autofill({data: tags});
+        });
+    </script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    {#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>#}
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+</div>
 </body>
 
 {#<script type="text/javascript" src="js/angular.min.js"></script>#}
 <!-- Yandex.Metrika informer -->
 <div style="position: fixed; bottom: 0px; left: 0px">
-<a href="https://metrika.yandex.ru/stat/?id=36077980&amp;from=informer"
-target="_blank" rel="nofollow"><img src="https://informer.yandex.ru/informer/36077980/3_1_FFFFFFFF_EFEFEFFF_0_uniques"
-style="width:88px; height:31px; border:0;" alt="Яндекс.Метрика" title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)" /></a>
+    <a href="https://metrika.yandex.ru/stat/?id=36077980&amp;from=informer"
+       target="_blank" rel="nofollow"><img
+            src="https://informer.yandex.ru/informer/36077980/3_1_FFFFFFFF_EFEFEFFF_0_uniques"
+            style="width:88px; height:31px; border:0;" alt="Яндекс.Метрика"
+            title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)"/></a>
 </div>
 <!-- /Yandex.Metrika informer -->
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript">
     (function (d, w, c) {
-        (w[c] = w[c] || []).push(function() {
+        (w[c] = w[c] || []).push(function () {
             try {
                 w.yaCounter36077980 = new Ya.Metrika({
-                    id:36077980,
-                    clickmap:true,
-                    trackLinks:true,
-                    accurateTrackBounce:true,
-                    webvisor:true
+                    id: 36077980,
+                    clickmap: true,
+                    trackLinks: true,
+                    accurateTrackBounce: true,
+                    webvisor: true
                 });
-            } catch(e) { }
+            } catch (e) {
+            }
         });
 
         var n = d.getElementsByTagName("script")[0],
-            s = d.createElement("script"),
-            f = function () { n.parentNode.insertBefore(s, n); };
+                s = d.createElement("script"),
+                f = function () {
+                    n.parentNode.insertBefore(s, n);
+                };
         s.type = "text/javascript";
         s.async = true;
         s.src = "https://mc.yandex.ru/metrika/watch.js";
 
         if (w.opera == "[object Opera]") {
             d.addEventListener("DOMContentLoaded", f, false);
-        } else { f(); }
+        } else {
+            f();
+        }
     })(document, window, "yandex_metrika_callbacks");
 </script>
-<noscript><div><img src="https://mc.yandex.ru/watch/36077980" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<noscript>
+    <div><img src="https://mc.yandex.ru/watch/36077980" style="position:absolute; left:-9999px;" alt=""/></div>
+</noscript>
 <!-- /Yandex.Metrika counter -->
 </html>
 

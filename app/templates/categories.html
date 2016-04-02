@@ -4,40 +4,44 @@
     <style>
         .fa, .glyphicon {
             font-size: 6em;
-    }
+        }
     </style>
     <h3>Выберите категорию</h3>
 
     <div class="row" style="background: #f3fdff">
         <div role="tabpanel" class="tab-pane fade in active" id="intown">
-        {% for cat_group in categories %}
-            <div class="row row-content">
-                <div class="col-sm-2" align="center">
-                    <i class="{{ cat_group.icon }}" ></i>
-                    <br>
-                    <h3>{{ cat_group.rus_title }}</h3>
+            {% for cat_group in categories %}
+                <div class="row row-content">
+                    <div class="col-sm-2" align="center">
+                        <i class="{{ cat_group.icon }}"></i>
+                        <br>
+
+                        <h3>{{ cat_group.rus_title }}</h3>
+                    </div>
+                    <div class="col-sm-10" align="left">
+                        {% for eng, rus in cat_group.categs.items() %}
+                            <a class="btn btn-lg btn-primary btn-centered"
+                               href="{{ url_for('search_result', category_rus=rus) }}" role="button"> {{ rus }}</a>
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="col-sm-10" align="left">
-                    {% for eng, rus in cat_group.categs.items() %}
-                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('search_result', category_rus=rus) }}" role="button"> {{ rus }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
             {% for cat_group in categories_callable %}
-            <div class="row row-content">
-                <div class="col-sm-2" align="center">
-                    <i class="{{ cat_group.icon }}" ></i>
-                    <br>
-                    <h3>{{ cat_group.rus_title }}</h3>
+                <div class="row row-content">
+                    <div class="col-sm-2" align="center">
+                        <i class="{{ cat_group.icon }}"></i>
+                        <br>
+
+                        <h3>{{ cat_group.rus_title }}</h3>
+                    </div>
+                    <div class="col-sm-10" align="left">
+                        {% for eng, rus in cat_group.categs.items() %}
+                            <a class="btn btn-lg btn-primary btn-centered"
+                               href="{{ url_for('search_result', category_rus=rus) }}" role="button"> {{ rus }}</a>
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="col-sm-10" align="left">
-                    {% for eng, rus in cat_group.categs.items() %}
-                        <a class="btn btn-lg btn-primary btn-centered" href="{{ url_for('search_result', category_rus=rus) }}" role="button"> {{ rus }}</a>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
         </div>
 
     </div>
@@ -45,17 +49,31 @@
     <div class="row row-footer">
         <div class="col-sm-6">
             <ul>
-                <a href="{{ url_for('show_categories_all') }}"><li>Категории</li></a>
-                <a href="{{ url_for('list_posts') }}"><li>Комментарии, пожелания, отзывы</li></a>
-                <a href="{{ url_for('contacts') }}"><li>Контакты</li></a>
+                <a href="{{ url_for('show_categories_all') }}">
+                    <li>Категории</li>
+                </a>
+                <a href="{{ url_for('list_posts') }}">
+                    <li>Комментарии, пожелания, отзывы</li>
+                </a>
+                <a href="{{ url_for('contacts') }}">
+                    <li>Контакты</li>
+                </a>
             </ul>
         </div>
         <div class="col-sm-6">
             <ul>
-                <a href="{{ url_for('list_orgs') }}"><li>Общий список</li></a>
-                <a href="{{ url_for('contacts') }}"><li>Сотрудничество</li></a>
-                <a href="{{ url_for('secret_query') }}"><li>Поиск по номеру</li></a>
-                <a href="{{ url_for('secret_allTags') }}"><li>Тэги</li></a>
+                <a href="{{ url_for('list_orgs') }}">
+                    <li>Общий список</li>
+                </a>
+                <a href="{{ url_for('contacts') }}">
+                    <li>Сотрудничество</li>
+                </a>
+                <a href="{{ url_for('secret_query_by_phonenumber') }}">
+                    <li>Поиск по номеру</li>
+                </a>
+                <a href="{{ url_for('secret_allTags') }}">
+                    <li>Тэги</li>
+                </a>
 
             </ul>
         </div>

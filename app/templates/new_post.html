@@ -8,11 +8,11 @@
             <label for="content">Текст</label>
             {{ form.content|safe }}
             {% if form.content.errors %}
-            <ul class="errors">
-                {% for error in form.content.errors %}
-                <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
+                <ul class="errors">
+                    {% for error in form.content.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
             {% endif %}
         </p>
         <p><input type="submit" value="Сохранить"/></p>

@@ -11,7 +11,7 @@ from app import app
 from models import PostModel, OrganizationModel, TagsModel
 from flask.ext.wtf import Form
 from wtforms import StringField, FloatField, TextAreaField, IntegerField, BooleanField, widgets
-from wtforms.validators import DataRequired,NumberRange
+from wtforms.validators import DataRequired, NumberRange
 from app.data import categories_callable, categories
 
 categories_all = {}
@@ -20,28 +20,33 @@ for i_dict in categories:
 for i_dict in categories_callable:
     categories_all.update(i_dict['categs'])
 
+
 class OrganizationForm(Form):
     category = StringField(default=u"")
     title = StringField(default=u"Без названия")
     adres = StringField(default=u"")
     adres_details = StringField(default=u"")
     phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
-    phonenumber_static = StringField(widget=widgets.Input(input_type="tel"),render_kw={"placeholder": u"9-99-99"})
-    rating = IntegerField(widget=widgets.Input(input_type="tel"),default=0)
+    phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
+    rating = IntegerField(widget=widgets.Input(input_type="tel"), default=0)
     owner = StringField(render_kw={"placeholder": u"Иван Иванович"})
     lat = FloatField(default=0)
     lng = FloatField(default=0)
     description = TextAreaField()
     tags = StringField()
-    price = IntegerField(widget=widgets.Input(input_type="tel"),default=0)
-    size = IntegerField(u'Размер объекта(1-5)', widget=widgets.Input(input_type="tel"),default=2, validators=[NumberRange(message=u'От 1 до 5', min=1, max=5)])
+    price = IntegerField(widget=widgets.Input(input_type="tel"), default=0)
+    size = IntegerField(u'Размер объекта(1-5)', widget=widgets.Input(input_type="tel"), default=2,
+                        validators=[NumberRange(message=u'От 1 до 5', min=1, max=5)])
     high_quality = BooleanField(default=False)
     delivery = BooleanField(default=False)
+    delivery_terms = StringField()
+    daynight = BooleanField(default=False)
+
 
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
-            return (obj - datetime(1970,1,1)).total_seconds()
+            return (obj - datetime(1970, 1, 1)).total_seconds()
         # elif isinstance(obj, list):
         #     return ', '.join([i for i in obj if i])
         elif isinstance(obj, ndb.Model):
@@ -51,34 +56,39 @@ class GaeEncoder(json.JSONEncoder):
         elif isinstance(obj, users.User):
             return obj.nickname()
         elif isinstance(obj, datastore_types.GeoPt):
-            return {'lat': obj.lat, 'lng':obj.lon}
+            return {'lat': obj.lat, 'lng': obj.lon}
         else:
             return json.JSONEncoder.default(self, obj)
+
 
 @app.route('/details/<int:id>')
 def details(id):
     org = OrganizationModel.get_by_id(int(id))
-    return render_template("details.html", org = org, posts = json.loads(json.dumps([org], cls=GaeEncoder)), categories=categories, categories_callable=categories_callable)
+    return render_template("details.html", org=org, posts=json.loads(json.dumps([org], cls=GaeEncoder)),
+                           categories=categories, categories_callable=categories_callable)
+
 
 @app.route('/')
 def index():
     all_tags = get_all_tags()
     return render_template("index.html", all_tags=','.join(all_tags))
 
+
 @app.route('/categories')
 def show_categories_all():
     return render_template("categories.html", categories=categories, categories_callable=categories_callable)
 
 
-@app.route('/search_result', methods = ['GET', 'POST'])
+@app.route('/search_result', methods=['GET', 'POST'])
 def search_result():
     if request.method == 'GET':
         keyword = request.args.get('category_rus')
     elif request.method == 'POST':
         keyword = request.form.get('search')
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
-    return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
+    return render_template("search_result.html", posts=json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
                            categories=categories, categories_callable=categories_callable, keyword=keyword)
+
 
 # @app.route('/category/<category_eng>')
 # def category(category_eng):
@@ -88,7 +98,7 @@ def search_result():
 #                            categories_callable=categories_callable)
 
 
-@app.route('/orgs/new', methods = ['GET', 'POST'])
+@app.route('/orgs/new', methods=['GET', 'POST'])
 def new_org():
     # category = request.args.get("category_value") # Delete
     orgs = OrganizationModel.query().fetch()
@@ -97,7 +107,11 @@ def new_org():
         all_tags = get_all_tags()
         if request.args.get('keyword'):
             form.tags.data = request.args.get('keyword')
-        return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+        else:
+            form.tags.data = ''
+        return render_template('new_org.html', form=form, categories=categories,
+                               categories_callable=categories_callable,
+                               posts=json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
     elif request.method == 'POST':
         if form.validate_on_submit():
             tags = form.tags.data.lower().split(',')
@@ -110,34 +124,37 @@ def new_org():
             tags = [t.strip() for t in tags if t]
             tags = list(set(tags))
             add_tags_to_overall(tags)
-            post = OrganizationModel(title = form.title.data,
-                                        tags = tags,
-                                        category = form.category.data,
-                                        phonenumber = form.phonenumber.data.split(','),
-                                        phonenumber_static = form.phonenumber_static.data.split(','),
-                                        rating = form.rating.data,
-                                        owner = form.owner.data,
-                                        adres = form.adres.data,
-                                        adres_details = form.adres_details.data,
-                                        author = users.get_current_user(),
-                                        location = ndb.GeoPt(form.lat.data, form.lng.data),
-                                        description = form.description.data,
-                                        price = form.price.data,
-                                        size = form.size.data,
-                                        delivery = form.delivery.data,
-                                        high_quality = form.high_quality.data
-                                         )
+            post = OrganizationModel(title=form.title.data,
+                                     tags=tags,
+                                     category=form.category.data,
+                                     phonenumber=form.phonenumber.data.split(','),
+                                     phonenumber_static=form.phonenumber_static.data.split(','),
+                                     rating=form.rating.data,
+                                     owner=form.owner.data,
+                                     adres=form.adres.data,
+                                     adres_details=form.adres_details.data,
+                                     author=users.get_current_user(),
+                                     location=ndb.GeoPt(form.lat.data, form.lng.data),
+                                     description=form.description.data,
+                                     price=form.price.data,
+                                     size=form.size.data,
+                                     delivery=form.delivery.data,
+                                     delivery_terms=form.delivery_terms.data,
+                                     daynight=form.daynight.data,
+                                     high_quality=form.high_quality.data
+                                     )
             post.put()
             flash(u'Организация успешно добавлена!')
             return redirect(url_for('show_categories_all'))
         else:
             flash(u'Форма не прошла валидацию.', 'error')
             all_tags = get_all_tags()
-            return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable,
-                                   posts = json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
+            return render_template('new_org.html', form=form, categories=categories,
+                                   categories_callable=categories_callable,
+                                   posts=json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
 
 
-@app.route('/edit_org/<int:id>', methods = ['GET', 'POST'])
+@app.route('/edit_org/<int:id>', methods=['GET', 'POST'])
 def edit_org(id):
     org = OrganizationModel.get_by_id(int(id))
     if users.is_current_user_admin() or users.get_current_user() == org.author:
@@ -154,21 +171,23 @@ def edit_org(id):
                 tags = [t.strip() for t in tags if t]
                 tags = list(set(tags))
                 add_tags_to_overall(tags)
-                org.populate(title = form.title.data,
-                            category = form.category.data,
-                            phonenumber = form.phonenumber.data.split(', '),
-                            phonenumber_static = form.phonenumber_static.data.split(', '),
-                            rating = form.rating.data,
-                            owner = form.owner.data,
-                            adres = form.adres.data,
-                            adres_details = form.adres_details.data,
-                            location = ndb.GeoPt(form.lat.data, form.lng.data),
-                            when_modified = datetime.now(),
-                            description = form.description.data,
-                            size = form.size.data,
-                            tags = tags,
-                            delivery = form.delivery.data,
-                            high_quality = form.high_quality.data
+                org.populate(title=form.title.data,
+                             category=form.category.data,
+                             phonenumber=form.phonenumber.data.split(', '),
+                             phonenumber_static=form.phonenumber_static.data.split(', '),
+                             rating=form.rating.data,
+                             owner=form.owner.data,
+                             adres=form.adres.data,
+                             adres_details=form.adres_details.data,
+                             location=ndb.GeoPt(form.lat.data, form.lng.data),
+                             when_modified=datetime.now(),
+                             description=form.description.data,
+                             size=form.size.data,
+                             tags=tags,
+                             delivery=form.delivery.data,
+                             delivery_terms=form.delivery_terms.data,
+                             daynight=form.daynight.data,
+                             high_quality=form.high_quality.data
                              )
                 org.put()
                 flash(u'Изменения приняты!')
@@ -188,6 +207,8 @@ def edit_org(id):
             form.lng.data = org.location.lon
         form.tags.data = ",".join(org.tags)
         form.delivery.data = org.delivery
+        form.delivery_terms.data = org.delivery_terms
+        form.daynight.data = org.daynight
         form.high_quality.data = org.high_quality
         keyword = request.args.get('keyword')
         if keyword:
@@ -196,14 +217,14 @@ def edit_org(id):
             orgs = [OrganizationModel.get_by_id(int(id))]
         all_tags = get_all_tags()
         return render_template("edit_org.html", categories=categories, categories_callable=categories_callable,
-                               form=form, id=id, posts = json.loads(json.dumps(orgs, cls=GaeEncoder)),
-                               tags=",".join(org.tags), all_tags=','.join(all_tags),keyword=keyword)
+                               form=form, id=id, posts=json.loads(json.dumps(orgs, cls=GaeEncoder)),
+                               tags=",".join(org.tags), all_tags=','.join(all_tags), keyword=keyword)
     else:
         flash(u"У вас нет права на редактирование. Вы не являетесь автором этого объекта!", 'error')
         return redirect(url_for('index'))
 
 
-@app.route('/del_org/<int:id>', methods = ['GET','DELETE'])
+@app.route('/del_org/<int:id>', methods=['GET', 'DELETE'])
 def del_org(id):
     org = OrganizationModel.get_by_id(int(id))
     current_user = users.get_current_user()
@@ -219,10 +240,12 @@ def del_org(id):
         flash(u"У вас нет права на удаление. Вы не являетесь автором этого объекта!", 'error')
         return redirect(url_for('index'))
 
+
 @app.route('/orgs')
 def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
     return render_template('list_orgs.html', posts=orgs, categories=categories, categories_callable=categories_callable)
+
 
 ### Edit all_Tags
 def add_tags_to_overall(tag_list):
@@ -232,10 +255,11 @@ def add_tags_to_overall(tag_list):
     if not tags_from_ds:
         tags_from_ds = TagsModel(uid='myid')
     old_list = tags_from_ds.all_tags
-    new_list = list(set(old_list+tag_list))
+    new_list = list(set(old_list + tag_list))
     memcache.set('all_tags', new_list)
     tags_from_ds.all_tags = new_list
     tags_from_ds.put()
+
 
 def get_all_tags(update=False):
     all_tags = memcache.get('all_tags')
@@ -248,10 +272,6 @@ def get_all_tags(update=False):
             all_tags = []
     return all_tags
 
-### Edit tags in entities
-@app.route('/secret_edit_tags')
-def secret_edit_tags():
-    pass
 
 def delete_some_tags(tag_to_delete):
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_delete.lower().strip()).fetch()
@@ -265,41 +285,81 @@ def delete_some_tags(tag_to_delete):
     all_tags.put()
     get_all_tags(True)
 
+
 @app.route('/contacts')
 def contacts():
     return render_template("contacts.html", categories=categories, categories_callable=categories_callable)
 
-@app.route('/secret_query', methods=['GET','POST'])
-def secret_query():
-    if users.is_current_user_admin():
-        formS = SecretForm()
-        if request.method == 'POST':
-            if formS.validate_on_submit():
-                phonenumber = formS.phonenumber.data
-                phonenumber_static = formS.phonenumber_static.data
-                if request.form['btn'] == u'Мобильный':
-                    selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber == phonenumber).fetch()
-                else:
-                    selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber_static == phonenumber_static).fetch()
-                if selected_orgs:
-                    return render_template("search_result.html", posts = json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
-                               categories=categories, categories_callable=categories_callable)
-                else:
-                    all_tags = get_all_tags()
-                    form = OrganizationForm()
-                    form.phonenumber.data = phonenumber
-                    return render_template('new_org.html', form=form, categories=categories, categories_callable=categories_callable,
-                                           posts = json.loads(json.dumps({}, cls=GaeEncoder)), all_tags=','.join(all_tags))
-        return render_template('secret_query.html', form=formS)
-    else:
-        flash(u"У вас нет права доступа!", 'error')
-        return redirect(url_for('index'))
+
+def get_nearby_objects(lat, lon):
+    area = .0005
+    # lat = float(self.request.get('lat'))
+    # lon = float(self.request.get('lon'))
+    minLat = lat - area
+    minLon = lon - area
+    maxLat = lat + area
+    maxLon = lon + area
+    query = ndb.gql("SELECT * FROM OrganizationModel WHERE location >= :1 AND location <=:2",
+                    ndb.GeoPt(lat=minLat, lon=minLon), ndb.GeoPt(lat=maxLat, lon=maxLon)).fetch()
+    return query
+
+
+######## POST ###########
+class PostForm(Form):
+    content = TextAreaField('Content', validators=[DataRequired(message=u'Обязятельное поле')])
+
+
+@app.route('/posts')
+def list_posts():
+    posts = PostModel.query().order(-PostModel.when)
+    return render_template('list_posts.html', posts=posts, categories=categories,
+                           categories_callable=categories_callable)
+
+
+@app.route('/posts/new', methods=['GET', 'POST'])
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = PostModel(
+            content=form.content.data,
+            author=users.get_current_user())
+        post.put()
+        flash(u'Комментарий успешно создан!')
+        return redirect(url_for('list_posts'))
+    return render_template('new_post.html', form=form, categories=categories, categories_callable=categories_callable)
+
+
+@app.route('/add_comment', methods=['POST'])
+def add_comment():
+    post = PostModel(
+        content=request.form['comment'],
+        category=request.form['category'],
+        organization_id=int(request.form['organization_id']),
+        author=users.get_current_user())
+    post.put()
+    return json.dumps({'status': 'OK', 'comment': request.form['comment']})
+
+
+@app.route('/get_comments_by_org')
+def get_comments_by_org():
+    comments_org = PostModel.query(PostModel.organization_id == int(request.args.get('organization_id'))).order(
+        -PostModel.when).fetch()
+    return json.dumps({'status': 'OK', 'comments': comments_org}, cls=GaeEncoder)
+
+
+#### ADMIN FUNCTIONS
+### Edit tags in entities
+@app.route('/secret_edit_tags')
+def secret_edit_tags():
+    pass
+
 
 class AllTagsForm(Form):
     tags = StringField()
     uid = StringField()
 
-@app.route('/secret_allTags', methods=['GET','POST'])
+
+@app.route('/secret_allTags', methods=['GET', 'POST'])
 def secret_allTags():
     if users.is_current_user_admin():
         form = AllTagsForm()
@@ -318,55 +378,38 @@ def secret_allTags():
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
 
-def get_nearby_objects(lat,lon):
-    area = .0005
-    # lat = float(self.request.get('lat'))
-    # lon = float(self.request.get('lon'))
-    minLat = lat - area
-    minLon = lon - area
-    maxLat = lat + area
-    maxLon = lon + area
-    query = ndb.gql("SELECT * FROM OrganizationModel WHERE location >= :1 AND location <=:2",
-                         ndb.GeoPt(lat=minLat, lon=minLon), ndb.GeoPt(lat=maxLat, lon=maxLon)).fetch()
-    return query
-
-######## POST ###########
-class PostForm(Form):
-    content = TextAreaField('Content', validators=[DataRequired(message=u'Обязятельное поле')])
-
-@app.route('/posts')
-def list_posts():
-    posts = PostModel.query().order(-PostModel.when)
-    return render_template('list_posts.html', posts=posts, categories=categories, categories_callable=categories_callable)
-
-@app.route('/posts/new', methods = ['GET', 'POST'])
-def new_post():
-    form = PostForm()
-    if form.validate_on_submit():
-        post = PostModel(
-                    content = form.content.data,
-                    author = users.get_current_user())
-        post.put()
-        flash(u'Комментарий успешно создан!')
-        return redirect(url_for('list_posts'))
-    return render_template('new_post.html', form=form, categories=categories, categories_callable=categories_callable)
-
-@app.route('/add_comment', methods=['POST'])
-def add_comment():
-    post = PostModel(
-            content =  request.form['comment'],
-            category = request.form['category'],
-            organization_id = int(request.form['organization_id']),
-            author = users.get_current_user())
-    post.put()
-    return json.dumps({'status':'OK','comment':request.form['comment']})
-
-@app.route('/get_comments_by_org')
-def get_comments_by_org():
-    comments_org = PostModel.query(PostModel.organization_id == int(request.args.get('organization_id'))).order(-PostModel.when).fetch()
-    return json.dumps({'status':'OK','comments':comments_org}, cls=GaeEncoder)
 
 class SecretForm(Form):
     phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
-    phonenumber_static = StringField(widget=widgets.Input(input_type="tel"),render_kw={"placeholder": u"9-99-99"})
+    phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
 
+
+@app.route('/secret_query_by_phonenumber', methods=['GET', 'POST'])
+def secret_query_by_phonenumber():
+    if users.is_current_user_admin():
+        formS = SecretForm()
+        if request.method == 'POST':
+            if formS.validate_on_submit():
+                phonenumber = formS.phonenumber.data
+                phonenumber_static = formS.phonenumber_static.data
+                if request.form['btn'] == u'Мобильный':
+                    selected_orgs = OrganizationModel.query(OrganizationModel.phonenumber == phonenumber).fetch()
+                else:
+                    selected_orgs = OrganizationModel.query(
+                        OrganizationModel.phonenumber_static == phonenumber_static).fetch()
+                if selected_orgs:
+                    return render_template("search_result.html",
+                                           posts=json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
+                                           categories=categories, categories_callable=categories_callable)
+                else:
+                    all_tags = get_all_tags()
+                    form = OrganizationForm()
+                    form.phonenumber.data = phonenumber
+                    return render_template('new_org.html', form=form, categories=categories,
+                                           categories_callable=categories_callable,
+                                           posts=json.loads(json.dumps({}, cls=GaeEncoder)),
+                                           all_tags=','.join(all_tags))
+        return render_template('secret_query_by_phonenumber.html', form=formS)
+    else:
+        flash(u"У вас нет права доступа!", 'error')
+        return redirect(url_for('index'))

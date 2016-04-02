@@ -5,21 +5,22 @@
         <div class="row">
             {# // Карта#}
             <div class="col-sm-12">
-                <h2 align="center">По Вашему запросу "{{ keyword }}" найдено {{posts|length}} варианта(ов).</h2>
+                <h2 align="center">По Вашему запросу "{{ keyword }}" найдено {{ posts|length }} варианта(ов).</h2>
                 <h4>Полный список смотрите в таблице ниже.</h4>
+
                 <div class="row" id="wrapper">
                     <div id="map">
                         Google Maps
                     </div>
-{#                    <div id="add_button">#}
-{#                        <a class="btn btn-primary" href="{{ url_for('new_org', category_value=category_rus, category_eng=category_eng) }}" role="button">Добавить объект</a>#}
-{#                    </div>#}
+                    {#                    <div id="add_button">#}
+                    {#                        <a class="btn btn-primary" href="{{ url_for('new_org', category_value=category_rus, category_eng=category_eng) }}" role="button">Добавить объект</a>#}
+                    {#                    </div>#}
                     <div id="find_by_adres">
-                            <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
-                            <input id="submit" type="button" value="Искать">
+                        <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
+                        <input id="submit" type="button" value="Искать">
                     </div>
                     <div id="gps_button">
-                            <input id="my_location_button" type="button" value="Определить по GPS">
+                        <input id="my_location_button" type="button" value="Определить по GPS">
                     </div>
                 </div>
             </div>
@@ -27,24 +28,24 @@
         <div class="row">
             <table class="table table-striped">
                 {% for post in posts %}
-                <tr class="table-500">
-                    <td style="max-width: 10%">{{ post.title }}</td>
-                    {% if post.adres %}
-                        {% set adres_short = post.adres.split(', Изобильный')[0] %}
-                    {% else %}
-                        {% set adres_short = "Отсутствует" %}
-                    {% endif %}
-                    <td style="max-width: 10%">{{ adres_short }}</td>
-                    <td class="hidden-500">{{ post.category }}</td>
-                    <td>{{ post.phonenumber|join(", ") }}</td>
-                    <td>{{ post.phonenumber_static|join(", ") }}</td>
-                    <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>
-                    <td>
-                        <a href='/details/{{ post.id }}'>Подробнее</a><br>
-                        <a href='{{ url_for('edit_org', id = post.id, keyword=keyword) }}'>Редакт.</a><br>
-                        <a href='/del_org/{{ post.id }}' onclick="return confirm('Вы уверены?');">Удалить</a>
-                    </td>
-                </tr>
+                    <tr class="table-500">
+                        <td style="max-width: 10%">{{ post.title }}</td>
+                        {% if post.adres %}
+                            {% set adres_short = post.adres.split(', Изобильный')[0] %}
+                        {% else %}
+                            {% set adres_short = "Отсутствует" %}
+                        {% endif %}
+                        <td style="max-width: 10%">{{ adres_short }}</td>
+                        <td class="hidden-500">{{ post.category }}</td>
+                        <td>{{ post.phonenumber|join(", ") }}</td>
+                        <td>{{ post.phonenumber_static|join(", ") }}</td>
+                        <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>
+                        <td>
+                            <a href='/details/{{ post.id }}'>Подробнее</a><br>
+                            <a href='{{ url_for('edit_org', id = post.id, keyword=keyword) }}'>Редакт.</a><br>
+                            <a href='/del_org/{{ post.id }}' onclick="return confirm('Вы уверены?');">Удалить</a>
+                        </td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>

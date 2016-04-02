@@ -1,10 +1,13 @@
-    {#GOOGLE MAPS#}
-    <script>
-      var map;
-      var markers = [];
-      var new_markers_array = [];
-      function initMap() {
-          map = new google.maps.Map(document.getElementById('map'), {
+{#GOOGLE MAPS#}
+<script>
+    var posts = {{ posts | tojson | safe }};
+    var keyword = "{{ keyword | safe }}";
+    var id = parseInt("{{ id | safe }}");
+    var map;
+    var markers = [];
+    var new_markers_array = [];
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
             mapTypeId: google.maps.MapTypeId.HYBRID,
             center: {lat: 45.367557, lng: 41.711604},
             zoom: 13,
@@ -15,177 +18,174 @@
             draggable: true,
             scrollwheel: true,
         });
-          // Получает JSON от БД и в цикле добавляет маркер в массив маркеров.
 
-          var posts = {{ posts | tojson | safe }};
-          var geocoder = new google.maps.Geocoder();
-            addMarkerstoMap(posts);
+        var geocoder = new google.maps.Geocoder();
+        addMarkerstoMap(posts);
 
-          // Listeners
-          // Определение своего местоположения. Вызывается функция GetLocation
-          document.getElementById('my_location_button').addEventListener('click', function () {
-              navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
-{#              addMarkerstoMap(posts);#}
-          });
-          // Обработка ввода улицы.
-          document.getElementById('submit').addEventListener('click', function () {
-              geocodeAddress(geocoder, map);
-{#              addMarkerstoMap(posts)#}
-          });
-          // Обработка клика по карте - создание маркера.
-
-          map.addListener('click', function (event) {
-{#              addMarkerstoMap(posts);#}
-              geocodeLatLng(event.latLng);
-
-          });
-      }
-
-      var keyword = "{{ keyword | safe }}";
-      var id = "{{ id | safe }}";
-      id = parseInt(id);
-        function addMarkerstoMap(posts) {
-            for (var i = 0; i < posts.length; i++) {
-                var post = posts[i];
-                add(post, i * 100);
-        }}
-        function add (post, timeout) {
-            window.setTimeout(function() {
-              if (post.location) {
-                  var myLatLng = {lat: post.location.lat, lng: post.location.lng};
-{#                  var image = {#}
-{#                    url: '/images/quality.png',#}
-{#                    scaledSize: new google.maps.Size(50, 50)#}
-{#                  };#}
-                    var marker1 = new google.maps.Marker({
-                        position: myLatLng,
-{#                                icon: image,#}
-                        map: map,
-                        animation: google.maps.Animation.DROP
-                    });
-                    if (post.id === id) {
-                        marker1.setAnimation(google.maps.Animation.BOUNCE);
-                    }
-                    var adress = post.adres.split(', Изобильный')[0];
-                    var rating = post.rating;
-                    if (post.description) {
-                        var description = post.description.replaceAll('\n','<br>');
-                    } else {
-                        var description = ''
-                    }
-                    var content = "<div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>"+post.title+"</h3></div>" +
-                            "<div class='panel-body'>" +
-                            "<div>Адрес: "+adress+"</div>" +
-                            "<div>Телефон: "+post.phonenumber+", "+post.phonenumber_static+"</div>" +
-                            "<div>Рейтинг: "+post.rating+"</div>" +
-                            "<div>Изменено: "+moment.unix(post.when_modified).format('LLL')+"</div>" +
-                            "</div>" +
-                            "<div class='panel-footer'>" + post.description + "</div></div>" +
-                            "<a href='/details/"+post.id+"'>Подробнее</a>" + "<br>" +
-                            "<a href='/edit_org/"+post.id+"?keyword="+keyword+"'>Редактировать</a>" + "<br>" +
-                            "<a href='/del_org/"+post.id+"'>Удалить</a>";
-                    var infowindow1 = new google.maps.InfoWindow({content: content});
-{#                    infowindow1.setZIndex(10);#}
-                    marker1.addListener('click', function() {infowindow1.open(map, marker1);});
-                    markers.push(marker1);
-                    }
-                  }, timeout);
-
-            }
-
-      function geocodeAddress(geocoder, resultsMap) {
-        var address = document.getElementById('address').value + ", Изобильный, Ставропольский край, Россия";
-        geocoder.geocode({'address': address}, function(results, status) {
-          if (status === google.maps.GeocoderStatus.OK) {
-            resultsMap.setCenter(results[0].geometry.location);
-              map.setZoom(18);
-              clearNewMarkers();
-              var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
-            var marker_new = new google.maps.Marker({
-              map: resultsMap,
-                icon: image,
-              position: results[0].geometry.location
-            });
-              new_markers_array.push(marker_new);
-              document.getElementById("adres").value = address;
-              document.getElementById("lat").value = results[0].geometry.location.lat();
-              document.getElementById("lng").value = results[0].geometry.location.lng();
-          } else {
-            alert('Поиск не удался: ' + status);
-          }
+        // Listeners
+        // Определение своего местоположения. Вызывается функция GetLocation
+        document.getElementById('my_location_button').addEventListener('click', function () {
+            navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
         });
-      }
+        // Обработка ввода улицы.
+        document.getElementById('submit').addEventListener('click', function () {
+            geocodeAddress(geocoder, map);
+        });
+        // Обработка клика по карте - создание маркера.
+        map.addListener('click', function (event) {
+            geocodeLatLng(event.latLng);
+        });
+    }
 
-      function geocodeLatLng(location) {
-          var geocoder = new google.maps.Geocoder();
-          geocoder.geocode({'location': location}, function(results, status) {
-            if (status === google.maps.GeocoderStatus.OK) {
-              if (results[0]) {
-                  var address = results[0].formatted_address;
-                  if (document.getElementById("adres")) {
-                      document.getElementById("adres").value = address;
-                      document.getElementById("lat").value = location.lat();
-                      document.getElementById("lng").value = location.lng();
-                  }
-                  var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
-                  clearNewMarkers();
-                  var marker_new = new google.maps.Marker({
-                          position: location,
-                            icon: image,
-                          map: map
-                        });
-                  var infowindow = new google.maps.InfoWindow();
-                    infowindow.setContent(address);
-                    infowindow.open(map, marker_new);
-                  new_markers_array.push(marker_new);
-              } else {
-                console.log('Ничего не найдено');
-              }
-            } else {
-              console.log('Геопоиск не удался из-за: ' + status);
-            }
-          });
+
+    function addMarkerstoMap(posts) {
+        for (var i = 0; i < posts.length; i++) {
+            var post = posts[i];
+            add(post, i * 100);
         }
+    }
+    function add(post, timeout) {
+        window.setTimeout(function () {
+            if (post.location) {
+                var myLatLng = {lat: post.location.lat, lng: post.location.lng};
+                {#                  var image = {#}
+                {#                    url: '/images/quality.png',#}
+                {#                    scaledSize: new google.maps.Size(50, 50)#}
+                {#                  };#}
+                var marker1 = new google.maps.Marker({
+                    position: myLatLng,
+                    {#                                icon: image,#}
+                    map: map,
+                    animation: google.maps.Animation.DROP
+                });
+                if (post.id === id) {
+                    marker1.setAnimation(google.maps.Animation.BOUNCE);
+                }
+                var adress = post.adres.split(', Изобильный')[0];
+                var rating = post.rating;
+                if (post.description) {
+                    var description = post.description.replaceAll('\n', '<br>');
+                } else {
+                    var description = ''
+                }
+                var content = "<div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>" + post.title + "</h3></div>" +
+                        "<div class='panel-body'>" +
+                        "<div>Адрес: " + adress + "</div>" +
+                        "<div>Телефон: " + post.phonenumber + ", " + post.phonenumber_static + "</div>" +
+                        "<div>Рейтинг: " + post.rating + "</div>" +
+                        "<div>Изменено: " + moment.unix(post.when_modified).format('LLL') + "</div>" +
+                        "</div>" +
+                        "<div class='panel-footer'>" + post.description + "</div></div>" +
+                        "<a href='/details/" + post.id + "'>Подробнее</a>" + "<br>" +
+                        "<a href='/edit_org/" + post.id + "?keyword=" + keyword + "'>Редактировать</a>" + "<br>" +
+                        "<a href='/del_org/" + post.id + "'>Удалить</a>";
+                var infowindow1 = new google.maps.InfoWindow({content: content});
+                {#                    infowindow1.setZIndex(10);#}
+                marker1.addListener('click', function () {
+                    infowindow1.open(map, marker1);
+                });
+                markers.push(marker1);
+            }
+        }, timeout);
 
-      function GetLocation(location) {
-            if (location.coords.accuracy > 15) {
-                $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, включите GPS и выйдите на улицу.");
-            } else {
+    }
 
-                initialLocation = new google.maps.LatLng(location.coords.latitude,location.coords.longitude);
-                map.setCenter(initialLocation);
+    function geocodeAddress(geocoder, resultsMap) {
+        var address = document.getElementById('address').value + ", Изобильный, Ставропольский край, Россия";
+        geocoder.geocode({'address': address}, function (results, status) {
+            if (status === google.maps.GeocoderStatus.OK) {
+                resultsMap.setCenter(results[0].geometry.location);
                 map.setZoom(18);
                 clearNewMarkers();
                 var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                 var marker_new = new google.maps.Marker({
-                  position: initialLocation,
+                    map: resultsMap,
                     icon: image,
-                    map: map,
-                  title:"Вы находитесь здесь!"
+                    position: results[0].geometry.location
                 });
-                var infowindow = new google.maps.InfoWindow();
-                infowindow.setContent("Вы находитесь здесь!<br>Точность местоопределения: " + location.coords.accuracy);
-                infowindow.open(map, marker_new);
                 new_markers_array.push(marker_new);
-                var geocoder = new google.maps.Geocoder();
-                geocoder.geocode({'location': initialLocation}, function(results, status) {
-                if (status === google.maps.GeocoderStatus.OK) {
-                  if (results[0]) {
-                      document.getElementById("adres").value = results[0].formatted_address;
-                      document.getElementById("lat").value = initialLocation.lat();
-                      document.getElementById("lng").value = initialLocation.lng();}}});
+                document.getElementById("adres").value = address;
+                document.getElementById("lat").value = results[0].geometry.location.lat();
+                document.getElementById("lng").value = results[0].geometry.location.lng();
+            } else {
+                alert('Поиск не удался: ' + status);
             }
-        }
-      // Фунцкия для тотальной замены (в частности, переводов строки в описании маркера)
-      String.prototype.replaceAll = function(search, replace){
-          return this.split(search).join(replace);
-        };
+        });
+    }
 
-      function clearNewMarkers() {
-            for (var i = 0; i < new_markers_array.length; i++) {
-                new_markers_array[i].setMap(null);
+    function geocodeLatLng(location) {
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({'location': location}, function (results, status) {
+            if (status === google.maps.GeocoderStatus.OK) {
+                if (results[0]) {
+                    var address = results[0].formatted_address;
+                    if (document.getElementById("adres")) {
+                        document.getElementById("adres").value = address;
+                        document.getElementById("lat").value = location.lat();
+                        document.getElementById("lng").value = location.lng();
+                    }
+                    var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+                    clearNewMarkers();
+                    var marker_new = new google.maps.Marker({
+                        position: location,
+                        icon: image,
+                        map: map
+                    });
+                    var infowindow = new google.maps.InfoWindow();
+                    infowindow.setContent(address);
+                    infowindow.open(map, marker_new);
+                    new_markers_array.push(marker_new);
+                } else {
+                    console.log('Ничего не найдено');
+                }
+            } else {
+                console.log('Геопоиск не удался из-за: ' + status);
             }
+        });
+    }
+
+    function GetLocation(location) {
+        if (location.coords.accuracy > 15) {
+            $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, включите GPS и выйдите на улицу.");
+        } else {
+
+            initialLocation = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
+            map.setCenter(initialLocation);
+            map.setZoom(18);
+            clearNewMarkers();
+            var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+            var marker_new = new google.maps.Marker({
+                position: initialLocation,
+                icon: image,
+                map: map,
+                title: "Вы находитесь здесь!"
+            });
+            var infowindow = new google.maps.InfoWindow();
+            infowindow.setContent("Вы находитесь здесь!<br>Точность местоопределения: " + location.coords.accuracy);
+            infowindow.open(map, marker_new);
+            new_markers_array.push(marker_new);
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({'location': initialLocation}, function (results, status) {
+                if (status === google.maps.GeocoderStatus.OK) {
+                    if (results[0]) {
+                        document.getElementById("adres").value = results[0].formatted_address;
+                        document.getElementById("lat").value = initialLocation.lat();
+                        document.getElementById("lng").value = initialLocation.lng();
+                    }
+                }
+            });
         }
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"
+    }
+    // Фунцкия для тотальной замены (в частности, переводов строки в описании маркера)
+    String.prototype.replaceAll = function (search, replace) {
+        return this.split(search).join(replace);
+    };
+
+    function clearNewMarkers() {
+        for (var i = 0; i < new_markers_array.length; i++) {
+            new_markers_array[i].setMap(null);
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"
         async defer></script>

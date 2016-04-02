@@ -13,7 +13,8 @@
                         </div>
 
                         <div id="gps_button">
-                                <input id="my_location_button" type="button" value="Определить свое местоположение на карте">
+                            <input id="my_location_button" type="button"
+                                   value="Определить свое местоположение на карте">
                         </div>
                     </div>
                     <div id="accuracy"></div>
@@ -65,13 +66,15 @@
 
                             <dt>Рейтинг</dt>
                             <dd>{{ org.rating }}</dd>
-                            <dt>Доставка</dt>
+
                             {% if org.delivery %}
-                                <dd>Есть</dd>
-                            {% else %}
-                                <dd>Нет</dd>
+                                <dt>Доставка</dt>
+                                <dd>{{ org.delivery_terms }}</dd>
                             {% endif %}
-                       </dl>
+                            {% if org.daynight %}
+                                <dt>Работает круглосуточно</dt>
+                            {% endif %}
+                        </dl>
                     </div>
                     <div class="panel-footer">
                         <h4>{{ org.description }}</h4>
@@ -80,65 +83,68 @@
             </div>
 
             <div class="col-sm-6">
-                 <form class="form" style="margin-top: 20px" action="{{ url_for('add_comment', category=org.category, organization_id=org.id)}}" method="post" role="form">
-                     <div class="form-group" align="center">
-                         <label style="font-size: 20px" for="comment">Комментарии</label>
-                         <input type="text" id="comment" name="comment" class="form-control" placeholder="Ваш комментарий" required>
-                         <input type="hidden" name="category" class="form-control" value={{ org.category }} >
-                         <input type="hidden" name="organization_id" class="form-control" value={{ org.id }}>
-                         <button class="btn btn-lg btn-primary btn-block" type="button">Отправить </button>
-                     </div>
-                 </form>
+                <form class="form" style="margin-top: 20px"
+                      action="{{ url_for('add_comment', category=org.category, organization_id=org.id) }}" method="post"
+                      role="form">
+                    <div class="form-group" align="center">
+                        <label style="font-size: 20px" for="comment">Комментарии</label>
+                        <input type="text" id="comment" name="comment" class="form-control"
+                               placeholder="Ваш комментарий" required>
+                        <input type="hidden" name="category" class="form-control" value={{ org.category }}>
+                        <input type="hidden" name="organization_id" class="form-control" value={{ org.id }}>
+                        <button class="btn btn-lg btn-primary btn-block" type="button">Отправить</button>
+                    </div>
+                </form>
 
-                 <div class="row">
-                     <p id="new_comment"></p>
-                     <span id="comments"></span>
-                 </div>
+                <div class="row">
+                    <p id="new_comment"></p>
+                    <span id="comments"></span>
+                </div>
 
             </div>
         </div>
     </div>
 
     <script>
-        $(document).ready(function(){
+        $(document).ready(function () {
             all_comments();
         });
 
         var id = {{ org.id | safe }};
 
-        var all_comments = function (){
+        var all_comments = function () {
             $.ajax({
                 url: '/get_comments_by_org',
-                data: {'organization_id':id},
+                data: {'organization_id': id},
                 type: 'GET',
-                success: function(response) {
+                success: function (response) {
                     console.log(response);
                     var data = JSON.parse(response);
                     var string_comments = '';
-                    for (var i=0; i<data.comments.length; i++) {
+                    for (var i = 0; i < data.comments.length; i++) {
                         string_comments += data.comments[i].content + '<br>'
                     }
                     document.getElementById("comments").innerHTML = string_comments;
                 },
-                error: function(error) {
+                error: function (error) {
                     console.log(error);
                 }
             })
         };
 
-        $(function() {
-            $('button').click(function() {
-        {#        var comment = $('#txtUsername').val();#}
+        $(function () {
+            $('button').click(function () {
+                {#        var comment = $('#txtUsername').val();#}
                 $.ajax({
                     url: '/add_comment',
                     data: $('form').serialize(),
                     type: 'POST',
-                    success: function(response) {
+                    success: function (response) {
                         console.log(response);
                         var data = JSON.parse(response);
                         document.getElementById("new_comment").innerHTML = data.comment;
                     },
-                    error: function(error) {
+                    error: function (error) {
                         console.log(error);
                     }
                 });

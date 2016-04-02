@@ -12,13 +12,13 @@
         </div>
         <table class="table table-striped">
             {% for post in posts %}
-            <tr>
-                <td>{{ post.content }}</td>
-                <td>{{ post.author.nickname() }}</td>
-                <td>{{ post.category }}</td>
-                <td>{{ momentjs(post.when).fromNow() }}</td>
-                <td>{{ momentjs(post.when).format('LLLL') }}</td>
-            </tr>
+                <tr>
+                    <td>{{ post.content }}</td>
+                    <td>{{ post.author.nickname() }}</td>
+                    <td>{{ post.category }}</td>
+                    <td>{{ momentjs(post.when).fromNow() }}</td>
+                    <td>{{ momentjs(post.when).format('LLLL') }}</td>
+                </tr>
             {% endfor %}
         </table>
     </div>
