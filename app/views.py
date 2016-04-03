@@ -8,18 +8,15 @@ from google.appengine.api import memcache
 
 from flask import render_template, redirect, flash, url_for, request
 from app import app
-from models import PostModel, OrganizationModel, TagsModel
+from models import CommentModel, OrganizationModel, TagsModel
 from flask.ext.wtf import Form
 from wtforms import StringField, FloatField, TextAreaField, IntegerField, BooleanField, widgets
 from wtforms.validators import DataRequired, NumberRange
-from app.data import categories_callable, categories
+from app.data import categories
 
-categories_all = {}
-for i_dict in categories:
-    categories_all.update(i_dict['categs'])
-for i_dict in categories_callable:
-    categories_all.update(i_dict['categs'])
-
+# categories_all = {}
+# for i_dict in categories:
+#     categories_all.update(i_dict['categs'])
 
 class OrganizationForm(Form):
     category = StringField(default=u"")
@@ -67,7 +64,7 @@ class GaeEncoder(json.JSONEncoder):
 def details(id):
     org = OrganizationModel.get_by_id(int(id))
     return render_template("details.html", org=org, posts=json.loads(json.dumps([org], cls=GaeEncoder)),
-                           categories=categories, categories_callable=categories_callable)
+                           categories=categories)
 
 
 @app.route('/')
@@ -78,7 +75,7 @@ def index():
 
 @app.route('/categories')
 def show_categories_all():
-    return render_template("categories.html", categories=categories, categories_callable=categories_callable)
+    return render_template("categories.html", categories=categories)
 
 
 @app.route('/search_result', methods=['GET', 'POST'])
@@ -89,7 +86,7 @@ def search_result():
         keyword = request.form.get('search')
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
     return render_template("search_result.html", posts=json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
-                           categories=categories, categories_callable=categories_callable, keyword=keyword)
+                           categories=categories, keyword=keyword)
 
 
 # @app.route('/category/<category_eng>')
@@ -112,7 +109,6 @@ def new_org():
         else:
             form.tags.data = ''
         return render_template('new_org.html', form=form, categories=categories,
-                               categories_callable=categories_callable,
                                posts=json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
     elif request.method == 'POST':
         if form.validate_on_submit():
@@ -154,7 +150,6 @@ def new_org():
             flash(u'Форма не прошла валидацию.', 'error')
             all_tags = get_all_tags()
             return render_template('new_org.html', form=form, categories=categories,
-                                   categories_callable=categories_callable,
                                    posts=json.loads(json.dumps(orgs, cls=GaeEncoder)), all_tags=','.join(all_tags))
 
 
@@ -224,7 +219,7 @@ def edit_org(id):
         else:
             orgs = [OrganizationModel.get_by_id(int(id))]
         all_tags = get_all_tags()
-        return render_template("edit_org.html", categories=categories, categories_callable=categories_callable,
+        return render_template("edit_org.html", categories=categories,
                                form=form, id=id, posts=json.loads(json.dumps(orgs, cls=GaeEncoder)),
                                tags=",".join(org.tags), all_tags=','.join(all_tags), keyword=keyword)
     else:
@@ -252,7 +247,7 @@ def del_org(id):
 @app.route('/orgs')
 def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
-    return render_template('list_orgs.html', posts=orgs, categories=categories, categories_callable=categories_callable)
+    return render_template('list_orgs.html', posts=orgs, categories=categories)
 
 
 ### Edit all_Tags
@@ -286,7 +281,7 @@ def get_all_tags(update=False):
 
 @app.route('/contacts')
 def contacts():
-    return render_template("contacts.html", categories=categories, categories_callable=categories_callable)
+    return render_template("contacts.html", categories=categories)
 
 
 def get_nearby_objects(lat, lon):
@@ -302,34 +297,35 @@ def get_nearby_objects(lat, lon):
     return query
 
 
-######## POST ###########
-class PostForm(Form):
+######## COMMENTS ###########
+class CommentForm(Form):
     content = TextAreaField('Content', validators=[DataRequired(message=u'Обязятельное поле')])
 
 
-@app.route('/posts')
-def list_posts():
-    posts = PostModel.query().order(-PostModel.when)
-    return render_template('list_posts.html', posts=posts, categories=categories,
-                           categories_callable=categories_callable)
+@app.route('/comments/get_all_comments')
+def get_all_comments():
+    posts = CommentModel.query().order(-CommentModel.when)
+    return render_template('get_all_comments.html', posts=posts, categories=categories)
 
 
-@app.route('/posts/new', methods=['GET', 'POST'])
-def new_post():
-    form = PostForm()
+@app.route('/comments/new', methods=['GET', 'POST'])
+def new_comment():
+    form = CommentForm()
     if form.validate_on_submit():
-        post = PostModel(
-            content=form.content.data,
+        post = CommentModel(
+            content=request.form['comment'],
+            category=request.form['category'],
+            organization_id=int(request.form['organization_id']),
             author=users.get_current_user())
         post.put()
         flash(u'Комментарий успешно создан!')
-        return redirect(url_for('list_posts'))
-    return render_template('new_post.html', form=form, categories=categories, categories_callable=categories_callable)
+        return redirect(url_for('get_all_comments'))
+    return render_template('new_comment.html', form=form, categories=categories)
 
-
+## For API
 @app.route('/add_comment', methods=['POST'])
 def add_comment():
-    post = PostModel(
+    post = CommentModel(
         content=request.form['comment'],
         category=request.form['category'],
         organization_id=int(request.form['organization_id']),
@@ -340,8 +336,8 @@ def add_comment():
 
 @app.route('/get_comments_by_org')
 def get_comments_by_org():
-    comments_org = PostModel.query(PostModel.organization_id == int(request.args.get('organization_id'))).order(
-        -PostModel.when).fetch()
+    comments_org = CommentModel.query(CommentModel.organization_id == int(request.args.get('organization_id'))).order(
+        -CommentModel.when).fetch()
     return json.dumps({'status': 'OK', 'comments': comments_org}, cls=GaeEncoder)
 
 
@@ -359,6 +355,7 @@ def secret_edit_tags():
     if users.is_current_user_admin():
         form1 = DeleteTagForm(prefix="form1")
         form2 = ReplaceTagForm(prefix="form2")
+        form3 = ReplaceTagForm(prefix="form3")
         if request.method == 'POST':
             if form1.validate_on_submit() and request.form['btn'] == u'Удалить':
                 delete_some_tags(form1.tag.data.strip())
@@ -368,11 +365,15 @@ def secret_edit_tags():
                 replace_some_tags(form2.tag_del.data.strip(),form2.tag_add.data.strip())
                 flash(u'Замена прошла успешно')
                 redirect(url_for('secret_edit_tags'))
+            elif form3.validate_on_submit() and request.form['btn'] == u'Дополнить':
+                append_some_tags(form3.tag_del.data.strip(),form3.tag_add.data.strip())
+                flash(u'Дополнение прошло успешно')
+                redirect(url_for('secret_edit_tags'))
             # elif form1.validate_on_submit() and request.form['btn'] == u'Заполнить':
             #     populate_empty_tags()
             #     flash(u'Заполнение прошло успешно')
             #     redirect(url_for('secret_edit_tags'))
-        return render_template('secret_edit_tags.html', form1=form1, form2=form2)
+        return render_template('secret_edit_tags.html', form1=form1, form2=form2, form3=form3)
     else:
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
@@ -387,6 +388,22 @@ def secret_edit_tags():
 #             updated.append(entity)
 #             add_tags_to_overall([entity.title.lower().strip()])
 #     ndb.put_multi(updated)
+
+def append_some_tags(tag_to_find, tag_to_add):
+    # APPEND in orgs
+    selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_find.lower().strip()).fetch()
+    updated = []
+    for entity in selected_orgs:
+        if tag_to_add not in entity.tags:
+            entity.tags.append(tag_to_add)
+            updated.append(entity)
+    ndb.put_multi(updated)
+    # APPEND in allTags
+    all_tags = TagsModel.query(TagsModel.uid == 'myid').fetch()
+    if tag_to_add not in all_tags[0].all_tags:
+        all_tags[0].all_tags.append(tag_to_add)
+        all_tags[0].put()
+    get_all_tags(True)
 
 def replace_some_tags(tag_to_delete, tag_to_add):
     # replace in orgs
@@ -469,13 +486,12 @@ def secret_query_by_phonenumber():
                 if selected_orgs:
                     return render_template("search_result.html",
                                            posts=json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
-                                           categories=categories, categories_callable=categories_callable)
+                                           categories=categories)
                 else:
                     all_tags = get_all_tags()
                     form = OrganizationForm()
                     form.phonenumber.data = phonenumber
                     return render_template('new_org.html', form=form, categories=categories,
-                                           categories_callable=categories_callable,
                                            posts=json.loads(json.dumps({}, cls=GaeEncoder)),
                                            all_tags=','.join(all_tags))
         return render_template('secret_query_by_phonenumber.html', form=formS)

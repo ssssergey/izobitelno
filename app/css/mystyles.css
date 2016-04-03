@@ -111,13 +111,15 @@ body {
     width: 95%;
 }
 
-.dl-horizontal dt {
-    width: 80px;
-}
+/*.dl-horizontal dt {*/
+    /*width: 40%;*/
+    /*float: left;*/
 
-.dl-horizontal dd {
-    margin-left: 0px;
-}
+/*}*/
+
+/*.dl-horizontal dd {*/
+    /*margin-left: 40%;*/
+/*}*/
 
 .panel-body {
     padding: 5px;
@@ -138,4 +140,30 @@ body {
     .table-500 {
         font-size: 12px !important;
     }
+}
+
+dl {
+    width: 100%;
+    overflow: hidden;
+    /*background: #eaeaea;*/
+    padding: 0;
+    margin: 0
+}
+
+dt {
+    float: left;
+    width: 50%;
+    /* adjust the width; make sure the total of both is 100% */
+    background: gainsboro;
+    padding: 0;
+    margin-top: 1px;
+}
+
+dd {
+    float: left;
+    width: 50%;
+    /* adjust the width; make sure the total of both is 100% */
+    background: #eaeaea;
+    padding : 0;
+    margin-top: 1px
 }

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-
 {% block content %}
+
     <div class="container">
         <div class="row">
             {# // Карта#}
@@ -11,11 +11,13 @@
                         <div id="map">
                             Google Maps
                         </div>
-
-                        <div id="gps_button">
-                            <input id="my_location_button" type="button"
-                                   value="Определить свое местоположение на карте">
-                        </div>
+                    <div id="find_by_adres" style="margin-left: 10px">
+                        <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
+                        <input id="submit" type="button" value="Искать">
+                    </div>
+                    <div id="gps_button" style="margin-left: 10px">
+                        <input id="my_location_button" type="button" value="Определить по GPS">
+                    </div>
                     </div>
                     <div id="accuracy"></div>
                     {% include 'base_map.html' %}
@@ -25,8 +27,7 @@
                         <h3 class="panel-title">{{ org.title }}</h3>
                     </div>
                     <div class="panel-body">
-                        <dl class="dl-vertical">
-
+                        <dl class="dl">
                             {% if org.adres %}
                                 <dt>Адрес</dt>
                                 {% set adres_short = org.adres.split(', Изобильный')[0] %}
@@ -61,16 +62,18 @@
                             {% endif %}
                             {% if org.daynight %}
                                 <dt>Работает круглосуточно</dt>
+                                <dd>Да</dd>
+                            {% endif %}
+                            {% if org.working_hours %}
+                                <dt>Режим работы</dt>
+                                <dd>{{ org.working_hours }}</dd>
                             {% endif %}
 {#                            <dt>Дата добавления</dt>#}
 {#                            <dd>{{ momentjs(org.when_added).fromNow() }}</dd>#}
 {#                            <dt>Дата изменения</dt>#}
 {#                            <dd>{{ momentjs(org.when_modified).fromNow() }}</dd>#}
-
                             <dt>Рейтинг</dt>
                             <dd>{{ org.rating }}</dd>
-
-
                         </dl>
                     </div>
                     <div class="panel-footer">
@@ -81,7 +84,7 @@
 
             <div class="col-sm-6">
                 <form class="form" style="margin-top: 20px"
-                      action="{{ url_for('add_comment', category=org.category, organization_id=org.id) }}" method="post"
+                      action="{{ url_for('new_comment', category=org.category, organization_id=org.id) }}" method="post"
                       role="form">
                     <div class="form-group" align="center">
                         <label style="font-size: 20px" for="comment">Комментарии</label>

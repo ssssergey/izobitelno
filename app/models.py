@@ -2,13 +2,17 @@
 from google.appengine.ext import ndb
 from endpoints_proto_datastore.ndb import EndpointsModel
 
-class PostModel(EndpointsModel):
+class CommentModel(EndpointsModel):
     content = ndb.TextProperty(required = True)
     when = ndb.DateTimeProperty(auto_now_add = True)
-    author = ndb.UserProperty(required = True)
+    author = ndb.UserProperty()
     category = ndb.StringProperty()
     organization_id = ndb.IntegerProperty()
     complain = ndb.BooleanProperty(default=False)
+    rude = ndb.BooleanProperty(default=False)
+    task = ndb.BooleanProperty(default=False)
+    done = ndb.BooleanProperty(default=False)
+    anonymous = ndb.BooleanProperty(default=False)
 
 class OrganizationModel(EndpointsModel):
     category = ndb.StringProperty(default=u'Другие')

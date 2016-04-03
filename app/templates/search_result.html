@@ -5,9 +5,21 @@
         <div class="row">
             {# // Карта#}
             <div class="col-sm-12">
-                <h2 align="center">По Вашему запросу "{{ keyword }}" найдено {{ posts|length }} варианта(ов).</h2>
-                <h4>Полный список смотрите в таблице ниже.</h4>
-
+                {% set posts_count = posts|length %}
+                {% if posts_count == 0 %}
+                    <h2 align="center">По Вашему запросу <strong>"{{ keyword }}"</strong> ничего не найдено, но мы уже работаем на тем,
+                        чтобы найти в Изобильном <strong>{{ keyword }}</strong> для Вас.</h2>
+                {% else %}
+                    <h2 align="center">По Вашему запросу <strong>"{{ keyword }}"</strong> найдено {{ posts|length }} варианта(ов).</h2>
+                    <h4 align="center"><strong>Полный список</strong> смотрите в таблице ниже.</h4>
+                {% endif %}
+                {% set post_with_adress = [] %}
+                {% for post in posts  %}
+                    {% if post.adres %}
+                        {% if post_with_adress.append(1) %}{% endif %}
+                    {% endif %}
+                {% endfor %}
+                {% if post_with_adress %}
                 <div class="row" id="wrapper">
                     <div id="map">
                         Google Maps
@@ -23,6 +35,8 @@
                         <input id="my_location_button" type="button" value="Определить по GPS">
                     </div>
                 </div>
+                <div id="accuracy"></div>
+                {% endif %}
             </div>
         </div>
         <div class="row">
