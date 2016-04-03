@@ -70,7 +70,7 @@
                     </li>
                 {% endfor %}
                 <li><a href="{{ url_for('new_org', keyword=keyword) }}">Создать</a></li>
-                <li><a href="/secret_query_by_phonenumber">По номеру</a></li>
+                <li><a href="{{ url_for('secret_query_by_phonenumber') }}">По номеру</a></li>
             </ul>
         </div>
     </div>

@@ -43,7 +43,7 @@
                         <td>
                             <a href='/details/{{ post.id }}'>Подробнее</a><br>
                             <a href='{{ url_for('edit_org', id = post.id, keyword=keyword) }}'>Редакт.</a><br>
-                            <a href='/del_org/{{ post.id }}' onclick="return confirm('Вы уверены?');">Удалить</a>
+                            <a href='/del_org/{{ post.id }}' onclick="return confirm('Вы уверены?')">Удалить</a>
                         </td>
                     </tr>
                 {% endfor %}

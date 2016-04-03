@@ -339,31 +339,45 @@ def get_comments_by_org():
 
 #### ADMIN FUNCTIONS
 ### Edit tags in entities
-@app.route('/secret_edit_tags')
+class DelTag(Form):
+    tag = StringField(default=u"")
+
+@app.route('/secret_edit_tags', methods=['GET', 'POST'])
 def secret_edit_tags():
-    pass
+    if users.is_current_user_admin():
+        form1 = DelTag(prefix="form1")
+        if request.method == 'POST':
+            if form1.validate_on_submit() and request.form['btn'] == u'Удалить':
+                delete_some_tags(form1.tag.data.strip())
+                flash(u'Удаление прошло успешно')
+                redirect(url_for('secret_edit_tags'))
+        return render_template('secret_edit_tags.html', form=form1)
 
 def delete_some_tags(tag_to_delete):
+    # Delete form orgs
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_delete.lower().strip()).fetch()
     updated = []
     for entity in selected_orgs:
         entity.tags.remove(tag_to_delete)
         updated.append(entity)
     ndb.put_multi(updated)
+    # Delete form allTags
     all_tags = TagsModel.query(TagsModel.uid == 'myid').fetch()
-    all_tags.all_tags.remove(tag_to_delete)
-    all_tags.put()
+    try:
+        all_tags[0].all_tags.remove(tag_to_delete)
+        all_tags[0].put()
+    except:
+        pass
     get_all_tags(True)
 
-class AllTagsForm(Form):
+### Get all tags list into template to edit
+class GetAllTagsForm(Form):
     tags = StringField()
-    uid = StringField()
 
-
-@app.route('/secret_allTags', methods=['GET', 'POST'])
-def secret_allTags():
+@app.route('/secret_get_allTags', methods=['GET', 'POST'])
+def secret_get_allTags():
     if users.is_current_user_admin():
-        form = AllTagsForm()
+        form = GetAllTagsForm()
         if request.method == 'POST':
             if form.validate_on_submit():
                 tags = form.tags.data.lower().split(',')
@@ -371,16 +385,16 @@ def secret_allTags():
                 all_tags.all_tags = tags
                 all_tags.put()
                 flash(u"Изменения приняты!")
-                return render_template("secret_allTags.html", form=form)
+                return render_template("secretGetAllTags.html", form=form)
         all_tags = TagsModel.query(TagsModel.uid == 'myid').get()
         form.tags.data = ",".join(all_tags.all_tags)
-        return render_template('secret_allTags.html', form=form)
+        return render_template('secretGetAllTags.html', form=form)
     else:
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
 
-
-class SecretForm(Form):
+### Find entity by phone, if not go to new_org with this phone
+class SecretPhoneForm(Form):
     phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
     phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
 
@@ -388,7 +402,7 @@ class SecretForm(Form):
 @app.route('/secret_query_by_phonenumber', methods=['GET', 'POST'])
 def secret_query_by_phonenumber():
     if users.is_current_user_admin():
-        formS = SecretForm()
+        formS = SecretPhoneForm()
         if request.method == 'POST':
             if formS.validate_on_submit():
                 phonenumber = formS.phonenumber.data
