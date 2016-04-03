@@ -40,6 +40,8 @@ class OrganizationForm(Form):
     high_quality = BooleanField(default=False)
     delivery = BooleanField(default=False)
     delivery_terms = StringField()
+    working_hours = StringField()
+    internet_site = StringField()
     daynight = BooleanField(default=False)
 
 
@@ -140,8 +142,10 @@ def new_org():
                                      size=form.size.data,
                                      delivery=form.delivery.data,
                                      delivery_terms=form.delivery_terms.data,
+                                     working_hours=form.working_hours.data,
                                      daynight=form.daynight.data,
-                                     high_quality=form.high_quality.data
+                                     high_quality=form.high_quality.data,
+                                     internet_site=form.internet_site.data,
                                      )
             post.put()
             flash(u'Организация успешно добавлена!')
@@ -186,8 +190,10 @@ def edit_org(id):
                              tags=tags,
                              delivery=form.delivery.data,
                              delivery_terms=form.delivery_terms.data,
+                             working_hours=form.working_hours.data,
                              daynight=form.daynight.data,
-                             high_quality=form.high_quality.data
+                             high_quality=form.high_quality.data,
+                             internet_site=form.internet_site.data,
                              )
                 org.put()
                 flash(u'Изменения приняты!')
@@ -208,6 +214,8 @@ def edit_org(id):
         form.tags.data = ",".join(org.tags)
         form.delivery.data = org.delivery
         form.delivery_terms.data = org.delivery_terms
+        form.working_hours.data = org.working_hours
+        form.internet_site.data = org.internet_site
         form.daynight.data = org.daynight
         form.high_quality.data = org.high_quality
         keyword = request.args.get('keyword')
@@ -339,19 +347,65 @@ def get_comments_by_org():
 
 #### ADMIN FUNCTIONS
 ### Edit tags in entities
-class DelTag(Form):
+class DeleteTagForm(Form):
     tag = StringField(default=u"")
+
+class ReplaceTagForm(Form):
+    tag_del = StringField(validators=[DataRequired(message=u'Обязятельное поле')])
+    tag_add = StringField(validators=[DataRequired(message=u'Обязятельное поле')])
 
 @app.route('/secret_edit_tags', methods=['GET', 'POST'])
 def secret_edit_tags():
     if users.is_current_user_admin():
-        form1 = DelTag(prefix="form1")
+        form1 = DeleteTagForm(prefix="form1")
+        form2 = ReplaceTagForm(prefix="form2")
         if request.method == 'POST':
             if form1.validate_on_submit() and request.form['btn'] == u'Удалить':
                 delete_some_tags(form1.tag.data.strip())
                 flash(u'Удаление прошло успешно')
                 redirect(url_for('secret_edit_tags'))
-        return render_template('secret_edit_tags.html', form=form1)
+            elif form2.validate_on_submit() and request.form['btn'] == u'Заменить':
+                replace_some_tags(form2.tag_del.data.strip(),form2.tag_add.data.strip())
+                flash(u'Замена прошла успешно')
+                redirect(url_for('secret_edit_tags'))
+            # elif form1.validate_on_submit() and request.form['btn'] == u'Заполнить':
+            #     populate_empty_tags()
+            #     flash(u'Заполнение прошло успешно')
+            #     redirect(url_for('secret_edit_tags'))
+        return render_template('secret_edit_tags.html', form1=form1, form2=form2)
+    else:
+        flash(u"У вас нет права доступа!", 'error')
+        return redirect(url_for('index'))
+# def populate_empty_tags():
+#     selected_orgs = OrganizationModel.query().fetch()
+#     updated = []
+#     for entity in selected_orgs:
+#         if not entity.tags:
+#             entity.tags.append(entity.title.lower().strip())
+#             if entity.title.lower().strip() != entity.category.lower().strip():
+#                 entity.tags.append(entity.category.lower().strip())
+#             updated.append(entity)
+#             add_tags_to_overall([entity.title.lower().strip()])
+#     ndb.put_multi(updated)
+
+def replace_some_tags(tag_to_delete, tag_to_add):
+    # replace in orgs
+    selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_delete.lower().strip()).fetch()
+    updated = []
+    for entity in selected_orgs:
+        entity.tags.remove(tag_to_delete)
+        entity.tags.append(tag_to_add)
+        updated.append(entity)
+    ndb.put_multi(updated)
+    # replace in allTags
+    all_tags = TagsModel.query(TagsModel.uid == 'myid').fetch()
+    try:
+        all_tags[0].all_tags.remove(tag_to_delete)
+        all_tags[0].all_tags.append(tag_to_add)
+        all_tags[0].put()
+    except:
+        pass
+    get_all_tags(True)
 
 def delete_some_tags(tag_to_delete):
     # Delete form orgs

@@ -30,8 +30,11 @@ class OrganizationModel(EndpointsModel):
     high_quality = ndb.BooleanProperty(default=False)
     delivery = ndb.BooleanProperty(default=False)
     delivery_terms = ndb.StringProperty()
+    working_hours = ndb.StringProperty()
     daynight = ndb.BooleanProperty(default=False)
     assortiment = ndb.PickleProperty()
+    internet_site = ndb.StringProperty()
+    email = ndb.StringProperty()
 
 
 class UserModel(EndpointsModel):
