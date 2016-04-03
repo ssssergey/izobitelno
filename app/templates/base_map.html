@@ -41,7 +41,12 @@
     function addMarkerstoMap(posts) {
         for (var i = 0; i < posts.length; i++) {
             var post = posts[i];
-            add(post, i * 100);
+            if (i < 50) {
+                timeout = i * 100
+            } else {
+                timeout = 100
+            }
+            add(post, timeout);
         }
     }
     function add(post, timeout) {

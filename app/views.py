@@ -273,17 +273,7 @@ def get_all_tags(update=False):
     return all_tags
 
 
-def delete_some_tags(tag_to_delete):
-    selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_delete.lower().strip()).fetch()
-    updated = []
-    for entity in selected_orgs:
-        entity.tags.remove(tag_to_delete)
-        updated.append(entity)
-    ndb.put_multi(updated)
-    all_tags = TagsModel.query(TagsModel.uid == 'myid').fetch()
-    all_tags.all_tags.remove(tag_to_delete)
-    all_tags.put()
-    get_all_tags(True)
+
 
 
 @app.route('/contacts')
@@ -353,6 +343,17 @@ def get_comments_by_org():
 def secret_edit_tags():
     pass
 
+def delete_some_tags(tag_to_delete):
+    selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_delete.lower().strip()).fetch()
+    updated = []
+    for entity in selected_orgs:
+        entity.tags.remove(tag_to_delete)
+        updated.append(entity)
+    ndb.put_multi(updated)
+    all_tags = TagsModel.query(TagsModel.uid == 'myid').fetch()
+    all_tags.all_tags.remove(tag_to_delete)
+    all_tags.put()
+    get_all_tags(True)
 
 class AllTagsForm(Form):
     tags = StringField()

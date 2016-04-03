@@ -26,54 +26,51 @@
                     </div>
                     <div class="panel-body">
                         <dl class="dl-vertical">
-                            <dt>Адрес</dt>
+
                             {% if org.adres %}
+                                <dt>Адрес</dt>
                                 {% set adres_short = org.adres.split(', Изобильный')[0] %}
                                 <dd>{{ adres_short }}
                                     {% if org.adres_details %}
                                         <strong><i> ({{ org.adres_details }})</i></strong>
                                     {% endif %}
                                 </dd>
-                            {% else %}
-                                <dd>Отсутствует.</dd>
                             {% endif %}
 
-                            <dt>Тэги</dt>
                             {% if org.tags|join(", ") %}
+                                <dt>Тэги</dt>
                                 <dd>{{ org.tags|join(", ") }}</dd>
-                            {% else %}
-                                <dd>Отсутствуют.</dd>
                             {% endif %}
 
-                            <dt>Телефоны (моб.)</dt>
                             {% if org.phonenumber|join(", ") %}
+                                <dt>Телефон (моб.)</dt>
                                 <dd>{{ org.phonenumber|join(", ") }}</dd>
-                            {% else %}
-                                <dd>Отсутствуют.</dd>
                             {% endif %}
 
-                            <dt>Телефоны (гор.)</dt>
                             {% if org.phonenumber_static|join(", ") %}
+                                <dt>Телефон (гор.)</dt>
                                 <dd>{{ org.phonenumber_static|join(", ") }}</dd>
-                            {% else %}
-                                <dd>Отсутствуют.</dd>
                             {% endif %}
-
-                            <dt>Дата добавления</dt>
-                            <dd>{{ momentjs(org.when_added).fromNow() }}</dd>
-                            <dt>Дата изменения</dt>
-                            <dd>{{ momentjs(org.when_modified).fromNow() }}</dd>
-
-                            <dt>Рейтинг</dt>
-                            <dd>{{ org.rating }}</dd>
-
                             {% if org.delivery %}
                                 <dt>Доставка</dt>
-                                <dd>{{ org.delivery_terms }}</dd>
+                                {% if org.delivery_terms %}
+                                    <dd>{{ org.delivery_terms }}</dd>
+                                {% else %}
+                                    <dd>Есть</dd>
+                                {% endif %}
                             {% endif %}
                             {% if org.daynight %}
                                 <dt>Работает круглосуточно</dt>
                             {% endif %}
+{#                            <dt>Дата добавления</dt>#}
+{#                            <dd>{{ momentjs(org.when_added).fromNow() }}</dd>#}
+{#                            <dt>Дата изменения</dt>#}
+{#                            <dd>{{ momentjs(org.when_modified).fromNow() }}</dd>#}
+
+                            <dt>Рейтинг</dt>
+                            <dd>{{ org.rating }}</dd>
+
+
                         </dl>
                     </div>
                     <div class="panel-footer">
