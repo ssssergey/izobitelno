@@ -51,8 +51,18 @@
                         {% endif %}
                         <td style="max-width: 10%">{{ adres_short }}</td>
                         <td class="hidden-500">{{ post.category }}</td>
-                        <td>{{ post.phonenumber|join(", ") }}</td>
-                        <td>{{ post.phonenumber_static|join(", ") }}</td>
+                        <td>
+                            {% set comma = joiner(",") %}
+                            {% for number in post.phonenumber %}
+                                {{ comma() }}<a href="tel: 8{{number }}">{{ number }}</a>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% set comma = joiner(",") %}
+                            {% for number in post.phonenumber_static %}
+                                {{ comma() }}<a href="tel: 8{{number }}">{{ number }}</a>
+                            {% endfor %}
+                        </td>
                         <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>
                         <td>
                             <a href='/details/{{ post.id }}'>Подробнее</a><br>

@@ -45,12 +45,22 @@
 
                             {% if org.phonenumber|join(", ") %}
                                 <dt>Телефон (моб.)</dt>
-                                <dd>{{ org.phonenumber|join(", ") }}</dd>
+                                <dd>
+                                    {% set comma = joiner(",") %}
+                                    {% for number in org.phonenumber %}
+                                        {{ comma() }}<a href="tel: 8{{number }}">{{ number }}</a>
+                                    {% endfor %}
+                                </dd>
                             {% endif %}
 
                             {% if org.phonenumber_static|join(", ") %}
                                 <dt>Телефон (гор.)</dt>
-                                <dd>{{ org.phonenumber_static|join(", ") }}</dd>
+                                <dd>
+                                    {% set comma = joiner(",") %}
+                                    {% for number in org.phonenumber_static %}
+                                        {{ comma() }}<a href="tel: 8(86545){{number }}">{{ number }}</a>
+                                    {% endfor %}
+                                </dd>
                             {% endif %}
                             {% if org.delivery %}
                                 <dt>Доставка</dt>
@@ -87,7 +97,7 @@
                       action="{{ url_for('new_comment', category=org.category, organization_id=org.id) }}" method="post"
                       role="form">
                     <div class="form-group" align="center">
-                        <label style="font-size: 20px" for="comment">Комментарии</label>
+                        <label style="font-size: 20px" for="comment">Какой информации не хватает на этой странице?</label>
                         <input type="text" id="comment" name="comment" class="form-control"
                                placeholder="Ваш комментарий" required>
                         <input type="hidden" name="category" class="form-control" value={{ org.category }}>

@@ -136,10 +136,15 @@ body {
     .hidden-500 {
         display: none !important;
     }
-
     .table-500 {
         font-size: 12px !important;
     }
+}
+
+@media (min-width: 768px) and (max-width: 1000px) {
+   .under-navbar {
+       margin-top: 100px !important;
+   }
 }
 
 dl {

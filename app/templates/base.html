@@ -40,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="{{ url_for('index') }}"><span style="color:orangered">И</span>зобильный</a>
     </div>
-    <div class="container" style="min-width: 100%">
+    <div class="container-fluid">
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 {% for cat_group in categories %}
@@ -73,11 +73,11 @@
         {% endfor %}
     {% endif %}
 {% endwith %}
-
+<div class="under-navbar">
 {% block content %}
 
 {% endblock %}
-
+</div>
 
 </body>
 
