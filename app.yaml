@@ -24,9 +24,17 @@ handlers:
 - url: /_ah/spi/.*
   script: main.application_API
 
-- url: .*
+- url: /orgs/new
   script: main.app
   login: required
+
+- url: /edit_org/(.*)
+  script: main.app
+  login: required
+
+- url: .*
+  script: main.app
+#  login: required
 
 
 libraries:

@@ -25,14 +25,14 @@
 			});
 			
 			// create the div wrapper
-			var $wrapper = $("<div class='autofill-wrapper'></div>").css("position","relative");
+			var $wrapper = $("<div class='autofill-wrapper form-control'></div>").css("position","relative");
 			// wrap
 			$(self).wrap($wrapper);
 			// reset wrapper cuz now its doc fragment?
 			$wrapper = $(self).parent();
 			// make the bg input
 			var color = opts.color || "rgba(17,51,224,1)";
-			var top = opts.top || 3;
+			var top = opts.top || -20;
 			var $bg = $("<input type='text' class='autofill-bg' disabled/>").css({
 				"color":color,
 				"top": top,

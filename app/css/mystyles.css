@@ -112,13 +112,13 @@ body {
 }
 
 /*.dl-horizontal dt {*/
-    /*width: 40%;*/
-    /*float: left;*/
+/*width: 40%;*/
+/*float: left;*/
 
 /*}*/
 
 /*.dl-horizontal dd {*/
-    /*margin-left: 40%;*/
+/*margin-left: 40%;*/
 /*}*/
 
 .panel-body {
@@ -132,24 +132,15 @@ body {
     padding: 10px;
 }
 
-@media (max-width: 500px) {
-    .hidden-500 {
-        display: none !important;
-    }
-    .table-500 {
-        font-size: 12px !important;
-    }
-}
-
 @media (min-width: 768px) and (max-width: 1000px) {
-   .under-navbar {
-       margin-top: 100px !important;
-   }
+    .under-navbar {
+        margin-top: 100px !important;
+    }
 }
 
 .under-navbar {
-       max-width: 100% !important;
-   }
+    max-width: 100% !important;
+}
 
 dl {
     width: 100%;
@@ -173,25 +164,45 @@ dd {
     width: 50%;
     /* adjust the width; make sure the total of both is 100% */
     background: #eaeaea;
-    padding : 4px 0;
+    padding: 4px 0;
     margin: 4px 0;
 }
 
 .badge-danger {
-  background-color: #d43f3a;
+    background-color: #d43f3a;
 }
+
 .badge-warning {
-background-color: #d58512;
+    background-color: #d58512;
 }
 
 .badge-success {
-background-color: #398439;
+    background-color: #398439;
 }
 
 .badge-info {
-background-color: #269abc;
+    background-color: #269abc;
 }
 
+.badge-primary {
+    background-color: #3f69bc;
+}
 .badge-inverse {
-background-color: #333333;
+    background-color: #333333;
+}
+
+/*Table*/
+@media (max-width: 500px) {
+    .hidden-500 {
+        display: none !important;
+    }
+
+    .table-500 {
+        font-size: 12px !important;
+    }
+}
+
+.mobile-table {
+    table-layout: fixed;
+    word-wrap: break-word;
 }

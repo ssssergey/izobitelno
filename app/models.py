@@ -31,14 +31,16 @@ class OrganizationModel(EndpointsModel):
     tags = ndb.StringProperty(repeated=True)
     price = ndb.IntegerProperty(default=0)
     size = ndb.IntegerProperty(default=2)
-    high_quality = ndb.BooleanProperty(default=False)
-    delivery = ndb.BooleanProperty(default=False)
     delivery_terms = ndb.StringProperty()
     working_hours = ndb.StringProperty()
-    daynight = ndb.BooleanProperty(default=False)
     assortiment = ndb.PickleProperty()
     internet_site = ndb.StringProperty()
     email = ndb.StringProperty()
+    password = ndb.StringProperty()                     # to add
+    daynight = ndb.BooleanProperty(default=False)
+    high_quality = ndb.BooleanProperty(default=False)   # to add
+    delivery = ndb.BooleanProperty(default=False)
+    new = ndb.BooleanProperty(default=False)            # to add
 
 
 class UserModel(EndpointsModel):

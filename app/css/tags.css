@@ -5,7 +5,7 @@
 	http://youtube.com/optikalefxx
 */
 .tags-wrapper {
-	background:white;
+	background:transparent;
 	overflow:hidden;
 	/*background-image: -webkit-linear-gradient(top, rgb(238, 238, 238) 1%, white 15%);*/
 	/*box-shadow: 0 0 5px rgba(0, 0, 0, .3);*/
@@ -51,12 +51,14 @@
     float: left}
 
 .tags-wrapper li.tags-input {
+	background: white;
 	white-space: nowrap;
-	margin: 2px;
+	margin-top: 15px;
 	padding: 0;
-	outline: solid;
-	outline-color: #177199;
+	/*outline: solid;*/
+	/*outline-color: #177199;*/
 	width: 98%;
+	/*height: 50px;*/
 }
 
 .tags-wrapper li input {
@@ -69,12 +71,34 @@
 	width: 100%;
 	margin: 4px;
 }
-.tags-wrapper .autofill-bg {
-	position:relative;
-	top:4px;
-	background-color: white !important;
-	width: 100%;
+
+.autofill-bg {
+	position: relative;
+	margin-top: 10px;
+	margin-left: 13px;
+	background: transparent !important;
+	outline: none;
+	float: left;
+	border: 0px solid;
 }
+
+/*.tags-wrapper .autofill-bg {*/
+	/*position:relative;*/
+	/*top:4px;*/
+	/*background-color: white !important;*/
+	/*width: 100%;*/
+	/*z-index: 100;*/
+/*}*/
+
+/*.autofill-bg {*/
+	/*position: relative;*/
+	/*margin-top: 7px;*/
+	/*margin-left: 13px;*/
+	/*background-color: white !important;*/
+	/*/!*outline: none;*!/*/
+	/*float: left;*/
+	/*border: 0px solid;*/
+/*}*/
 
 .autofill-wrapper {
 	float: left;
@@ -82,15 +106,8 @@
 }
 
 input.tags-secret {
-	outline: none;
-	width: 100% !important;
-}
-.autofill-bg {
-	position: relative;
-	margin-top: 7px;
-	margin-left: 13px;
-	background-color: white !important;
 	/*outline: none;*/
-	float: left;
-	border: 0px solid;
+	width: 100% !important;
+	/*outline: solid !important;*/
+	/*outline-color: #177199 !important;*/
 }

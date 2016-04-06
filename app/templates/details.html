@@ -98,8 +98,8 @@
 
             <div class="col-sm-6" style="margin-top: 20px">
                 <a class="btn btn-info pull-right" href="#" role="button" data-toggle="tooltip" data-placement="top"
-                   title="Нажмите, чтоб повысить им рейтинг">Мне нравится! <span class="badge">{{ org.rating }}</span></a>
-
+                   title="Нажмите, чтоб повысить им рейтинг"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true">
+                    </span>  Мне нравится! <span class="badge">{{ org.rating }}</span></a>
                 <form class="form"
                       action="{{ url_for('new_comment', category=org.category, organization_id=org.id) }}" method="post"
                       role="form">
