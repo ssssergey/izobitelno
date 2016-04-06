@@ -45,7 +45,7 @@ input {
     margin-left: 0px;
     background: transparent !important;
     outline: none;
-    float: left;
+    /*float: left;*/
     border: 0px solid;
 }
 
@@ -54,11 +54,11 @@ button {
     top: 20px
 }
 
-@media (max-width: 500px) {
-    input {
-        width: 80% !important;
-    }
-}
+/*@media (max-width: 500px) {*/
+    /*input {*/
+        /*width: 80% !important;*/
+    /*}*/
+/*}*/
 
 #search {
     position: relative !important;
