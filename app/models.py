@@ -57,3 +57,7 @@ class UserModel(EndpointsModel):
 class TagsModel(EndpointsModel):
     all_tags = ndb.StringProperty(repeated=True)
     uid = ndb.StringProperty()
+
+class SearchWordsModel(EndpointsModel):
+    word = ndb.StringProperty()
+    quantity = ndb.IntegerProperty()

@@ -14,7 +14,12 @@
             {% for post in posts %}
                 <tr>
                     <td>{{ post.content }}</td>
-                    <td>{{ post.author.nickname() }}</td>
+                    {% if post.author %}
+                        <td>{{ post.author.nickname() }}</td>
+                    {% else %}
+                        <td>Аноним</td>
+                    {% endif %}
+                    <td>{{ post.org }}</td>
                     <td>{{ post.category }}</td>
                     <td>{{ momentjs(post.when).fromNow() }}</td>
                     <td>{{ momentjs(post.when).format('LLLL') }}</td>

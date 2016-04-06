@@ -147,6 +147,10 @@ body {
    }
 }
 
+.under-navbar {
+       max-width: 100% !important;
+   }
+
 dl {
     width: 100%;
     overflow: hidden;
@@ -160,8 +164,8 @@ dt {
     width: 50%;
     /* adjust the width; make sure the total of both is 100% */
     background: gainsboro;
-    padding: 0;
-    margin-top: 1px;
+    padding: 4px 0;
+    margin: 4px 0;
 }
 
 dd {
@@ -169,6 +173,25 @@ dd {
     width: 50%;
     /* adjust the width; make sure the total of both is 100% */
     background: #eaeaea;
-    padding : 0;
-    margin-top: 1px
+    padding : 4px 0;
+    margin: 4px 0;
+}
+
+.badge-danger {
+  background-color: #d43f3a;
+}
+.badge-warning {
+background-color: #d58512;
+}
+
+.badge-success {
+background-color: #398439;
+}
+
+.badge-info {
+background-color: #269abc;
+}
+
+.badge-inverse {
+background-color: #333333;
 }

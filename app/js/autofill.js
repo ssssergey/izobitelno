@@ -32,7 +32,7 @@
 			$wrapper = $(self).parent();
 			// make the bg input
 			var color = opts.color || "rgba(17,51,224,1)";
-			var top = opts.top || -1;
+			var top = opts.top || 3;
 			var $bg = $("<input type='text' class='autofill-bg' disabled/>").css({
 				"color":color,
 				"top": top,

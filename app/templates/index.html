@@ -34,11 +34,12 @@
     <div class="row" style="background: #315981; height: 20%; min-height: 100px">
         <div class="col-xs-12 col-sm-6">
             <div style="margin-top: 10px; font-size: 20px"><span style="color:orangered">И</span><span
-                    style="color:white">зопоиск</span></div>
+                    style="color:white">зобильный</span></div>
         </div>
         <div class="col-xs-12 col-sm-6">
             <a style="float: right; margin: 10px" class="btn btn-lg btn-info"
-               href="{{ url_for('show_categories_all') }}" role="button">Категории</a>
+               href="{{ url_for('show_categories_all') }}" role="button" data-toggle="tooltip" data-placement="bottom"
+               title="Ищите по категориям">Категории</a>
         </div>
     </div>
 
@@ -51,7 +52,7 @@
 
                     <form action="{{ url_for('search_result') }}" method="post" accept-charset="utf-8">
                         <input class="form-control" id="search" name="search" type="text" value=""
-                               placeholder="Введите запрос" required autofocus/>
+                               placeholder="Введите запрос" required autofocus style="height: 40px"/>
                         <button type="submit" class="btn btn-primary">Поиск в Изобильном</button>
                     </form>
                 </div>
@@ -59,7 +60,7 @@
         </div>
     </div>
 
-    <div class="row" style="background: #DFDFDF; padding-top: 10px; bottom: 0">
+    <div class="row" style="background: #DFDFDF; padding: 10px 0 20px 0; bottom: 0">
         <div class="col-sm-6">
             <ul>
                 <a href="{{ url_for('show_categories_all') }}">
@@ -103,6 +104,12 @@
     {#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>#}
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    {#    Скрипт для tooltip#}
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
 </div>
 </body>
 

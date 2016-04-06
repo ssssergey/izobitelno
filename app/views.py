@@ -8,9 +8,10 @@ from google.appengine.api import memcache
 
 from flask import render_template, redirect, flash, url_for, request
 from app import app
-from models import CommentModel, OrganizationModel, TagsModel
+from models import CommentModel, OrganizationModel, TagsModel, SearchWordsModel
 from flask.ext.wtf import Form
 from wtforms import StringField, FloatField, TextAreaField, IntegerField, BooleanField, widgets
+from wtforms.fields.html5 import TelField
 from wtforms.validators import DataRequired, NumberRange
 from app.data import categories
 
@@ -23,7 +24,8 @@ class OrganizationForm(Form):
     title = StringField(default=u"Без названия")
     adres = StringField(default=u"")
     adres_details = StringField(default=u"")
-    phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
+    phonenumber = TelField(render_kw={"placeholder": u"(999) 999-9999"})
+    # phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
     phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
     rating = IntegerField(widget=widgets.Input(input_type="tel"), default=0)
     owner = StringField(render_kw={"placeholder": u"Иван Иванович"})
@@ -84,6 +86,13 @@ def search_result():
         keyword = request.args.get('category_rus')
     elif request.method == 'POST':
         keyword = request.form.get('search')
+        word = SearchWordsModel.query(SearchWordsModel.word == keyword.lower().strip()).get()
+        if word:
+            word.quantity = word.quantity + 1
+            word.put()
+        else:
+            word = SearchWordsModel(word = keyword.lower().strip(), quantity = 1)
+            word.put()
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
     return render_template("search_result.html", posts=json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
                            categories=categories, keyword=keyword)
@@ -305,6 +314,13 @@ class CommentForm(Form):
 @app.route('/comments/get_all_comments')
 def get_all_comments():
     posts = CommentModel.query().order(-CommentModel.when)
+    for post in posts:
+        org = OrganizationModel.get_by_id(int(post.organization_id))
+        if org:
+            org_name = org.title
+        else:
+            org_name = u'Неизвестно'
+        post.org = org_name
     return render_template('get_all_comments.html', posts=posts, categories=categories)
 
 

@@ -7,12 +7,20 @@
             <div class="col-sm-12">
                 {% set posts_count = posts|length %}
                 {% if posts_count == 0 %}
-                    <h2 align="center">По Вашему запросу <strong>"{{ keyword }}"</strong> ничего не найдено, но мы уже
-                        работаем на тем,
-                        чтобы найти в Изобильном <strong>{{ keyword }}</strong> для Вас.</h2>
+                    <h2 align="center">По Вашему запросу <span class="label label-primary">{{ keyword }}
+                    </span> ничего не найдено, но мы уже работаем на тем,чтобы найти в Изобильном
+                        <span class="label label-primary">{{ keyword }}</span> для Вас.</h2>
                 {% else %}
-                    <h2 align="center">По Вашему запросу <strong>"{{ keyword }}"</strong> найдено {{ posts|length }}
-                        варианта(ов).</h2>
+                    <h2 align="center">По Вашему запросу <span class="label label-primary">{{ keyword }}
+                    </span> найдено вариантов: <span class="label label-danger">{{ posts|length }}</span>.</h2>
+                    <div class="well well-sm">
+                        <h4 align="center"><strong>Если Вы зашли с телефона, то знайте:</strong></h4>
+
+                        <p align="center">- номера телефонов на сайте кликабельны. Звоните в два нажатия!</p>
+
+                        <p align="center">- карта активая, поэтому, чтобы ее пролистать, проводите по самому краю
+                            экрана.</p>
+                    </div>
                 {% endif %}
                 {% set post_with_adress = [] %}
                 {% for post in posts %}
@@ -21,7 +29,7 @@
                     {% endif %}
                 {% endfor %}
                 {% if post_with_adress %}
-                    <h4 align="center"><strong>Полный список</strong> смотрите в таблице ниже.</h4>
+                    <h4 align="center"><strong>Полный список</strong> результата поиска смотрите в таблице ниже.</h4>
                     <div class="row" id="wrapper">
                         <div id="map">
                             Google Maps
@@ -41,7 +49,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="row">
+        <div class="row" style="max-width: 100%">
             <table class="table table-striped">
                 <tr class="table-500">
                     <th>Назв.</th>
@@ -49,13 +57,23 @@
                     <th class="hidden-500">Категория</th>
                     <th>Тел.м.</th>
                     <th>Тел.г.</th>
-                    <th class="hidden-500">Когда создан</th>
-                    <th>Тел.г.</th>
+                    <th class="hidden-500">Дата создания</th>
                     <th></th>
                 </tr>
                 {% for post in posts %}
                     <tr class="table-500">
-                        <td style="max-width: 10%">{{ post.title }}</td>
+                        <td>
+                            {{ post.title }}
+                            {% if post.daynight %}
+                                <span class="badge badge-danger" data-toggle="tooltip" data-placement="top" title="Круглосуточно">24ч</span>
+                            {% endif %}
+                            {% if post.delivery %}
+                                <span class="badge badge-success" aria-hidden="false" data-toggle="tooltip"
+                                      data-placement="top" title="Доставка">
+                                    <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                                </span>
+                            {% endif %}
+                        </td>
                         {% if post.adres %}
                             {% set adres_short = post.adres.split(', Изобильный')[0] %}
                         {% else %}
@@ -64,15 +82,17 @@
                         <td style="max-width: 10%">{{ adres_short }}</td>
                         <td class="hidden-500">{{ post.category }}</td>
                         <td>
-                            {% set comma = joiner(",") %}
+                            {% set comma = joiner(", ") %}
                             {% for number in post.phonenumber %}
                                 {{ comma() }}<a href="tel: 8{{ number }}">{{ number }}</a>
                             {% endfor %}
                         </td>
                         <td>
-                            {% set comma = joiner(",") %}
+                            {% set comma = joiner(", ") %}
                             {% for number in post.phonenumber_static %}
-                                {{ comma() }}<a href="tel: 886545{{ number }}">{{ number }}</a>
+                                {{ comma() }}<a href="tel: 886545{{ number }}">
+                                <nobr>{{ number }}</nobr>
+                            </a>
                             {% endfor %}
                         </td>
                         <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>
@@ -86,5 +106,10 @@
             </table>
         </div>
     </div>
-
+    {#    Скрипт для tooltip#}
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
 {% endblock %}

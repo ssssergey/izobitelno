@@ -11,13 +11,13 @@
                         <div id="map">
                             Google Maps
                         </div>
-                    <div id="find_by_adres" style="margin-left: 10px">
-                        <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
-                        <input id="submit" type="button" value="Искать">
-                    </div>
-                    <div id="gps_button" style="margin-left: 10px">
-                        <input id="my_location_button" type="button" value="Определить по GPS">
-                    </div>
+                        <div id="find_by_adres" style="margin-left: 10px">
+                            <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
+                            <input id="submit" type="button" value="Искать">
+                        </div>
+                        <div id="gps_button" style="margin-left: 10px">
+                            <input id="my_location_button" type="button" value="Определить по GPS">
+                        </div>
                     </div>
                     <div id="accuracy"></div>
                     {% include 'base_map.html' %}
@@ -46,9 +46,11 @@
                             {% if org.phonenumber|join(", ") %}
                                 <dt>Телефон (моб.)</dt>
                                 <dd>
-                                    {% set comma = joiner(",") %}
+                                    {% set comma = joiner(", ") %}
                                     {% for number in org.phonenumber %}
-                                        {{ comma() }}<a href="tel: 8{{number }}">{{ number }}</a>
+                                        {{ comma() }}<a href="tel: 8{{ number }}">
+                                        <nobr>{{ number }}</nobr>
+                                    </a>
                                     {% endfor %}
                                 </dd>
                             {% endif %}
@@ -56,9 +58,11 @@
                             {% if org.phonenumber_static|join(", ") %}
                                 <dt>Телефон (гор.)</dt>
                                 <dd>
-                                    {% set comma = joiner(",") %}
+                                    {% set comma = joiner(", ") %}
                                     {% for number in org.phonenumber_static %}
-                                        {{ comma() }}<a href="tel: 886545{{number }}">{{ number }}</a>
+                                        {{ comma() }}<a href="tel: 886545{{ number }}">
+                                        <nobr>{{ number }}</nobr>
+                                    </a>
                                     {% endfor %}
                                 </dd>
                             {% endif %}
@@ -78,10 +82,10 @@
                                 <dt>Режим работы</dt>
                                 <dd>{{ org.working_hours }}</dd>
                             {% endif %}
-{#                            <dt>Дата добавления</dt>#}
-{#                            <dd>{{ momentjs(org.when_added).fromNow() }}</dd>#}
-{#                            <dt>Дата изменения</dt>#}
-{#                            <dd>{{ momentjs(org.when_modified).fromNow() }}</dd>#}
+                            {#                            <dt>Дата добавления</dt>#}
+                            {#                            <dd>{{ momentjs(org.when_added).fromNow() }}</dd>#}
+                            {#                            <dt>Дата изменения</dt>#}
+                            {#                            <dd>{{ momentjs(org.when_modified).fromNow() }}</dd>#}
                             <dt>Рейтинг</dt>
                             <dd>{{ org.rating }}</dd>
                         </dl>
@@ -92,12 +96,18 @@
                 </div>
             </div>
 
-            <div class="col-sm-6">
-                <form class="form" style="margin-top: 20px"
+            <div class="col-sm-6" style="margin-top: 20px">
+                <a class="btn btn-info pull-right" href="#" role="button" data-toggle="tooltip" data-placement="top"
+                   title="Нажмите, чтоб повысить им рейтинг">Мне нравится! <span class="badge">{{ org.rating }}</span></a>
+
+                <form class="form"
                       action="{{ url_for('new_comment', category=org.category, organization_id=org.id) }}" method="post"
                       role="form">
                     <div class="form-group" align="center">
-                        <label style="font-size: 20px" for="comment">Какой информации не хватает на этой странице?</label>
+                        <label style="font-size: 20px" for="comment">
+                            Какой информации не хватает на этой странице?<br>
+                            Или может быть представленная информация неверна?
+                        </label>
                         <input type="text" id="comment" name="comment" class="form-control"
                                placeholder="Ваш комментарий" required>
                         <input type="hidden" name="category" class="form-control" value={{ org.category }}>
@@ -161,6 +171,12 @@
                 all_comments();
             });
         });
+    </script>
+{#    Скрипт для tooltip#}
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
     </script>
 
 {% endblock %}

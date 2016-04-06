@@ -24,7 +24,7 @@ categories = [
               u'Товары для детей',u'Цветы',u'Электроника']},
     {'eng_title':'leisure',
     'rus_title':u'Досуг',
-    'icon':"glyphicon glyphicon-send",
+    'icon':"glyphicon glyphicon-leaf",
     'categs':[u'Тренажерный (фитнес) зал', u'Бег', u'Кафе и бары', u'Баня и сауна',u'Командный спорт',u'Бильярд']},
     {'eng_title':'callable',
     'rus_title':u'Нанять для работы',
