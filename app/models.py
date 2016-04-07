@@ -12,7 +12,7 @@ class CommentModel(EndpointsModel):
     rude = ndb.BooleanProperty(default=False)
     task = ndb.BooleanProperty(default=False)
     done = ndb.BooleanProperty(default=False)
-    anonymous = ndb.BooleanProperty(default=False)
+    from_contacts = ndb.BooleanProperty(default=False)
 
 class OrganizationModel(EndpointsModel):
     category = ndb.StringProperty(default=u'Другие')

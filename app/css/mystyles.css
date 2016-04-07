@@ -29,10 +29,10 @@ body {
 }
 
 .navbar-inverse .navbar-nav > .active > a,
-.navbar-inverse .navbar-nav > .active > a:hover,
-.navbar-inverse .navbar-nav > .active > a:focus {
-color: #fff;
-background: #3992a3;
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > li > a:focus {
+    color: #fff;
+    background: #406fa3;
 }
 
 .navbar-inverse .navbar-nav > li > a {
@@ -187,6 +187,7 @@ dd {
 .badge-primary {
     background-color: #3f69bc;
 }
+
 .badge-inverse {
     background-color: #333333;
 }

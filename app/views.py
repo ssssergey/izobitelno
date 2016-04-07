@@ -31,17 +31,17 @@ class GaeEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-@app.route('/details/<int:id>')
-def details(id):
-    org = OrganizationModel.get_by_id(int(id))
-    return render_template("details.html", org=org, posts=json.loads(json.dumps([org], cls=GaeEncoder)),
-                           categories=categories)
-
 
 @app.route('/')
 def index():
     all_tags = get_all_tags()
     return render_template("index.html", all_tags=','.join(all_tags))
+
+@app.route('/details/<int:id>')
+def details(id):
+    org = OrganizationModel.get_by_id(int(id))
+    return render_template("details.html", org=org, posts=json.loads(json.dumps([org], cls=GaeEncoder)),
+                           categories=categories)
 
 
 @app.route('/categories')
@@ -324,7 +324,7 @@ def get_comments_by_org():
 #### ADMIN FUNCTIONS
 ### Edit tags in entities
 
-@app.route('/secret_edit_tags', methods=['GET', 'POST'])
+@app.route('/admin/secret_edit_tags', methods=['GET', 'POST'])
 def secret_edit_tags():
     if users.is_current_user_admin():
         form1 = DeleteTagForm(prefix="form1")
@@ -422,7 +422,7 @@ def delete_some_tags(tag_to_delete):
 
 ### Get all tags list into template to edit
 
-@app.route('/secret_get_allTags', methods=['GET', 'POST'])
+@app.route('/admin/secret_get_allTags', methods=['GET', 'POST'])
 def secret_get_allTags():
     if users.is_current_user_admin():
         form = GetAllTagsForm()
@@ -445,7 +445,7 @@ def secret_get_allTags():
 ### Find entity by phone, if not go to new_org with this phone
 
 
-@app.route('/secret_query_by_phonenumber', methods=['GET', 'POST'])
+@app.route('/admin/secret_query_by_phonenumber', methods=['GET', 'POST'])
 def secret_query_by_phonenumber():
     if users.is_current_user_admin():
         formS = SecretPhoneForm()
