@@ -40,7 +40,7 @@ class OrganizationModel(EndpointsModel):
     daynight = ndb.BooleanProperty(default=False)
     high_quality = ndb.BooleanProperty(default=False)   # to add
     delivery = ndb.BooleanProperty(default=False)
-    new = ndb.BooleanProperty(default=False)            # to add
+    new = ndb.BooleanProperty(default=False)
 
 
 class UserModel(EndpointsModel):

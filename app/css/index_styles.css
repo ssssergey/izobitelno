@@ -41,11 +41,11 @@ input {
 
 .autofill-bg {
     position: relative;
-    margin-top: -20px;
+    margin-top: -15px;
     margin-left: 0px;
     background: transparent !important;
     outline: none;
-    /*float: left;*/
+    float: left;
     border: 0px solid;
 }
 

@@ -9,40 +9,9 @@ from google.appengine.api import memcache
 from flask import render_template, redirect, flash, url_for, request
 from app import app
 from models import CommentModel, OrganizationModel, TagsModel, SearchWordsModel
-from flask.ext.wtf import Form
-from wtforms import StringField, FloatField, TextAreaField, IntegerField, BooleanField, widgets
-from wtforms.fields.html5 import TelField
-from wtforms.validators import DataRequired, NumberRange
+from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, GetAllTagsForm, SecretPhoneForm
+
 from app.data import categories
-
-# categories_all = {}
-# for i_dict in categories:
-#     categories_all.update(i_dict['categs'])
-
-class OrganizationForm(Form):
-    category = StringField(default=u"")
-    title = StringField(default=u"Без названия")
-    adres = StringField(default=u"")
-    adres_details = StringField(default=u"")
-    phonenumber = TelField(render_kw={"placeholder": u"(999) 999-9999"})
-    # phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
-    phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
-    rating = IntegerField(widget=widgets.Input(input_type="tel"), default=0)
-    owner = StringField(render_kw={"placeholder": u"Иван Иванович"})
-    lat = FloatField(default=0)
-    lng = FloatField(default=0)
-    description = TextAreaField()
-    tags = StringField()
-    price = IntegerField(widget=widgets.Input(input_type="tel"), default=0)
-    size = IntegerField(u'Размер объекта(1-5)', widget=widgets.Input(input_type="tel"), default=2,
-                        validators=[NumberRange(message=u'От 1 до 5', min=1, max=5)])
-    high_quality = BooleanField(default=False)
-    delivery = BooleanField(default=False)
-    delivery_terms = StringField()
-    working_hours = StringField()
-    internet_site = StringField()
-    daynight = BooleanField(default=False)
-
 
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -91,7 +60,7 @@ def search_result():
             word.quantity = word.quantity + 1
             word.put()
         else:
-            word = SearchWordsModel(word = keyword.lower().strip(), quantity = 1)
+            word = SearchWordsModel(word=keyword.lower().strip(), quantity=1)
             word.put()
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
     return render_template("search_result.html", posts=json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
@@ -285,9 +254,6 @@ def get_all_tags(update=False):
     return all_tags
 
 
-
-
-
 @app.route('/contacts')
 def contacts():
     return render_template("contacts.html", categories=categories)
@@ -307,9 +273,6 @@ def get_nearby_objects(lat, lon):
 
 
 ######## COMMENTS ###########
-class CommentForm(Form):
-    content = TextAreaField('Content', validators=[DataRequired(message=u'Обязятельное поле')])
-
 
 @app.route('/comments/get_all_comments')
 def get_all_comments():
@@ -338,6 +301,7 @@ def new_comment():
         return redirect(url_for('get_all_comments'))
     return render_template('new_comment.html', form=form, categories=categories)
 
+
 ## For API
 @app.route('/add_comment', methods=['POST'])
 def add_comment():
@@ -359,12 +323,6 @@ def get_comments_by_org():
 
 #### ADMIN FUNCTIONS
 ### Edit tags in entities
-class DeleteTagForm(Form):
-    tag = StringField(default=u"")
-
-class ReplaceTagForm(Form):
-    tag_del = StringField(validators=[DataRequired(message=u'Обязятельное поле')])
-    tag_add = StringField(validators=[DataRequired(message=u'Обязятельное поле')])
 
 @app.route('/secret_edit_tags', methods=['GET', 'POST'])
 def secret_edit_tags():
@@ -378,21 +336,23 @@ def secret_edit_tags():
                 flash(u'Удаление прошло успешно')
                 redirect(url_for('secret_edit_tags'))
             elif form2.validate_on_submit() and request.form['btn'] == u'Заменить':
-                replace_some_tags(form2.tag_del.data.strip(),form2.tag_add.data.strip())
+                replace_some_tags(form2.tag_del.data.strip(), form2.tag_add.data.strip())
                 flash(u'Замена прошла успешно')
                 redirect(url_for('secret_edit_tags'))
             elif form3.validate_on_submit() and request.form['btn'] == u'Дополнить':
-                append_some_tags(form3.tag_del.data.strip(),form3.tag_add.data.strip())
+                append_some_tags(form3.tag_del.data.strip(), form3.tag_add.data.strip())
                 flash(u'Дополнение прошло успешно')
                 redirect(url_for('secret_edit_tags'))
-            # elif form1.validate_on_submit() and request.form['btn'] == u'Заполнить':
-            #     populate_empty_tags()
-            #     flash(u'Заполнение прошло успешно')
-            #     redirect(url_for('secret_edit_tags'))
+                # elif form1.validate_on_submit() and request.form['btn'] == u'Заполнить':
+                #     populate_empty_tags()
+                #     flash(u'Заполнение прошло успешно')
+                #     redirect(url_for('secret_edit_tags'))
         return render_template('secret_edit_tags.html', form1=form1, form2=form2, form3=form3)
     else:
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
+
+
 # def populate_empty_tags():
 #     selected_orgs = OrganizationModel.query().fetch()
 #     updated = []
@@ -421,6 +381,7 @@ def append_some_tags(tag_to_find, tag_to_add):
         all_tags[0].put()
     get_all_tags(True)
 
+
 def replace_some_tags(tag_to_delete, tag_to_add):
     # replace in orgs
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_delete.lower().strip()).fetch()
@@ -440,6 +401,7 @@ def replace_some_tags(tag_to_delete, tag_to_add):
         pass
     get_all_tags(True)
 
+
 def delete_some_tags(tag_to_delete):
     # Delete form orgs
     selected_orgs = OrganizationModel.query(OrganizationModel.tags == tag_to_delete.lower().strip()).fetch()
@@ -457,9 +419,8 @@ def delete_some_tags(tag_to_delete):
         pass
     get_all_tags(True)
 
+
 ### Get all tags list into template to edit
-class GetAllTagsForm(Form):
-    tags = StringField()
 
 @app.route('/secret_get_allTags', methods=['GET', 'POST'])
 def secret_get_allTags():
@@ -480,10 +441,8 @@ def secret_get_allTags():
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
 
+
 ### Find entity by phone, if not go to new_org with this phone
-class SecretPhoneForm(Form):
-    phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
-    phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
 
 
 @app.route('/secret_query_by_phonenumber', methods=['GET', 'POST'])
