@@ -7,6 +7,7 @@ from google.appengine.ext import ndb
 from google.appengine.api import memcache
 
 from flask import render_template, redirect, flash, url_for, request
+from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app
 from models import CommentModel, OrganizationModel, TagsModel, SearchWordsModel
 from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, GetAllTagsForm, SecretPhoneForm

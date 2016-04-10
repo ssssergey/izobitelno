@@ -21,6 +21,66 @@
                         <p align="center">- карта активая, поэтому, чтобы ее пролистать, проводите по самому краю
                             экрана.</p>
                     </div>
+                    <div class="row" style="max-width: 100%">
+                        <table class="table table-striped mobile-table">
+                            <tr class="table-500">
+                                <th>Назв.</th>
+                                <th>Адрес</th>
+                                <th class="hidden-500">Категория</th>
+                                <th>Тел.м.</th>
+                                <th>Тел.г.</th>
+                                <th class="hidden-500">Дата создания</th>
+                                <th></th>
+                            </tr>
+                            {% for post in posts %}
+                                <tr class="table-500">
+                                    <td>
+                                        {{ post.title }}
+                                        {% if post.daynight %}
+                                            <span class="badge badge-success" data-toggle="tooltip" data-placement="top"
+                                                  title="Круглосуточно">24ч</span>
+                                        {% endif %}
+                                        {% if post.delivery %}
+                                            <span class="badge badge-success" aria-hidden="false" data-toggle="tooltip"
+                                                  data-placement="top" title="Доставка">
+                                    <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                                </span>
+                                        {% endif %}
+                                    </td>
+                                    {% if post.adres %}
+                                        {% set adres_short = post.adres.split(', Изобильный')[0] %}
+                                    {% else %}
+                                        {% set adres_short = "Отсутствует" %}
+                                    {% endif %}
+                                    <td style="max-width: 10%">{{ adres_short }}</td>
+                                    <td class="hidden-500">{{ post.category }}</td>
+                                    <td>
+                                        {% set comma = joiner(", ") %}
+                                        {% for number in post.phonenumber %}
+                                            {{ comma() }}<a href="tel: 8{{ number }}">{{ number }}</a>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% set comma = joiner(", ") %}
+                                        {% for number in post.phonenumber_static %}
+                                            {{ comma() }}<a href="tel: 886545{{ number }}">
+                                            <nobr>{{ number }}</nobr>
+                                        </a>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>
+                                    <td>
+                                        <a href='/details/{{ post.id }}'>
+                                            <span class="badge badge-primary"><nobr>Подробнее</nobr></span>
+                                        </a><br>
+                                        <a href='{{ url_for('edit_org', id = post.id, keyword=keyword) }}'>Редакт.</a><br>
+                                        <a href='/del_org/{{ post.id }}'
+                                           onclick="return confirm('Вы уверены?')">Удалить</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
                 {% endif %}
                 {% set post_with_adress = [] %}
                 {% for post in posts %}
@@ -29,7 +89,6 @@
                     {% endif %}
                 {% endfor %}
                 {% if post_with_adress %}
-                    <h4 align="center"><strong>Полный список</strong> результата поиска смотрите в таблице ниже.</h4>
                     <div class="row" id="wrapper">
                         <div id="map">
                             Google Maps
@@ -49,64 +108,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="row" style="max-width: 100%">
-            <table class="table table-striped mobile-table">
-                <tr class="table-500">
-                    <th>Назв.</th>
-                    <th>Адрес</th>
-                    <th class="hidden-500">Категория</th>
-                    <th>Тел.м.</th>
-                    <th>Тел.г.</th>
-                    <th class="hidden-500">Дата создания</th>
-                    <th></th>
-                </tr>
-                {% for post in posts %}
-                    <tr class="table-500">
-                        <td>
-                            {{ post.title }}
-                            {% if post.daynight %}
-                                <span class="badge badge-success" data-toggle="tooltip" data-placement="top" title="Круглосуточно">24ч</span>
-                            {% endif %}
-                            {% if post.delivery %}
-                                <span class="badge badge-success" aria-hidden="false" data-toggle="tooltip"
-                                      data-placement="top" title="Доставка">
-                                    <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
-                                </span>
-                            {% endif %}
-                        </td>
-                        {% if post.adres %}
-                            {% set adres_short = post.adres.split(', Изобильный')[0] %}
-                        {% else %}
-                            {% set adres_short = "Отсутствует" %}
-                        {% endif %}
-                        <td style="max-width: 10%">{{ adres_short }}</td>
-                        <td class="hidden-500">{{ post.category }}</td>
-                        <td>
-                            {% set comma = joiner(", ") %}
-                            {% for number in post.phonenumber %}
-                                {{ comma() }}<a href="tel: 8{{ number }}">{{ number }}</a>
-                            {% endfor %}
-                        </td>
-                        <td>
-                            {% set comma = joiner(", ") %}
-                            {% for number in post.phonenumber_static %}
-                                {{ comma() }}<a href="tel: 886545{{ number }}">
-                                <nobr>{{ number }}</nobr>
-                            </a>
-                            {% endfor %}
-                        </td>
-                        <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>
-                        <td>
-                            <a href='/details/{{ post.id }}'>
-                                <span class="badge badge-primary"><nobr>Подробнее</nobr></span>
-                            </a><br>
-                            <a href='{{ url_for('edit_org', id = post.id, keyword=keyword) }}'>Редакт.</a><br>
-                            <a href='/del_org/{{ post.id }}' onclick="return confirm('Вы уверены?')">Удалить</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
+
     </div>
     {#    Скрипт для tooltip#}
     <script>
