@@ -7,19 +7,19 @@
             <div class="col-sm-6" align="center">
                 <h4>{{ org.title }}</h4>
                 {% if org.location.lat %}
-                    <div class="row" id="wrapper">
+                    <div class="row well" id="wrapper">
                         <div id="map">
                             Google Maps
                         </div>
-                        <div id="find_by_adres" style="margin-left: 10px">
+                        <div id="gps_button_group">
                             <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
-                            <input id="submit" type="button" value="Искать">
+                            <input id="submit_address" type="button" value="Искать">
+                            <input id="gps_input" type="button" value="Определить по GPS">
+                            <input id="zoomin_input" type="button" value="Приблизить">
                         </div>
-                        <div id="gps_button" style="margin-left: 10px">
-                            <input id="my_location_button" type="button" value="Определить по GPS">
-                        </div>
+                        <div id="accuracy" style="color: red"></div>
                     </div>
-                    <div id="accuracy"></div>
+
                     {% include 'base_map.html' %}
                 {% endif %}
                 <div class="panel panel-primary">
@@ -97,12 +97,14 @@
             </div>
 
             <div class="col-sm-6" style="margin-top: 20px">
-                <a class="btn btn-info pull-right" href="#" role="button" data-toggle="tooltip" data-placement="top"
-                   title="Нажмите, чтоб повысить им рейтинг"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true">
-                    </span>  Мне нравится! <span class="badge">{{ org.rating }}</span></a>
-                <form class="form"
-                      action="{{ url_for('new_comment', category=org.category, organization_id=org.id) }}" method="post"
-                      role="form">
+                <a id="like" class="btn btn-info pull-right" href="#" role="button" data-toggle="tooltip"
+                   data-placement="top" title="Нажмите, чтоб повысить им рейтинг"><span
+                        class="glyphicon glyphicon-thumbs-up"
+                        aria-hidden="true">
+                    </span> Мне нравится! <span id="rating" class="badge">{{ org.rating }}</span>
+                </a>
+
+                <form class="form" action="#" method="post" role="form">
                     <div class="form-group" align="center">
                         <label style="font-size: 20px" for="comment">
                             Какой информации не хватает на этой странице?<br>
@@ -112,13 +114,17 @@
                                placeholder="Ваш комментарий" required>
                         <input type="hidden" name="category" class="form-control" value={{ org.category }}>
                         <input type="hidden" name="organization_id" class="form-control" value={{ org.id }}>
-                        <button class="btn btn-lg btn-primary btn-block" type="button">Отправить</button>
+                        <button id="comment-button" class="btn btn-lg btn-primary btn-block" type="button">Отправить
+                        </button>
                     </div>
                 </form>
 
                 <div class="row">
-                    <p id="new_comment"></p>
-                    <span id="comments"></span>
+                    <div class="col-sm-12">
+                        <h4 id="new_comment"></h4>
+
+                        <div id="comments"></div>
+                    </div>
                 </div>
 
             </div>
@@ -128,33 +134,8 @@
     <script>
         $(document).ready(function () {
             all_comments();
-        });
-
-        var id = {{ org.id | safe }};
-
-        var all_comments = function () {
-            $.ajax({
-                url: '/get_comments_by_org',
-                data: {'organization_id': id},
-                type: 'GET',
-                success: function (response) {
-                    console.log(response);
-                    var data = JSON.parse(response);
-                    var string_comments = '';
-                    for (var i = 0; i < data.comments.length; i++) {
-                        string_comments += data.comments[i].content + '<br>'
-                    }
-                    document.getElementById("comments").innerHTML = string_comments;
-                },
-                error: function (error) {
-                    console.log(error);
-                }
-            })
-        };
-
-        $(function () {
-            $('button').click(function () {
-                {#        var comment = $('#txtUsername').val();#}
+            $('#comment-button').click(function (event) {
+                event.preventDefault();
                 $.ajax({
                     url: '/add_comment',
                     data: $('form').serialize(),
@@ -163,16 +144,88 @@
                         console.log(response);
                         var data = JSON.parse(response);
                         document.getElementById("new_comment").innerHTML = data.comment;
+                        all_comments();
                     },
                     error: function (error) {
                         console.log(error);
                     }
                 });
-                all_comments();
+                {#                all_comments();#}
             });
         });
+
+        var id = {{ org.id | safe }};
+        var all_comments = function () {
+            $.ajax({
+                url: '/get_comments_by_org',
+                data: {'organization_id': id},
+                type: 'GET',
+                success: function (response) {
+                    console.log(response);
+                    var data = JSON.parse(response);
+                    var news = document.getElementById("comments");
+                    news.innerHTML = '';
+                    for (var i = 0; i < data.comments.length; i++) {
+                        var h5 = document.createElement("h5");
+                        h5.innerHTML = data.comments[i].content + '(' + moment.unix(data.comments[i].when).format('LLL') + ')';
+                        news.appendChild(h5);
+                        var p = document.createElement("p");
+                        p.innerHTML = data.comments[i].author;
+                        p.align = 'right';
+                        news.appendChild(p);
+                    }
+
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            })
+        };
+
+        {#        $(function () {#}
+        {#            $('#comment-button').click(function (event) {#}
+        {#                event.preventDefault();#}
+        {#                $.ajax({#}
+        {#                    url: '/add_comment',#}
+        {#                    data: $('form').serialize(),#}
+        {#                    type: 'POST',#}
+        {#                    success: function (response) {#}
+        {#                        console.log(response);#}
+        {#                        var data = JSON.parse(response);#}
+        {#                        document.getElementById("new_comment").innerHTML = data.comment;#}
+        {#                    },#}
+        {#                    error: function (error) {#}
+        {#                        console.log(error);#}
+        {#                    }#}
+        {#                });#}
+        {#                all_comments();#}
+        {#            });#}
+        {#        });#}
+
+        $(function () {
+            $('#like').click(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    url: '/like',
+                    data: {organization_id: id},
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response);
+                        var data = JSON.parse(response);
+                        if (data.rating) {
+                            document.getElementById("rating").innerHTML = data.rating;
+                        }
+
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+
     </script>
-{#    Скрипт для tooltip#}
+    {#    Скрипт для tooltip#}
     <script>
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()

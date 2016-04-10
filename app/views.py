@@ -6,10 +6,10 @@ from google.appengine.api import users, datastore_types
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
 
-from flask import render_template, redirect, flash, url_for, request
+from flask import render_template, redirect, flash, url_for, request, g, abort
 from flask.ext.login import login_user, logout_user, current_user, login_required
-from app import app
-from models import CommentModel, OrganizationModel, TagsModel, SearchWordsModel
+from app import app, lm
+from models import CommentModel, OrganizationModel, TagsModel, SearchWordsModel, UserModel
 from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, GetAllTagsForm, SecretPhoneForm
 
 from app.data import categories
@@ -31,6 +31,39 @@ class GaeEncoder(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, obj)
 
+#Login->
+@app.before_request
+def before_request():
+    g.user = current_user
+
+@lm.user_loader
+def load_user(id):
+    return UserModel.get_by_id(int(id))
+
+@lm.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('login', next = request.url))
+    return render_template('401.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    google_user = users.get_current_user()
+    if google_user:
+        flask_user = UserModel.query(UserModel.google_user == google_user).get()
+        if not flask_user:
+            flask_user = UserModel(google_user=google_user, nickname = google_user.nickname())
+            flask_user.put()
+        login_user(flask_user)
+        flash(u'Вы успешно залогинились по аккунту Google!')
+        next = request.args.get('next')
+        return redirect(next or url_for('index'))
+    return redirect(users.create_login_url(request.url))
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+#<-Login
 
 
 @app.route('/')
@@ -279,9 +312,12 @@ def get_nearby_objects(lat, lon):
 def get_all_comments():
     posts = CommentModel.query().order(-CommentModel.when)
     for post in posts:
-        org = OrganizationModel.get_by_id(int(post.organization_id))
-        if org:
-            org_name = org.title
+        if post.organization_id:
+            org = OrganizationModel.get_by_id(int(post.organization_id))
+            if org:
+                org_name = org.title
+            else:
+                org_name = u'Неизвестно'
         else:
             org_name = u'Неизвестно'
         post.org = org_name
@@ -293,9 +329,9 @@ def new_comment():
     form = CommentForm()
     if form.validate_on_submit():
         post = CommentModel(
-            content=request.form['comment'],
-            category=request.form['category'],
-            organization_id=int(request.form['organization_id']),
+            content=request.form['content'],
+            # category=request.form['category'],
+            # organization_id=int(request.form['organization_id']),
             author=users.get_current_user())
         post.put()
         flash(u'Комментарий успешно создан!')
@@ -303,7 +339,7 @@ def new_comment():
     return render_template('new_comment.html', form=form, categories=categories)
 
 
-## For API
+## For Ajax
 @app.route('/add_comment', methods=['POST'])
 def add_comment():
     post = CommentModel(
@@ -320,6 +356,23 @@ def get_comments_by_org():
     comments_org = CommentModel.query(CommentModel.organization_id == int(request.args.get('organization_id'))).order(
         -CommentModel.when).fetch()
     return json.dumps({'status': 'OK', 'comments': comments_org}, cls=GaeEncoder)
+
+@app.route('/like')
+# @login_required
+def like():
+    if current_user.is_authenticated:
+        org_id = int(request.args.get('organization_id'))
+        user = UserModel.get_by_id(int(current_user.id))
+        if org_id in user.liked_orgs:
+            return json.dumps({'status': 'OK', 'repeat': u'Вы уже оценивали данную организацию'}, cls=GaeEncoder)
+        else:
+            user.liked_orgs.append(org_id)
+            user.put()
+            org = OrganizationModel.get_by_id(int(org_id))
+            org.rating += 1
+            org.put()
+            return json.dumps({'status': 'OK', 'rating': org.rating}, cls=GaeEncoder)
+    return json.dumps({'status': 'OK', 'notlogin': [u'Чтобы ставить оценку, вам нужно войти.', url_for('login')]}, cls=GaeEncoder)
 
 
 #### ADMIN FUNCTIONS

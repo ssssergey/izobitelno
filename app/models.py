@@ -44,17 +44,25 @@ class OrganizationModel(EndpointsModel):
 
 
 class UserModel(EndpointsModel):
-    auth_object = ndb.UserProperty(required = True)
-    nickname = ndb.StringProperty(required = True)
+    google_user = ndb.UserProperty()
+    nickname = ndb.StringProperty()
     password = ndb.StringProperty()
-    when_added = ndb.DateTimeProperty(auto_now_add = True)
-    when_last_visit = ndb.DateTimeProperty(auto_now_add = True)
+    when_came = ndb.DateTimeProperty(auto_now_add = True)
+    last_seen = ndb.DateTimeProperty(auto_now_add = True)
     visits = ndb.IntegerProperty()
     modifications = ndb.IntegerProperty()
     contributions = ndb.IntegerProperty()
-    incorrect_actions = ndb.IntegerProperty()
     false_actions = ndb.IntegerProperty()
     rating = ndb.IntegerProperty()
+    wot_access_token = ndb.StringProperty()
+    wot_account_id = ndb.StringProperty()
+    is_authenticated = ndb.BooleanProperty(default=True)
+    is_active = ndb.BooleanProperty(default=True)
+    is_anonymous = ndb.BooleanProperty(default=False)
+    liked_orgs = ndb.IntegerProperty(repeated=True)
+
+    def get_id(self):
+      return self.id
 
 class TagsModel(EndpointsModel):
     all_tags = ndb.StringProperty(repeated=True)

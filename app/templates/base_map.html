@@ -24,18 +24,24 @@
 
         // Listeners
         // Определение своего местоположения. Вызывается функция GetLocation
-        document.getElementById('my_location_button').addEventListener('click', function () {
+        document.getElementById('gps_input').addEventListener('click', function () {
             navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
         });
         // Обработка ввода улицы.
-        document.getElementById('submit').addEventListener('click', function () {
-            geocodeAddress(geocoder, map);
+        document.getElementById('submit_address').addEventListener('click', function () {
+            geocodeAddress(geocoder);
         });
         // Обработка клика по карте - создание маркера.
         map.addListener('click', function (event) {
             geocodeLatLng(event.latLng);
         });
+        // Приближение к точке.
+        document.getElementById('zoomin_input').addEventListener('click', function () {
+            map.setCenter(posts[0].location);
+            map.setZoom(18);
+        });
     }
+
 
 
     function addMarkerstoMap(posts) {
@@ -95,23 +101,30 @@
 
     }
 
-    function geocodeAddress(geocoder, resultsMap) {
+    function geocodeAddress(geocoder) {
         var address = document.getElementById('address').value + ", Изобильный, Ставропольский край, Россия";
         geocoder.geocode({'address': address}, function (results, status) {
             if (status === google.maps.GeocoderStatus.OK) {
-                resultsMap.setCenter(results[0].geometry.location);
+                map.setCenter(results[0].geometry.location);
                 map.setZoom(18);
                 clearNewMarkers();
                 var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                 var marker_new = new google.maps.Marker({
-                    map: resultsMap,
+{#                    map: resultsMap,#}
+                    map: map,
                     icon: image,
                     position: results[0].geometry.location
                 });
                 new_markers_array.push(marker_new);
-                document.getElementById("adres").value = address;
-                document.getElementById("lat").value = results[0].geometry.location.lat();
-                document.getElementById("lng").value = results[0].geometry.location.lng();
+                if (document.getElementById("adres")) {
+                    document.getElementById("adres").value = address;
+                }
+                if (document.getElementById("lat")) {
+                    document.getElementById("lat").value = results[0].geometry.location.lat();
+                }
+                if (document.getElementById("lng")) {
+                    document.getElementById("lng").value = results[0].geometry.location.lng();
+                }
             } else {
                 alert('Поиск не удался: ' + status);
             }
@@ -151,7 +164,7 @@
 
     function GetLocation(location) {
         if (location.coords.accuracy > 15) {
-            $('#accuracy').text("Точность местоопределения очень низкая. Пожалуйста, включите GPS и выйдите на улицу.");
+            $('#accuracy').text("Плохой прием GPS. Включите GPS и выйдите на улицу.");
         } else {
 
             initialLocation = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
