@@ -11,13 +11,13 @@
                         <div id="map">
                             Google Maps
                         </div>
+                        <div id="accuracy" align="center" style="background-color: red;"><strong></strong></div>
                         <div id="gps_button_group">
                             <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
                             <input id="submit_address" type="button" value="Искать">
-                            <input id="gps_input" type="button" value="Определить по GPS">
+                            <input id="gps_input" type="button" value="Определить себя по GPS">
                             <input id="zoomin_input" type="button" value="Приблизить">
                         </div>
-                        <div id="accuracy" style="color: red"></div>
                     </div>
 
                     {% include 'base_map.html' %}
@@ -97,8 +97,16 @@
             </div>
 
             <div class="col-sm-6" style="margin-top: 20px">
-                <a id="like" class="btn btn-info pull-right" href="#" role="button" data-toggle="tooltip"
-                   data-placement="top" title="Нажмите, чтоб повысить им рейтинг"><span
+                <a id="like"
+                   tabindex="0"
+                   class="btn btn-info pull-right"
+                   href="#"
+                   role="button"
+                   data-toggle="popover"
+                   data-trigger="focus"
+                   data-placement="top"
+                   data-container="body">
+                    <span
                         class="glyphicon glyphicon-thumbs-up"
                         aria-hidden="true">
                     </span> Мне нравится! <span id="rating" class="badge">{{ org.rating }}</span>
@@ -129,6 +137,12 @@
 
             </div>
         </div>
+    </div>
+
+    <div id="notlogin" style="display: none;">
+        <a href="{{ url_for("login") }}"><strong>Войти</strong></a>
+        <br>
+        <a href="#"><strong>У меня нет аккаунта</strong></a>
     </div>
 
     <script>
@@ -214,6 +228,34 @@
                         var data = JSON.parse(response);
                         if (data.rating) {
                             document.getElementById("rating").innerHTML = data.rating;
+                            $('#like')
+                                    .popover('destroy')
+                                    .popover({
+{#                                        html: true,#}
+                                        title: 'Вы успешно подняли рейтинг!',
+                                    })
+                                    .popover('show');
+                        }
+                        if (data.repeat) {
+                            $('#like')
+{#                                    .popover('destroy')#}
+                                    .popover({
+{#                                        html: true,#}
+                                        title: 'Голосовать разрешается только один раз!',
+                                        delay: 200
+                                    })
+                                    .popover('show');
+                        }
+                        if (data.notlogin) {
+                            console.log('Вы не вошли');
+                            $('#like')
+                                    .popover('destroy')
+                                    .popover({
+                                        html: true,
+                                        title: 'Чтобы повышать рейтинги, войдите на сайт под аккаунтом!',
+                                        content:$('#notlogin').html(),
+                                    })
+                                    .popover('show');
                         }
 
                     },
@@ -227,9 +269,12 @@
     </script>
     {#    Скрипт для tooltip#}
     <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
-        })
+{#        $(function () {#}
+{#            $('[data-toggle="tooltip"]').tooltip()#}
+{#        })#}
+{#    $(document).ready(function(){#}
+{#      $('[data-toggle="popover"]').popover();#}
+{#    });#}
     </script>
 
 {% endblock %}

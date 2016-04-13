@@ -36,10 +36,12 @@
             geocodeLatLng(event.latLng);
         });
         // Приближение к точке.
-        document.getElementById('zoomin_input').addEventListener('click', function () {
-            map.setCenter(posts[0].location);
-            map.setZoom(18);
-        });
+        if (document.getElementById('zoomin_input')) {
+            document.getElementById('zoomin_input').addEventListener('click', function () {
+                map.setCenter(posts[0].location);
+                map.setZoom(18);
+            });
+        }
     }
 
 
@@ -87,9 +89,11 @@
                         "<div>Изменено: " + moment.unix(post.when_modified).format('LLL') + "</div>" +
                         "</div>" +
                         "<div class='panel-footer'>" + post.category + "</div></div>" +
-                        "<a href='/details/" + post.id + "'>Подробнее</a>" + "<br>" +
+                        "<a href='/details/" + post.id + "'>Подробнее</a>" +
+                        "{% if g.user.is_admin %}" + "<br>" +
                         "<a href='/edit_org/" + post.id + "?keyword=" + keyword + "'>Редактировать</a>" + "<br>" +
-                        "<a href='/del_org/" + post.id + "'>Удалить</a>";
+                        "<a href='/del_org/" + post.id + "'>Удалить</a>"
+                        "{% endif %}";
                 var infowindow1 = new google.maps.InfoWindow({content: content});
                 {#                    infowindow1.setZIndex(10);#}
                 marker1.addListener('click', function () {
@@ -164,7 +168,7 @@
 
     function GetLocation(location) {
         if (location.coords.accuracy > 15) {
-            $('#accuracy').text("Плохой прием GPS. Включите GPS и выйдите на улицу.");
+            $('#accuracy').text("Не удалось определить. Включите GPS - выйдите на улицу (или подойдите к окну) - нажмите на кнопку повторно.");
         } else {
 
             initialLocation = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);

@@ -52,3 +52,7 @@ class GetAllTagsForm(Form):
 class SecretPhoneForm(Form):
     phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
     phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
+
+class RegisterForm(Form):
+    email = StringField(u'Адрес электронной почты', validators=[DataRequired(message=u'Обязятельное поле')])
+    password = StringField(u'Пароль', validators=[DataRequired(message=u'Обязятельное поле')])

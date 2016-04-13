@@ -17,8 +17,6 @@
 
                         <p align="center">- номера телефонов на сайте кликабельны. Звоните в два нажатия!</p>
 
-                        <p align="center">- карта активая, поэтому, чтобы ее пролистать, проводите по самому краю
-                            экрана.</p>
                     </div>
                     <div class="row" style="max-width: 100%">
                         <table class="table table-striped mobile-table">
@@ -71,10 +69,13 @@
                                     <td>
                                         <a href='/details/{{ post.id }}'>
                                             <span class="badge badge-primary"><nobr>Подробнее</nobr></span>
-                                        </a><br>
-                                        <a href='{{ url_for('edit_org', id = post.id, keyword=keyword) }}'>Редакт.</a><br>
-                                        <a href='/del_org/{{ post.id }}'
-                                           onclick="return confirm('Вы уверены?')">Удалить</a>
+                                        </a>
+                                        {% if g.user.is_admin %}
+                                            <br>
+                                            <a href='{{ url_for('edit_org', id = post.id, keyword=keyword) }}'>Редакт.</a><br>
+                                            <a href='/del_org/{{ post.id }}'
+                                               onclick="return confirm('Вы уверены?')">Удалить</a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -88,22 +89,18 @@
                     {% endif %}
                 {% endfor %}
                 {% if post_with_adress %}
-                    <div class="row" id="wrapper">
+                    <div class="row well" id="wrapper">
                         <div id="map">
                             Google Maps
                         </div>
-                        {#                    <div id="add_button">#}
-                        {#                        <a class="btn btn-primary" href="{{ url_for('new_org', category_value=category_rus, category_eng=category_eng) }}" role="button">Добавить объект</a>#}
-                        {#                    </div>#}
-                        <div id="find_by_adres">
+                        <div id="accuracy" align="center" style="background-color: red;"><strong></strong></div>
+                        <div id="gps_button_group">
                             <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
-                            <input id="submit" type="button" value="Искать">
-                        </div>
-                        <div id="gps_button">
-                            <input id="my_location_button" type="button" value="Определить по GPS">
+                            <input id="submit_address" type="button" value="Искать">
+                            <input id="gps_input" type="button" value="Определить себя по GPS">
                         </div>
                     </div>
-                    <div id="accuracy"></div>
+
                 {% endif %}
             </div>
         </div>

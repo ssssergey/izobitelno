@@ -24,7 +24,7 @@ class OrganizationModel(EndpointsModel):
     phonenumber_static = ndb.StringProperty(repeated=True)
     rating = ndb.IntegerProperty(default=0)
     when_added = ndb.DateTimeProperty(auto_now_add = True)
-    when_modified = ndb.DateTimeProperty(auto_now_add = True)
+    when_modified = ndb.DateTimeProperty(auto_now = True)
     author = ndb.UserProperty(required = True)
     owner = ndb.StringProperty()
     description = ndb.TextProperty()
@@ -45,6 +45,9 @@ class OrganizationModel(EndpointsModel):
 
 class UserModel(EndpointsModel):
     google_user = ndb.UserProperty()
+    email = ndb.StringProperty()
+    email_confirmed = ndb.BooleanProperty(default=False)
+    email_confirmed_on = ndb.DateTimeProperty()
     nickname = ndb.StringProperty()
     password = ndb.StringProperty()
     when_came = ndb.DateTimeProperty(auto_now_add = True)
@@ -59,15 +62,17 @@ class UserModel(EndpointsModel):
     is_authenticated = ndb.BooleanProperty(default=True)
     is_active = ndb.BooleanProperty(default=True)
     is_anonymous = ndb.BooleanProperty(default=False)
+    is_admin = ndb.BooleanProperty(default=False)
     liked_orgs = ndb.IntegerProperty(repeated=True)
 
     def get_id(self):
-      return self.id
+      return self.key.id()
 
 class TagsModel(EndpointsModel):
     all_tags = ndb.StringProperty(repeated=True)
     uid = ndb.StringProperty()
 
+# Count search words
 class SearchWordsModel(EndpointsModel):
     word = ndb.StringProperty()
     quantity = ndb.IntegerProperty()

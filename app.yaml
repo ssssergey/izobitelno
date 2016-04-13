@@ -26,11 +26,11 @@ handlers:
 
 - url: /orgs/new
   script: main.app
-  login: required
+#  login: required
 
 - url: /edit_org/(.*)
   script: main.app
-  login: required
+#  login: required
 
 - url: .*
   script: main.app

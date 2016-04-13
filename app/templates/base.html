@@ -4,6 +4,8 @@
     <title>Изобильный</title>
     <meta content='изопоиск, izopoisk, магазины, услуги, товары, цены, Изобильный, изобильный, црб, пицца, диагностический центр,
     доставка, купить, Ставропольский край' name='keywords'/>
+    <meta name="description" content="Сайт г. Изобильный (Ставропольский край), помогает жителям города в поиске товаров и услуг,
+    облегчает доступ к необходимой информации, способствует развитию информационной инфраструктуры и бизнеса города.">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -83,8 +85,18 @@
                         </ul>
                     </li>
                 {% endfor %}
-                <li><a href="{{ url_for('new_org', keyword=keyword) }}">Создать</a></li>
-                <li><a href="{{ url_for('secret_query_by_phonenumber') }}">По номеру</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if g.user.is_admin %}
+                    <li><a href="{{ url_for('new_org', keyword=keyword) }}">Создать</a></li>
+                    <li><a href="{{ url_for('secret_query_by_phonenumber') }}">По номеру</a></li>
+                {% endif %}
+                {% if current_user.is_authenticated %}
+                    <li><a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{ g.user.nickname }}</a></li>
+                    <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Выход</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Вход</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>

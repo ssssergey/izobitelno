@@ -5,6 +5,7 @@ from flask.ext.login import LoginManager
 import settings
 from jinja2 import evalcontextfilter, Markup, escape
 from momentjs import momentjs
+from flask.ext.mail import Mail
 
 app = Flask(__name__)
 
@@ -28,4 +29,7 @@ app.jinja_env.globals['momentjs'] = momentjs
 
 app.config.from_object('app.settings')
 
+mail = Mail(app)
+
 import views
+

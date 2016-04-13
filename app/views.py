@@ -10,9 +10,12 @@ from flask import render_template, redirect, flash, url_for, request, g, abort
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, lm
 from models import CommentModel, OrganizationModel, TagsModel, SearchWordsModel, UserModel
-from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, GetAllTagsForm, SecretPhoneForm
+from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, GetAllTagsForm, SecretPhoneForm, RegisterForm
 
 from app.data import categories
+
+from token import generate_confirmation_token, confirm_token
+from email import send_email
 
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -53,7 +56,10 @@ def login():
         if not flask_user:
             flask_user = UserModel(google_user=google_user, nickname = google_user.nickname())
             flask_user.put()
-        login_user(flask_user)
+        if users.is_current_user_admin():
+            flask_user.is_admin = True
+            flask_user.put()
+        login_user(flask_user, remember=True)
         flash(u'Вы успешно залогинились по аккунту Google!')
         next = request.args.get('next')
         return redirect(next or url_for('index'))
@@ -62,6 +68,49 @@ def login():
 @app.route('/logout')
 def logout():
     logout_user()
+    flash(u'Вы вышли из своего аккаунта')
+    return redirect(url_for('index'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm(request.form)
+    if form.validate_on_submit():
+        user = UserModel(
+            email=form.email.data,
+            password=form.password.data,
+            confirmed=False
+        )
+        user.put()
+
+        token = generate_confirmation_token(user.email)
+        confirm_url = url_for('user.confirm_email', token=token, _external=True)
+        html = render_template('activate.html', confirm_url=confirm_url)
+        subject = "Please confirm your email"
+        send_email(user.email, subject, html)
+
+        login_user(user)
+
+        flash('A confirmation email has been sent via email.', 'success')
+        return redirect(url_for("main.home"))
+
+    return render_template('user/register.html', form=form)
+
+@app.route('/confirm/<token>')
+@login_required
+def confirm_email(token):
+    try:
+        email = confirm_token(token)
+    except:
+        flash(u'Вы просрочили подтверждение почты или ссылка оказалась неверной.', 'danger')
+        return redirect(url_for('index'))
+    user = UserModel.query(UserModel.email == email).get()
+    if user.confirmed:
+        flash(u'Аккаунт уже подтвержден.Войдите под своими почтой и паролем.', 'success')
+    else:
+        user.confirmed = True
+        user.confirmed_on = datetime.now()
+        user.put()
+        flash(u'Вы подтвердили свой аккаунт. Спасибо!', 'success')
     return redirect(url_for('index'))
 #<-Login
 
@@ -110,6 +159,7 @@ def search_result():
 
 
 @app.route('/orgs/new', methods=['GET', 'POST'])
+@login_required
 def new_org():
     # category = request.args.get("category_value") # Delete
     orgs = OrganizationModel.query().fetch()
@@ -166,6 +216,7 @@ def new_org():
 
 
 @app.route('/edit_org/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_org(id):
     org = OrganizationModel.get_by_id(int(id))
     if users.is_current_user_admin() or users.get_current_user() == org.author:
@@ -240,6 +291,7 @@ def edit_org(id):
 
 
 @app.route('/del_org/<int:id>', methods=['GET', 'DELETE'])
+@login_required
 def del_org(id):
     org = OrganizationModel.get_by_id(int(id))
     current_user = users.get_current_user()
@@ -372,7 +424,7 @@ def like():
             org.rating += 1
             org.put()
             return json.dumps({'status': 'OK', 'rating': org.rating}, cls=GaeEncoder)
-    return json.dumps({'status': 'OK', 'notlogin': [u'Чтобы ставить оценку, вам нужно войти.', url_for('login')]}, cls=GaeEncoder)
+    return json.dumps({'status': 'OK', 'notlogin': [u'Чтобы ставить оценку, вам нужно войти.', request.url]}, cls=GaeEncoder)
 
 
 #### ADMIN FUNCTIONS

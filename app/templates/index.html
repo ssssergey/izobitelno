@@ -4,9 +4,12 @@
     <title>Изобильный</title>
     <meta content='изопоиск, izopoisk, магазины, услуги, товары, цены, Изобильный, изобильный, црб, пицца, диагностический центр,
     доставка, купить, Ставропольский край' name='keywords'/>
+    <meta name="description" content="Сайт г. Изобильный (Ставропольский край), помогает жителям города в поиске товаров и услуг,
+    облегчает доступ к необходимой информации, способствует развитию информационной инфраструктуры и бизнеса города.">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="https://izopoisk.ru"/>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-theme.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/font-awesome.min.css">
@@ -19,43 +22,82 @@
 
 <body>
 <!-- preloader -->
-    <style type="text/css">
-        .preloader_bg { position: fixed; background: rgba(15,15,15,1); width: 100%; height: 100%; top: 0; left: 0; z-index: 200; }
-        .preloader_content { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 201; font-size: 14px; }
-        .preloader_content span { display: block; margin: auto; text-align: center; text-transform: uppercase; color: rgba(225,225,225,1);}
-    </style>
-    <script type="text/javascript">
-    $(function(){
+<style type="text/css">
+    .preloader_bg {
+        position: fixed;
+        background: rgba(15, 15, 15, 1);
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 200;
+    }
+
+    .preloader_content {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 201;
+        font-size: 14px;
+    }
+
+    .preloader_content span {
+        display: block;
+        margin: auto;
+        text-align: center;
+        text-transform: uppercase;
+        color: rgba(225, 225, 225, 1);
+    }
+</style>
+<script type="text/javascript">
+    $(function () {
         $('.preloader_bg, .preloader_content').fadeIn(0);
-        $(window).load(function(){
+        $(window).load(function () {
             $('.preloader_bg').delay(250).fadeOut(1500);
             $('.preloader_content').delay(250).fadeOut(750);
         });
     });
-    </script>
-    <div class="preloader_bg"></div>
-    <div class="preloader_content">
-        <span>Идет загрузка...<br>Подождите...</span>
-    </div>
-    <noscript>
-        <style>
-            html, body { opacity: 1 !important; }
-            .preloader_bg, .preloader_content { display: none !important; }
-        </style>
-    </noscript>
+</script>
+<div class="preloader_bg"></div>
+<div class="preloader_content">
+    <span>Идет загрузка...<br>Подождите...</span>
+</div>
+<noscript>
+    <style>
+        html, body {
+            opacity: 1 !important;
+        }
+
+        .preloader_bg, .preloader_content {
+            display: none !important;
+        }
+    </style>
+</noscript>
 <!-- /preloader -->
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-warning alert-dismissible" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
+<style>
+    #overlay {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
+</style>
+<div id="overlay">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-warning alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
 <div class="container-fluid" style="height: 100%">
     <div class="row" style="background: #315981; height: 20%; min-height: 100px">
         <div class="col-xs-12 col-sm-6">
@@ -89,31 +131,19 @@
     <div class="row" style="background: #DFDFDF; padding: 10px 0 20px 0; bottom: 0">
         <div class="col-sm-6">
             <ul>
-                <a href="{{ url_for('show_categories_all') }}">
-                    <li>Категории</li>
-                </a>
-                <a href="{{ url_for('get_all_comments') }}">
-                    <li>Комментарии, пожелания, отзывы</li>
-                </a>
-                <a href="{{ url_for('contacts') }}">
-                    <li>Контакты</li>
-                </a>
+                <li><a href="{{ url_for('show_categories_all') }}">Категории</a></li>
+                <li><a href="{{ url_for('get_all_comments') }}">Комментарии, пожелания, отзывы</a></li>
+                <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
             </ul>
         </div>
         <div class="col-sm-6">
             <ul>
-                <a href="{{ url_for('list_orgs') }}">
-                    <li>Общий список</li>
-                </a>
-                <a href="{{ url_for('secret_query_by_phonenumber') }}">
-                    <li>Поиск по номеру</li>
-                </a>
-                <a href="{{ url_for('secret_get_allTags') }}">
-                    <li>Все тэги</li>
-                </a>
-                <a href="{{ url_for('secret_edit_tags') }}">
-                    <li>Редактировать тэги</li>
-                </a>
+                {% if g.user.is_admin %}
+                    <li><a href="{{ url_for('list_orgs') }}">Общий список</a></li>
+                    <li><a href="{{ url_for('secret_query_by_phonenumber') }}">Поиск по номеру</a></li>
+                    <li><a href="{{ url_for('secret_get_allTags') }}">Все тэги</a></li>
+                    <li><a href="{{ url_for('secret_edit_tags') }}">Редактировать тэги</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
