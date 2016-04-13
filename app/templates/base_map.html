@@ -45,7 +45,6 @@
     }
 
 
-
     function addMarkerstoMap(posts) {
         for (var i = 0; i < posts.length; i++) {
             var post = posts[i];
@@ -83,8 +82,21 @@
                 }
                 var content = "<div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>" + post.title + "</h3></div>" +
                         "<div class='panel-body'>" +
-                        "<div>Адрес: " + adress + "</div>" +
-{#                        "<div>Телефон: " + post.phonenumber + ", " + post.phonenumber_static + "</div>" +#}
+                        "<div>Адрес: " + adress + "</div>";
+                if (post.phonenumber.join('') || post.phonenumber_static.join('')) {
+                    content = content + "<div>Телефон: </div>";
+                    for (i = 0; i < post.phonenumber.length; i++) {
+                        if (post.phonenumber.join('')) {
+                            content = content + "<a href='tel: 8" + post.phonenumber[i] + "'>" + post.phonenumber[i] + "</a>; "
+                        }
+                    }
+                    for (i = 0; i < post.phonenumber_static.length; i++) {
+                        if (post.phonenumber_static.join('')) {
+                            content = content + "<a href='tel: 886545" + post.phonenumber_static[i] + "'>" + post.phonenumber_static[i] + "</a>; "
+                        }
+                    }
+                }
+                content = content +
                         "<div>Рейтинг: " + post.rating + "</div>" +
                         "<div>Изменено: " + moment.unix(post.when_modified).format('LLL') + "</div>" +
                         "</div>" +
@@ -114,7 +126,7 @@
                 clearNewMarkers();
                 var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                 var marker_new = new google.maps.Marker({
-{#                    map: resultsMap,#}
+                    {#                    map: resultsMap,#}
                     map: map,
                     icon: image,
                     position: results[0].geometry.location
@@ -142,9 +154,11 @@
                 if (results[0]) {
                     var address = results[0].formatted_address;
                     if (document.getElementById("adres")) {
-                        document.getElementById("adres").value = address;
                         document.getElementById("lat").value = location.lat();
                         document.getElementById("lng").value = location.lng();
+                        if (!document.getElementById("adres").value) {
+                            document.getElementById("adres").value = address;
+                        }
                     }
                     var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
                     clearNewMarkers();
