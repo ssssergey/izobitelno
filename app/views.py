@@ -1,21 +1,24 @@
 # -*- coding: utf-8 -*-
 import json
 from datetime import datetime
+# from passlib.handlers.sha2_crypt import sha256_crypt
 
 from google.appengine.api import users, datastore_types
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
 
-from flask import render_template, redirect, flash, url_for, request, g, abort
+from flask import render_template, redirect, flash, url_for, request, g, abort, session
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, lm
 from models import CommentModel, OrganizationModel, TagsModel, SearchWordsModel, UserModel
-from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, GetAllTagsForm, SecretPhoneForm, RegisterForm
+from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, GetAllTagsForm, SecretPhoneForm, \
+    RegistrationForm, LoginForm
 
 from app.data import categories
 
 from token import generate_confirmation_token, confirm_token
 from email import send_email
+
 
 class GaeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -29,40 +32,84 @@ class GaeEncoder(json.JSONEncoder):
             return result
         elif isinstance(obj, users.User):
             return obj.nickname()
+        elif isinstance(obj, UserModel):
+            return obj.nickname
         elif isinstance(obj, datastore_types.GeoPt):
             return {'lat': obj.lat, 'lng': obj.lon}
         else:
             return json.JSONEncoder.default(self, obj)
 
-#Login->
+
+###################Login->
+
+# @app.route('/register', methods=["GET", "POST"])
+# def register():
+#     form = RegistrationForm(request.form)
+#
+#     if request.method == "POST" and form.validate():
+#         nickname = form.username.data
+#         email = form.email.data
+#         password = sha256_crypt.encrypt((str(form.password.data)))
+#
+#         user = User.query.filter_by(nickname=nickname).first()
+#         if user != None:
+#             flash(u"Этот ник уже занят, попробуйте другой")
+#             return render_template('register.html', form=form)
+#         else:
+#             user = User(nickname=nickname, email=email, password=password)
+#             db.session.add(user)
+#             db.session.commit()
+#             registration_notification(nickname, 'is registered!')
+#             flash(u"Вы успешно зарегистрировались!")
+#             login_user(user)
+#             return redirect(request.args.get('next') or url_for('index'))
+#     return render_template("register.html", form=form)
+
+
 @app.before_request
 def before_request():
     g.user = current_user
+
+
 
 @lm.user_loader
 def load_user(id):
     return UserModel.get_by_id(int(id))
 
+
 @lm.unauthorized_handler
 def unauthorized():
-    return redirect(url_for('login', next = request.url))
+    return redirect(url_for('login', url_back=request.url))
     return render_template('401.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    form = LoginForm(request.form)
+    if request.method == 'POST' and form.validate_on_submit():
+        user = UserModel.query(UserModel.email == form.email.data.strip()).get()
+        if user and user.password == form.password.data:
+            login_user(user, remember=True)
+            flash(u'Вы успешно вошли по паролю!')
+            return redirect(session['url_back'] or url_for('index'))
+    session['url_back'] = request.args.get('url_back')
+    return render_template('auth/login.html', form=form)
+
+@app.route('/login_google', methods=['GET', 'POST'])
+def login_google():
     google_user = users.get_current_user()
     if google_user:
         flask_user = UserModel.query(UserModel.google_user == google_user).get()
         if not flask_user:
-            flask_user = UserModel(google_user=google_user, nickname = google_user.nickname())
+            flask_user = UserModel(google_user=google_user, nickname=google_user.nickname(), email=google_user.email(),
+                                   confirm_email=True, confirmed_on=datetime.now())
             flask_user.put()
         if users.is_current_user_admin():
             flask_user.is_admin = True
             flask_user.put()
         login_user(flask_user, remember=True)
         flash(u'Вы успешно залогинились по аккунту Google!')
-        next = request.args.get('next')
-        return redirect(next or url_for('index'))
+        return redirect(session['url_back'] or url_for('index'))
     return redirect(users.create_login_url(request.url))
 
 @app.route('/logout')
@@ -71,32 +118,42 @@ def logout():
     flash(u'Вы вышли из своего аккаунта')
     return redirect(url_for('index'))
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegisterForm(request.form)
-    if form.validate_on_submit():
+    form = RegistrationForm(request.form)
+
+    if request.method == 'POST' and form.validate_on_submit():
+        user = UserModel.query(UserModel.email == form.email.data.strip()).get()
+        if user:
+            flash(u'Такой email уже зарегистрирован! Если Вы забыли пароль, свяжитесь с администратором.', 'danger')
+            return render_template('auth/register.html', form=form)
         user = UserModel(
+            nickname=form.email.data,
             email=form.email.data,
             password=form.password.data,
-            confirmed=False
+            email_confirmed=False
         )
         user.put()
 
-        token = generate_confirmation_token(user.email)
-        confirm_url = url_for('user.confirm_email', token=token, _external=True)
-        html = render_template('activate.html', confirm_url=confirm_url)
-        subject = "Please confirm your email"
-        send_email(user.email, subject, html)
+        # token = generate_confirmation_token(user.email)
+        # confirm_url = url_for('confirm_email', token=token, _external=True)
+        # html = render_template('auth/activate.html', confirm_url=confirm_url)
+        # subject = u"Подтвердите свой email"
+        # send_email(user.email, subject, html)
 
         login_user(user)
+        flash(u'Вы зарегистрировались. Не теряйте пароль.', 'success')
+        # flash(u'Письмо для подтверждения регистрации было отправлено на указанный адрес. Откройте письмо и подтвердите '
+        #       u'регистрацию.', 'success')
+        return redirect(session['url_back'] or url_for('index'))
 
-        flash('A confirmation email has been sent via email.', 'success')
-        return redirect(url_for("main.home"))
+    session['url_back'] = request.args.get('url_back')
+    return render_template('auth/register.html', form=form)
 
-    return render_template('user/register.html', form=form)
 
 @app.route('/confirm/<token>')
-@login_required
+# @login_required
 def confirm_email(token):
     try:
         email = confirm_token(token)
@@ -112,13 +169,16 @@ def confirm_email(token):
         user.put()
         flash(u'Вы подтвердили свой аккаунт. Спасибо!', 'success')
     return redirect(url_for('index'))
-#<-Login
+
+
+#################<-Login
 
 
 @app.route('/')
 def index():
     all_tags = get_all_tags()
     return render_template("index.html", all_tags=','.join(all_tags))
+
 
 @app.route('/details/<int:id>')
 def details(id):
@@ -163,7 +223,7 @@ def search_result():
 def new_org():
     # category = request.args.get("category_value") # Delete
     orgs = OrganizationModel.query().fetch()
-    form = OrganizationForm()
+    form = OrganizationForm(request.form)
     if request.method == 'GET':
         all_tags = get_all_tags()
         if request.args.get('keyword'):
@@ -193,7 +253,7 @@ def new_org():
                                      owner=form.owner.data,
                                      adres=form.adres.data,
                                      adres_details=form.adres_details.data,
-                                     author=users.get_current_user(),
+                                     author=current_user.nickname,
                                      location=ndb.GeoPt(form.lat.data, form.lng.data),
                                      description=form.description.data,
                                      price=form.price.data,
@@ -219,8 +279,8 @@ def new_org():
 @login_required
 def edit_org(id):
     org = OrganizationModel.get_by_id(int(id))
-    if users.is_current_user_admin() or users.get_current_user() == org.author:
-        form = OrganizationForm()
+    if users.is_current_user_admin():
+        form = OrganizationForm(request.form)
         if request.method == 'POST':
             if form.validate_on_submit():
                 tags = form.tags.data.lower().split(',')
@@ -294,12 +354,11 @@ def edit_org(id):
 @login_required
 def del_org(id):
     org = OrganizationModel.get_by_id(int(id))
-    current_user = users.get_current_user()
     if users.is_current_user_admin():
         flash(u"Вы успешно удалили объект как администратор!")
         org.key.delete()
         return redirect(url_for('index'))
-    if current_user == org.author:
+    if current_user.nickname == org.author:
         flash(u"Вы успешно удалили объект как автор!")
         org.key.delete()
         return redirect(url_for('index'))
@@ -311,7 +370,7 @@ def del_org(id):
 @app.route('/orgs')
 def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
-    return render_template('list_orgs.html', posts=orgs, categories=categories)
+    return render_template('admin/list_orgs.html', posts=orgs, categories=categories)
 
 
 ### Edit all_Tags
@@ -360,7 +419,7 @@ def get_nearby_objects(lat, lon):
 
 ######## COMMENTS ###########
 
-@app.route('/comments/get_all_comments')
+@app.route('/comments/get_all')
 def get_all_comments():
     posts = CommentModel.query().order(-CommentModel.when)
     for post in posts:
@@ -376,15 +435,20 @@ def get_all_comments():
     return render_template('get_all_comments.html', posts=posts, categories=categories)
 
 
-@app.route('/comments/new', methods=['GET', 'POST'])
-def new_comment():
+@app.route('/comment_new/general', methods=['GET', 'POST'])
+def comment_new_general():
     form = CommentForm()
+    if not current_user.is_authenticated:
+        author = u'Аноним'
+    else:
+        author = current_user.nickname
     if form.validate_on_submit():
         post = CommentModel(
             content=request.form['content'],
             # category=request.form['category'],
             # organization_id=int(request.form['organization_id']),
-            author=users.get_current_user())
+            author=author,
+        )
         post.put()
         flash(u'Комментарий успешно создан!')
         return redirect(url_for('get_all_comments'))
@@ -392,22 +456,28 @@ def new_comment():
 
 
 ## For Ajax
-@app.route('/add_comment', methods=['POST'])
-def add_comment():
+@app.route('/comment_new/from_details', methods=['POST'])
+def comment_new_details():
+    if not current_user.is_authenticated:
+        author = u'Аноним'
+    else:
+        author = current_user.nickname
     post = CommentModel(
         content=request.form['comment'],
         category=request.form['category'],
         organization_id=int(request.form['organization_id']),
-        author=users.get_current_user())
+        author=author,
+        )
     post.put()
     return json.dumps({'status': 'OK', 'comment': request.form['comment']})
 
 
-@app.route('/get_comments_by_org')
+@app.route('/comments/get_by_org')
 def get_comments_by_org():
     comments_org = CommentModel.query(CommentModel.organization_id == int(request.args.get('organization_id'))).order(
         -CommentModel.when).fetch()
     return json.dumps({'status': 'OK', 'comments': comments_org}, cls=GaeEncoder)
+
 
 @app.route('/like')
 # @login_required
@@ -416,15 +486,21 @@ def like():
         org_id = int(request.args.get('organization_id'))
         user = UserModel.get_by_id(int(current_user.id))
         if org_id in user.liked_orgs:
-            return json.dumps({'status': 'OK', 'repeat': u'Вы уже оценивали данную организацию'}, cls=GaeEncoder)
+            user.liked_orgs.remove(org_id)
+            user.put()
+            org = OrganizationModel.get_by_id(int(org_id))
+            org.rating -= 1
+            org.put()
+            return json.dumps({'status': 'OK', 'rating_minus': str(org.rating)}, cls=GaeEncoder)
         else:
             user.liked_orgs.append(org_id)
             user.put()
             org = OrganizationModel.get_by_id(int(org_id))
             org.rating += 1
             org.put()
-            return json.dumps({'status': 'OK', 'rating': org.rating}, cls=GaeEncoder)
-    return json.dumps({'status': 'OK', 'notlogin': [u'Чтобы ставить оценку, вам нужно войти.', request.url]}, cls=GaeEncoder)
+            return json.dumps({'status': 'OK', 'rating_plus': str(org.rating)}, cls=GaeEncoder)
+    return json.dumps({'status': 'OK', 'notlogin': [u'Чтобы ставить оценку, вам нужно войти.', request.url]},
+                      cls=GaeEncoder)
 
 
 #### ADMIN FUNCTIONS
@@ -453,7 +529,7 @@ def secret_edit_tags():
                 #     populate_empty_tags()
                 #     flash(u'Заполнение прошло успешно')
                 #     redirect(url_for('secret_edit_tags'))
-        return render_template('secret_edit_tags.html', form1=form1, form2=form2, form3=form3)
+        return render_template("admin/secret_edit_tags.html", form1=form1, form2=form2, form3=form3)
     else:
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
@@ -539,10 +615,13 @@ def secret_get_allTags():
                 all_tags.all_tags = tags
                 all_tags.put()
                 flash(u"Изменения приняты!")
-                return render_template("secretGetAllTags.html", form=form)
+                return render_template("admin/secret_get_AllTags.html", form=form)
         all_tags = TagsModel.query(TagsModel.uid == 'myid').get()
-        form.tags.data = ",".join(all_tags.all_tags)
-        return render_template('secretGetAllTags.html', form=form)
+        if all_tags:
+            form.tags.data = ",".join(all_tags.all_tags)
+        else:
+            form.tags.data = ""
+        return render_template('admin/secret_get_AllTags.html', form=form)
     else:
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
@@ -575,7 +654,7 @@ def secret_query_by_phonenumber():
                     return render_template('new_org.html', form=form, categories=categories,
                                            posts=json.loads(json.dumps({}, cls=GaeEncoder)),
                                            all_tags=','.join(all_tags))
-        return render_template('secret_query_by_phonenumber.html', form=formS)
+        return render_template('admin/secret_query_by_phonenumber.html', form=formS)
     else:
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))

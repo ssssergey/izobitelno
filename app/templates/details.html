@@ -6,22 +6,7 @@
             {# // Карта#}
             <div class="col-sm-6" align="center">
                 <h4>{{ org.title }}</h4>
-                {% if org.location.lat %}
-                    <div class="row well" id="wrapper">
-                        <div id="map">
-                            Google Maps
-                        </div>
-                        <div id="accuracy" align="center" style="background-color: red;"><strong></strong></div>
-                        <div id="gps_button_group">
-                            <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
-                            <input id="submit_address" type="button" value="Искать">
-                            <input id="gps_input" type="button" value="Определить себя по GPS">
-                            <input id="zoomin_input" type="button" value="Приблизить">
-                        </div>
-                    </div>
 
-                    {% include 'base_map.html' %}
-                {% endif %}
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h3 class="panel-title">{{ org.title }}</h3>
@@ -38,9 +23,11 @@
                                 </dd>
                             {% endif %}
 
-                            {% if org.tags|join(", ") %}
-                                <dt>Тэги</dt>
-                                <dd>{{ org.tags|join(", ") }}</dd>
+                            {% if g.user.is_admin %}
+                                {% if org.tags|join(", ") %}
+                                    <dt>Тэги</dt>
+                                    <dd>{{ org.tags|join(", ") }}</dd>
+                                {% endif %}
                             {% endif %}
 
                             {% if org.phonenumber|join(", ") %}
@@ -94,21 +81,38 @@
                         <h4>{{ org.description|nl2br }}</h4>
                     </div>
                 </div>
+                {% if org.location.lat %}
+                    <div class="row well" id="wrapper">
+                        <div id="map">
+                            Google Maps
+                        </div>
+                        <div id="accuracy" align="center" style="background-color: red;"><strong></strong></div>
+                        <div id="gps_button_group">
+                            <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
+                            <input id="submit_address" type="button" value="Искать">
+                            <input id="gps_input" type="button" value="Определить себя по GPS">
+                            <input id="zoomin_input" type="button" value="Приблизить">
+                        </div>
+                    </div>
+
+                    {% include 'base_map.html' %}
+                {% endif %}
             </div>
 
             <div class="col-sm-6" style="margin-top: 20px">
                 <a id="like"
                    tabindex="0"
-                   class="btn btn-info pull-right"
+                   class="btn btn-info pull-left"
                    href="#"
                    role="button"
                    data-toggle="popover"
-                   data-trigger="focus"
-                   data-placement="top"
-                   data-container="body">
-                    <span
-                        class="glyphicon glyphicon-thumbs-up"
-                        aria-hidden="true">
+                   data-trigger="manual"
+                   data-placement="bottom"
+                   data-container="body"
+{#                   onclick="return confirm('Вы уверены?')"#}
+                        >
+                    <span class="glyphicon glyphicon-thumbs-up"
+                            aria-hidden="true">
                     </span> Мне нравится! <span id="rating" class="badge">{{ org.rating }}</span>
                 </a>
 
@@ -139,11 +143,11 @@
         </div>
     </div>
 
-    <div id="notlogin" style="display: none;">
-        <a href="{{ url_for("login") }}"><strong>Войти</strong></a>
-        <br>
-        <a href="#"><strong>У меня нет аккаунта</strong></a>
-    </div>
+{#    <div id="notlogin" style="display: none">#}
+{#        <a id="login" href="{{ url_for("login") }}"><strong>- Войти</strong></a>#}
+{#        <br><br>#}
+{#        <a id="no_account" href="#" style="margin: 10px 0"><strong>- У меня нет аккаунта</strong></a>#}
+{#    </div>#}
 
     <script>
         $(document).ready(function () {
@@ -151,7 +155,7 @@
             $('#comment-button').click(function (event) {
                 event.preventDefault();
                 $.ajax({
-                    url: '/add_comment',
+                    url: '{{ url_for("comment_new_details") }}',
                     data: $('form').serialize(),
                     type: 'POST',
                     success: function (response) {
@@ -171,7 +175,7 @@
         var id = {{ org.id | safe }};
         var all_comments = function () {
             $.ajax({
-                url: '/get_comments_by_org',
+                url: '{{ url_for("get_comments_by_org") }}',
                 data: {'organization_id': id},
                 type: 'GET',
                 success: function (response) {
@@ -188,7 +192,6 @@
                         p.align = 'right';
                         news.appendChild(p);
                     }
-
                 },
                 error: function (error) {
                     console.log(error);
@@ -196,29 +199,10 @@
             })
         };
 
-        {#        $(function () {#}
-        {#            $('#comment-button').click(function (event) {#}
-        {#                event.preventDefault();#}
-        {#                $.ajax({#}
-        {#                    url: '/add_comment',#}
-        {#                    data: $('form').serialize(),#}
-        {#                    type: 'POST',#}
-        {#                    success: function (response) {#}
-        {#                        console.log(response);#}
-        {#                        var data = JSON.parse(response);#}
-        {#                        document.getElementById("new_comment").innerHTML = data.comment;#}
-        {#                    },#}
-        {#                    error: function (error) {#}
-        {#                        console.log(error);#}
-        {#                    }#}
-        {#                });#}
-        {#                all_comments();#}
-        {#            });#}
-        {#        });#}
-
         $(function () {
             $('#like').click(function (event) {
                 event.preventDefault();
+                $('#like').popover('destroy');
                 $.ajax({
                     url: '/like',
                     data: {organization_id: id},
@@ -226,36 +210,41 @@
                     success: function (response) {
                         console.log(response);
                         var data = JSON.parse(response);
-                        if (data.rating) {
-                            document.getElementById("rating").innerHTML = data.rating;
-                            $('#like')
-                                    .popover('destroy')
-                                    .popover({
-{#                                        html: true,#}
-                                        title: 'Вы успешно подняли рейтинг!',
-                                    })
-                                    .popover('show');
+                        if (data.rating_plus) {
+                            document.getElementById("rating").innerHTML = data.rating_plus;
+                                $('#like')
+                                .popover({
+                                    trigger: 'manual',
+                                    html: true,
+                                    title: '<i class="fa fa-thumbs-up" aria-hidden="true"></i> Вы ОТДАЛИ свой голос!',
+                                })
+                                .popover('show');
                         }
-                        if (data.repeat) {
-                            $('#like')
-{#                                    .popover('destroy')#}
+                        if (data.rating_minus) {
+                            document.getElementById("rating").innerHTML = data.rating_minus;
+                            $(function(){
+                                $('#like')
                                     .popover({
-{#                                        html: true,#}
-                                        title: 'Голосовать разрешается только один раз!',
-                                        delay: 200
+{#                                        trigger: 'manual',#}
+                                        html: true,
+                                        title: '<i class="fa fa-thumbs-down" aria-hidden="true"></i> Вы ЗАБРАЛИ свой голос!',
                                     })
                                     .popover('show');
+                            })
                         }
                         if (data.notlogin) {
                             console.log('Вы не вошли');
-                            $('#like')
-                                    .popover('destroy')
+                            $(function(){
+                                $('#like')
                                     .popover({
+{#                                        trigger: 'manual',#}
                                         html: true,
-                                        title: 'Чтобы повышать рейтинги, войдите на сайт под аккаунтом!',
-                                        content:$('#notlogin').html(),
+                                        title: '<strong>Вы не можете изменять рейтинги, потому что не вошли на сайт под аккаунтом!</strong>',
+                                        content: 'Если у вас нет аккаунта - зарегистрируйтесь или войдите через социальные сети.<br>Смотрите в верхнем правом углу экрана.',
                                     })
                                     .popover('show');
+                            })
+
                         }
 
                     },
@@ -265,17 +254,19 @@
                 });
             });
         });
-
+        $(document).on('click', function(e) {
+        $('#like').popover('hide');
+        });
     </script>
     {#    Скрипт для tooltip#}
-    <script>
-{#        $(function () {#}
-{#            $('[data-toggle="tooltip"]').tooltip()#}
-{#        })#}
-{#    $(document).ready(function(){#}
-{#      $('[data-toggle="popover"]').popover();#}
-{#    });#}
-    </script>
+    {#    <script>#}
+    {#        $(function () {#}
+    {#            $('[data-toggle="tooltip"]').tooltip()#}
+    {#        })#}
+    {#    $(document).ready(function(){#}
+    {#      $('[data-toggle="popover"]').popover();#}
+    {#    });#}
+    {#    </script>#}
 
 {% endblock %}
 

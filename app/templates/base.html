@@ -95,7 +95,8 @@
                     <li><a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{ g.user.nickname }}</a></li>
                     <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Выход</a></li>
                 {% else %}
-                    <li><a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Вход</a></li>
+                    <li><a href="{{ url_for('register', url_back=request.url) }}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Регистрация</a></li>
+                    <li><a href="{{ url_for('login', url_back=request.url) }}"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Вход</a></li>
                 {% endif %}
             </ul>
         </div>

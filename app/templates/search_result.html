@@ -16,6 +16,7 @@
                         <h4 align="center"><strong>Если Вы зашли с телефона, то знайте:</strong></h4>
 
                         <p align="center">- номера телефонов на сайте кликабельны. Звоните в два нажатия!</p>
+                        <p align="center">- чтобы в таблице появилась колонка с режимами работы заведений, поверните телефон горизонтально</p>
 
                     </div>
                     <div class="row" style="max-width: 100%">
@@ -23,10 +24,10 @@
                             <tr class="table-500">
                                 <th>Назв.</th>
                                 <th>Адрес</th>
-                                <th class="hidden-500">Категория</th>
+{#                                <th class="hidden-500">Категория</th>#}
                                 <th>Тел.м.</th>
                                 <th>Тел.г.</th>
-                                <th class="hidden-500">Дата создания</th>
+                                <th class="hidden-500">Режим раб.</th>
                                 <th></th>
                             </tr>
                             {% for post in posts %}
@@ -40,7 +41,7 @@
                                         {% if post.delivery %}
                                             <span class="badge badge-success" aria-hidden="false" data-toggle="tooltip"
                                                   data-placement="top" title="Доставка">
-                                    <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                                    <i class="fa fa-truck fa-lg" aria-hidden="true"></i>
                                 </span>
                                         {% endif %}
                                     </td>
@@ -50,7 +51,7 @@
                                         {% set adres_short = "Отсутствует" %}
                                     {% endif %}
                                     <td style="max-width: 10%">{{ adres_short }}</td>
-                                    <td class="hidden-500">{{ post.category }}</td>
+{#                                    <td class="hidden-500">{{ post.category }}</td>#}
                                     <td>
                                         {% set comma = joiner(", ") %}
                                         {% for number in post.phonenumber %}
@@ -65,7 +66,8 @@
                                         </a>
                                         {% endfor %}
                                     </td>
-                                    <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>
+                                    <td class="hidden-500">{{ post.working_hours|replace("None", "-") }}</td>
+{#                                    <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>#}
                                     <td>
                                         <a href='/details/{{ post.id }}'>
                                             <span class="badge badge-primary"><nobr>Подробнее</nobr></span>

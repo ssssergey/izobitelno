@@ -182,7 +182,7 @@
 
     function GetLocation(location) {
         if (location.coords.accuracy > 15) {
-            $('#accuracy').text("Не удалось определить. Включите GPS - выйдите на улицу (или подойдите к окну) - нажмите на кнопку повторно.");
+            $('#accuracy').text("Не удалось определить. Включите GPS (установите в настройках: определять только по GPS) - выйдите на улицу (или подойдите к окну) - нажмите на кнопку повторно.");
         } else {
 
             initialLocation = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);

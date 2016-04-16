@@ -2,7 +2,7 @@
 from flask.ext.wtf import Form
 from wtforms import StringField, FloatField, TextAreaField, IntegerField, BooleanField, widgets
 from wtforms.fields.html5 import TelField, URLField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import DataRequired, NumberRange, EqualTo
 
 
 class OrganizationForm(Form):
@@ -53,6 +53,12 @@ class SecretPhoneForm(Form):
     phonenumber = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"(999) 999-9999"})
     phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
 
-class RegisterForm(Form):
+class RegistrationForm(Form):
+    email = StringField(u'Адрес электронной почты', validators=[DataRequired(message=u'Обязятельное поле')])
+    password = StringField(u'Пароль', validators=[DataRequired(message=u'Обязятельное поле'),
+                                                  EqualTo('confirm', message=u'Пароли не совпадают!')])
+    confirm = StringField(u'Повторить пароль', validators=[DataRequired(message=u'Обязятельное поле')])
+
+class LoginForm(Form):
     email = StringField(u'Адрес электронной почты', validators=[DataRequired(message=u'Обязятельное поле')])
     password = StringField(u'Пароль', validators=[DataRequired(message=u'Обязятельное поле')])

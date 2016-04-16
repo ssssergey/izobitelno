@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<body>
+	<div class = "container">
+		<h4>Регистрация</h4>
+		<br>
+		{% from "_formhelpers.html" import render_field %}
+		<form method=post action="{{ url_for('register') }}">
+            {{ form.csrf_token }}
+			<dl>
+				{{render_field(form.email)}}
+				{{render_field(form.password)}}
+				{{render_field(form.confirm)}}
+			</dl>
+			<p><input type=submit value=Зарегистрироваться></p>
+		</form>
+		
+		{% if error %}
+			<p class="error"><strong>Error:</strong>{{error}}</p>
+		{% endif %}
+
+	</div>
+</body>
+
+{% endblock %}
+ 

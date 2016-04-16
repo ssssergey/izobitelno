@@ -7,7 +7,7 @@ from jinja2 import evalcontextfilter, Markup, escape
 from momentjs import momentjs
 from flask.ext.mail import Mail
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 lm = LoginManager()
 lm.init_app(app)
