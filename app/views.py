@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import urllib2
 from datetime import datetime
 # from passlib.handlers.sha2_crypt import sha256_crypt
 
@@ -42,34 +43,10 @@ class GaeEncoder(json.JSONEncoder):
 
 ###################Login->
 
-# @app.route('/register', methods=["GET", "POST"])
-# def register():
-#     form = RegistrationForm(request.form)
-#
-#     if request.method == "POST" and form.validate():
-#         nickname = form.username.data
-#         email = form.email.data
-#         password = sha256_crypt.encrypt((str(form.password.data)))
-#
-#         user = User.query.filter_by(nickname=nickname).first()
-#         if user != None:
-#             flash(u"Этот ник уже занят, попробуйте другой")
-#             return render_template('register.html', form=form)
-#         else:
-#             user = User(nickname=nickname, email=email, password=password)
-#             db.session.add(user)
-#             db.session.commit()
-#             registration_notification(nickname, 'is registered!')
-#             flash(u"Вы успешно зарегистрировались!")
-#             login_user(user)
-#             return redirect(request.args.get('next') or url_for('index'))
-#     return render_template("register.html", form=form)
-
 
 @app.before_request
 def before_request():
     g.user = current_user
-
 
 
 @lm.user_loader
@@ -95,6 +72,7 @@ def login():
     session['url_back'] = request.args.get('url_back')
     return render_template('auth/login.html', form=form)
 
+
 @app.route('/login_google', methods=['GET', 'POST'])
 def login_google():
     google_user = users.get_current_user()
@@ -102,7 +80,7 @@ def login_google():
         flask_user = UserModel.query(UserModel.google_user == google_user).get()
         if not flask_user:
             flask_user = UserModel(google_user=google_user, nickname=google_user.nickname(), email=google_user.email(),
-                                   confirm_email=True, confirmed_on=datetime.now())
+                                   email_confirmed=True, email_confirmed_on=datetime.now())
             flask_user.put()
         if users.is_current_user_admin():
             flask_user.is_admin = True
@@ -111,6 +89,64 @@ def login_google():
         flash(u'Вы успешно залогинились по аккунту Google!')
         return redirect(session['url_back'] or url_for('index'))
     return redirect(users.create_login_url(request.url))
+
+
+@app.route('/login_vk', methods=['GET', 'POST'])
+def login_vk():
+    vk_app_id = "5437643"
+    vk_client_secret = "BZMjgoDhd8lW4iIVw5hC"
+    if request.args.get('bussiness'):
+        vk_scope = "email,photos,audio,video,docs,notes,pages,status,wall,notifications,stats,ads,market,offline,nohttps"
+    else:
+        vk_scope = "email"
+    login_attempt = request.args.get('login_attempt')
+
+    code = request.args.get('code')
+    error = request.args.get('error')
+    error_description = request.args.get('error_description')
+
+    if login_attempt:
+        return redirect("https://oauth.vk.com/authorize?client_id={}&display=page&redirect_uri={}&scope={}"
+                        "&response_type=code&v=5.52".format(vk_app_id, url_for('login_vk', _external=True), vk_scope))
+    if code:
+        print code
+        url_get_token = "https://oauth.vk.com/access_token?client_id={}&client_secret={}&redirect_uri={}" \
+                        "&code={}".format(vk_app_id, vk_client_secret, url_for('login_vk', _external=True), code)
+        req = urllib2.Request(url_get_token)
+        opener = urllib2.build_opener()
+        f = opener.open(req)
+        json_obj = json.loads(f.read())
+        print json_obj
+        access_token = json_obj.get('access_token')
+        expires_in = json_obj.get('expires_in')
+        user_id = json_obj.get('user_id')
+        email = json_obj.get('email')
+        if user_id and access_token:
+            url_getProfiles = "https://api.vkontakte.ru/method/getProfiles?uid={}&access_token={}".format(user_id,
+                                                                                                          access_token)
+            # {"response":[{"uid":10758791,"first_name":"Вася","last_name":"Пупкин"}]}
+            req = urllib2.Request(url_getProfiles)
+            opener = urllib2.build_opener()
+            f = opener.open(req)
+            json_obj = json.loads(f.read())
+            nickname = u"{} {}".format(json_obj['response'][0]['first_name'], json_obj['response'][0]['last_name'])
+            flask_user = UserModel.query(UserModel.vk_user_id == user_id).get()
+            if not flask_user:
+                flask_user = UserModel(
+                    nickname=nickname,
+                    vk_user_id=user_id,
+                    vk_access_token=access_token,
+                    vk_expires_in=expires_in,
+                )
+                if email:
+                    flask_user.email = email
+                    flask_user.email_confirmed = True
+                    flask_user.email_confirmed_on = datetime.now()
+                flask_user.put()
+            login_user(flask_user, remember=True)
+            flash(u'Вы успешно залогинились по аккунту ВКонтакте!')
+            return redirect(session['url_back'] or url_for('index'))
+
 
 @app.route('/logout')
 def logout():
@@ -136,11 +172,11 @@ def register():
         )
         user.put()
 
-        # token = generate_confirmation_token(user.email)
+        # token = generate_confirmation_token(comments.email)
         # confirm_url = url_for('confirm_email', token=token, _external=True)
         # html = render_template('auth/activate.html', confirm_url=confirm_url)
         # subject = u"Подтвердите свой email"
-        # send_email(user.email, subject, html)
+        # send_email(comments.email, subject, html)
 
         login_user(user)
         flash(u'Вы зарегистрировались. Не теряйте пароль.', 'success')
@@ -432,7 +468,7 @@ def get_all_comments():
         else:
             org_name = u'Неизвестно'
         post.org = org_name
-    return render_template('get_all_comments.html', posts=posts, categories=categories)
+    return render_template('comments/get_all_comments.html', posts=posts, categories=categories)
 
 
 @app.route('/comment_new/general', methods=['GET', 'POST'])
@@ -452,7 +488,7 @@ def comment_new_general():
         post.put()
         flash(u'Комментарий успешно создан!')
         return redirect(url_for('get_all_comments'))
-    return render_template('new_comment.html', form=form, categories=categories)
+    return render_template('comments/new_comment.html', form=form, categories=categories)
 
 
 ## For Ajax
@@ -467,7 +503,7 @@ def comment_new_details():
         category=request.form['category'],
         organization_id=int(request.form['organization_id']),
         author=author,
-        )
+    )
     post.put()
     return json.dumps({'status': 'OK', 'comment': request.form['comment']})
 
@@ -478,6 +514,8 @@ def get_comments_by_org():
         -CommentModel.when).fetch()
     return json.dumps({'status': 'OK', 'comments': comments_org}, cls=GaeEncoder)
 
+
+######## COMMENTS_END ###########
 
 @app.route('/like')
 # @login_required
