@@ -3,7 +3,7 @@
 
     <div class="container">
         <div class="row">
-            {# // Карта#}
+
             <div class="col-sm-6" align="center">
                 <h4>{{ org.title }}</h4>
 
@@ -81,24 +81,10 @@
                         <h4>{{ org.description|nl2br }}</h4>
                     </div>
                 </div>
-                {% if org.location.lat %}
-                    <div class="row well" id="wrapper">
-                        <div id="map">
-                            Google Maps
-                        </div>
-                        <div id="accuracy" align="center" style="background-color: red;"><strong></strong></div>
-                        <div id="gps_button_group">
-                            <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
-                            <input id="submit_address" type="button" value="Искать">
-                            <input id="gps_input" type="button" value="Определить себя по GPS">
-                            <input id="zoomin_input" type="button" value="Приблизить">
-                        </div>
-                    </div>
 
-                    {% include 'base_map.html' %}
-                {% endif %}
+
             </div>
-
+            <!-- Like and comments -->
             <div class="col-sm-6" style="margin-top: 20px">
                 <a id="like"
                    tabindex="0"
@@ -109,10 +95,10 @@
                    data-trigger="manual"
                    data-placement="bottom"
                    data-container="body"
-{#                   onclick="return confirm('Вы уверены?')"#}
+                        {#                   onclick="return confirm('Вы уверены?')"#}
                         >
                     <span class="glyphicon glyphicon-thumbs-up"
-                            aria-hidden="true">
+                          aria-hidden="true">
                     </span> Мне нравится! <span id="rating" class="badge">{{ org.rating }}</span>
                 </a>
 
@@ -140,14 +126,59 @@
                 </div>
 
             </div>
+
+            <!-- Map-Modal -->
+            {% if org.location.lat %}
+                <div>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"
+                            style="position: fixed; z-index: 999; bottom: 3px; right: 3px">
+                        <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Показать<br>на карте
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">Закрыть карту&nbsp;&nbsp;&times;</span></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="wrapper">
+                                        <div id="map">
+                                            Google Maps
+                                        </div>
+                                        <div id="accuracy" align="center" style="background-color: red;">
+                                            <strong></strong>
+                                        </div>
+                                        <div id="gps_button_group">
+                                            <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
+                                            <input id="submit_address" type="button" value="Искать">
+                                            <input id="gps_input" type="button" value="Определить себя по GPS">
+                                            <input id="zoomin_input" type="button" value="Приблизить">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть карту
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% include 'base_map.html' %}
+                </div>
+            {% endif %}
         </div>
     </div>
 
-{#    <div id="notlogin" style="display: none">#}
-{#        <a id="login" href="{{ url_for("login") }}"><strong>- Войти</strong></a>#}
-{#        <br><br>#}
-{#        <a id="no_account" href="#" style="margin: 10px 0"><strong>- У меня нет аккаунта</strong></a>#}
-{#    </div>#}
+    <script>
+        $('#myModal').on('shown.bs.modal', function () {
+            var currentCenter = map.getCenter();  // Get current center before resizing
+            google.maps.event.trigger(map, "resize");
+            map.setCenter(currentCenter); // Re-set previous center
+        });
+    </script>
 
     <script>
         $(document).ready(function () {
@@ -212,37 +243,37 @@
                         var data = JSON.parse(response);
                         if (data.rating_plus) {
                             document.getElementById("rating").innerHTML = data.rating_plus;
-                                $('#like')
-                                .popover({
-                                    trigger: 'manual',
-                                    html: true,
-                                    title: '<i class="fa fa-thumbs-up" aria-hidden="true"></i> Вы ОТДАЛИ свой голос!',
-                                })
-                                .popover('show');
+                            $('#like')
+                                    .popover({
+                                        trigger: 'manual',
+                                        html: true,
+                                        title: '<i class="fa fa-thumbs-up" aria-hidden="true"></i> Вы ОТДАЛИ свой голос!',
+                                    })
+                                    .popover('show');
                         }
                         if (data.rating_minus) {
                             document.getElementById("rating").innerHTML = data.rating_minus;
-                            $(function(){
+                            $(function () {
                                 $('#like')
-                                    .popover({
-{#                                        trigger: 'manual',#}
-                                        html: true,
-                                        title: '<i class="fa fa-thumbs-down" aria-hidden="true"></i> Вы ЗАБРАЛИ свой голос!',
-                                    })
-                                    .popover('show');
+                                        .popover({
+                                            {#                                        trigger: 'manual',#}
+                                            html: true,
+                                            title: '<i class="fa fa-thumbs-down" aria-hidden="true"></i> Вы ЗАБРАЛИ свой голос!',
+                                        })
+                                        .popover('show');
                             })
                         }
                         if (data.notlogin) {
                             console.log('Вы не вошли');
-                            $(function(){
+                            $(function () {
                                 $('#like')
-                                    .popover({
-{#                                        trigger: 'manual',#}
-                                        html: true,
-                                        title: '<strong>Вы не можете изменять рейтинги, потому что не вошли на сайт под аккаунтом!</strong>',
-                                        content: 'Если у вас нет аккаунта - зарегистрируйтесь или войдите через социальные сети.<br>Смотрите в верхнем правом углу экрана.',
-                                    })
-                                    .popover('show');
+                                        .popover({
+                                            {#                                        trigger: 'manual',#}
+                                            html: true,
+                                            title: '<strong>Вы не можете изменять рейтинги, потому что не вошли на сайт под аккаунтом!</strong>',
+                                            content: 'Если у вас нет аккаунта - зарегистрируйтесь или войдите через социальные сети.<br>Смотрите в верхнем правом углу экрана.',
+                                        })
+                                        .popover('show');
                             })
 
                         }
@@ -254,8 +285,8 @@
                 });
             });
         });
-        $(document).on('click', function(e) {
-        $('#like').popover('hide');
+        $(document).on('click', function (e) {
+            $('#like').popover('hide');
         });
     </script>
     {#    Скрипт для tooltip#}

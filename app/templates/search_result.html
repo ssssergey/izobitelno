@@ -27,13 +27,13 @@
                                 <th>Тел.м.</th>
                                 <th>Тел.г.</th>
                                 <th>Режим раб.</th>
-{#                                <th class="hidden-500">Режим раб.</th>#}
+                                {#                                <th class="hidden-500">Режим раб.</th>#}
                             </tr>
                             {% for post in posts %}
                                 <tr class="table-500">
                                     <td>
                                         <a href='/details/{{ post.id }}'>
-                                            <span class="badge badge-primary">{{ post.title }}</span>
+                                            {{ post.title }}
                                         </a>
                                         {% if post.daynight %}
                                             <span class="badge badge-success" data-toggle="tooltip" data-placement="top"
@@ -70,11 +70,12 @@
                                         {% set comma = joiner(", ") %}
                                         {% for number in post.phonenumber_static %}
                                             {{ comma() }}<a href="tel: 886545{{ number }}">
-                                            <nobr>{{ number }}</nobr></a>
+                                            <nobr>{{ number }}</nobr>
+                                        </a>
                                         {% endfor %}
                                     </td>
                                     <td>{{ post.working_hours|replace("None", "-") }}</td>
-{#                                    <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>#}
+                                    {#                                    <td class="hidden-500">{{ momentjs(post.when_added).fromNow() }}</td>#}
 
                                 </tr>
                             {% endfor %}
@@ -87,26 +88,59 @@
                         {% if post_with_adress.append(1) %}{% endif %}
                     {% endif %}
                 {% endfor %}
-                {% if post_with_adress %}
-                    <div class="row well" id="wrapper">
-                        <div id="map">
-                            Google Maps
-                        </div>
-                        <div id="accuracy" align="center" style="background-color: red;"><strong></strong></div>
-                        <div id="gps_button_group">
-                            <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
-                            <input id="submit_address" type="button" value="Искать">
-                            <input id="gps_input" type="button" value="Определить себя по GPS">
-                        </div>
-                    </div>
 
-                {% endif %}
             </div>
         </div>
+        <!-- Map-Modal -->
+        {% if post_with_adress %}
+            <div>
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"
+                        style="position: fixed; z-index: 999; bottom: 3px; right: 3px">
+                    <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Показать<br>на карте
+                </button>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                        aria-hidden="true">Закрыть карту&nbsp;&nbsp;&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="wrapper">
+                                    <div id="map">
+                                        Google Maps
+                                    </div>
+                                    <div id="accuracy" align="center" style="background-color: red; color: white">
+                                        <strong></strong></div>
+                                    <div id="gps_button_group">
+                                        <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
+                                        <input id="submit_address" type="button" value="Искать">
+                                        <input id="gps_input" type="button" value="Определить себя по GPS">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть карту
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% include 'base_map.html' %}
+            </div>
+        {% endif %}
     </div>
-    {% include 'base_map.html' %}
+
     {#    Скрипт для tooltip#}
     <script>
+        $('#myModal').on('shown.bs.modal', function () {
+            var currentCenter = map.getCenter();  // Get current center before resizing
+            google.maps.event.trigger(map, "resize");
+            map.setCenter(currentCenter); // Re-set previous center
+        });
+
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
         })
