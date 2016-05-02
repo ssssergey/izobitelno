@@ -59,7 +59,7 @@
                                         {% set adres_short = "Отсутствует" %}
                                     {% endif %}
                                     <td style="max-width: 10%">{{ adres_short }}</td>
-                                    <td class="hidden-500">{{ post.category }}</td>
+                                    <td class="hidden-500">{{ post.category|replace("None", "-") }}</td>
                                     <td>
                                         {% set comma = joiner(", ") %}
                                         {% for number in post.phonenumber %}
