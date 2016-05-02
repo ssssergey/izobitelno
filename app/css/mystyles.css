@@ -239,10 +239,10 @@ dd {
     height: auto;
 }
 
-.modal-dialog {
-  position: fixed;
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-}
+/*.modal-dialog {*/
+  /*position: fixed;*/
+  /*margin: 0;*/
+  /*width: 100%;*/
+  /*height: 100%;*/
+  /*padding: 0;*/
+/*}*/

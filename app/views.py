@@ -69,6 +69,8 @@ def login():
             login_user(user, remember=True)
             flash(u'Вы успешно вошли по паролю!')
             return redirect(session['url_back'] or url_for('index'))
+        else:
+            flash(u'Адрес почты или пароль не верны! Попробуйте еще раз.', 'error')
     session['url_back'] = request.args.get('url_back')
     return render_template('auth/login.html', form=form)
 

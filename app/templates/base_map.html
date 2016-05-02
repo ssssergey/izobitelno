@@ -1,4 +1,5 @@
 {#GOOGLE MAPS#}
+
 <script>
     var posts = {{ posts | tojson | safe }};
     var keyword = "{{ keyword | safe }}";
@@ -19,22 +20,28 @@
             scrollwheel: true,
         });
 
+
         var geocoder = new google.maps.Geocoder();
         addMarkerstoMap(posts);
 
         // Listeners
+
         // Определение своего местоположения. Вызывается функция GetLocation
-        document.getElementById('gps_input').addEventListener('click', function () {
-            navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
-        });
+        if (document.getElementById('gps_input')) {
+            document.getElementById('gps_input').addEventListener('click', function () {
+                navigator.geolocation.getCurrentPosition(GetLocation, Error, {enableHighAccuracy: true});
+            });
+        }
         // Обработка ввода улицы.
         document.getElementById('submit_address').addEventListener('click', function () {
             geocodeAddress(geocoder);
         });
         // Обработка клика по карте - создание маркера.
-        map.addListener('click', function (event) {
-            geocodeLatLng(event.latLng);
-        });
+        if (document.getElementById('gps_input')) {
+            map.addListener('click', function (event) {
+                geocodeLatLng(event.latLng);
+            });
+        }
         // Приближение к точке.
         if (document.getElementById('zoomin_input')) {
             document.getElementById('zoomin_input').addEventListener('click', function () {
@@ -42,7 +49,67 @@
                 map.setZoom(18);
             });
         }
+        // Приближение себя.
+        if (document.getElementById('zoomin_myself')) {
+            document.getElementById('zoomin_myself').addEventListener('click', function () {
+                map.setCenter(myposition);
+                map.setZoom(18);
+            });
+        }
+        // Отслеживание своего местоположения
+        document.getElementById('showMap').addEventListener('click', function () {
+            var watchID = navigator.geolocation.watchPosition(WatchMyPosition, Error, {enableHighAccuracy: true});
+
+        });
     }
+    var myposition = null;
+    var marker_self = null;
+
+    var WatchMyPosition = function (position) {
+                var altitude = position.coords.altitude;
+                if (altitude>20) altitude = 'Точность местоопределения низкая';
+                var lat = position.coords.latitude;
+                var long = position.coords.longitude;
+                var myLatlng = new google.maps.LatLng(lat, long);
+                myposition = myLatlng;
+
+                if (marker_self == null) {
+                    var iconimage = {
+                        url: '/images/man.png',
+                        scaledSize: new google.maps.Size(40, 40)
+                    };
+                    marker_self = new google.maps.Marker({
+                        position: myLatlng,
+                        animation: google.maps.Animation.DROP,
+                        {#                map: map,#}
+                        icon: iconimage
+                    });
+                    marker_self.setMap(map);
+                    var infowindow = new google.maps.InfoWindow({content: "Вы здесь!<br><button id='smile' class='btn btn-default btn-sm'>Приблизить</button>"});
+                    infowindow.open(map, marker_self);
+                    document.getElementById("smile").addEventListener('click', function () {
+                        map.setCenter(myLatlng);
+                        map.setZoom(18);
+                    });
+                    marker_self.addListener('click', function () {
+                                infowindow.open(map, marker_self);
+                                // Слушать нажатие на Приблизить в инфобоксе маркера
+{#                                document.getElementById("smile").addEventListener('click', function () {#}
+{#                                    map.setCenter(myLatLng);#}
+{#                                    map.setZoom(18);#}
+{#                                });#}
+                            }
+                    )
+                    ;
+                    if (document.getElementById('zoomin_myself')) {
+                        document.getElementById('zoomin_myself').style.display = 'block';
+                    }
+                }
+                else {
+                    marker_self.setPosition(myLatlng);
+                }
+            }
+            ;
 
 
     function addMarkerstoMap(posts) {
@@ -60,19 +127,20 @@
         window.setTimeout(function () {
             if (post.location) {
                 var myLatLng = {lat: post.location.lat, lng: post.location.lng};
-                {#                  var image = {#}
-                {#                    url: '/images/quality.png',#}
-                {#                    scaledSize: new google.maps.Size(50, 50)#}
-                {#                  };#}
+                {#                                  var image = {#}
+                {#                                    url: '/images/quality.png',#}
+                {#                                    scaledSize: new google.maps.Size(50, 50)#}
+                {#                                  };#}
                 var marker1 = new google.maps.Marker({
                     position: myLatLng,
-                    {#                                icon: image,#}
-                    map: map,
+                    {#                                                    icon: image,#}
+                    {#                    map: map,#}
                     animation: google.maps.Animation.DROP
                 });
                 if (post.id === id) {
                     marker1.setAnimation(google.maps.Animation.BOUNCE);
                 }
+
                 var adress = post.adres.split(', Изобильный')[0];
                 var rating = post.rating;
                 if (post.description) {
@@ -101,16 +169,23 @@
                         "<div>Изменено: " + moment.unix(post.when_modified).format('LLL') + "</div>" +
                         "</div>" +
                         "<div class='panel-footer'>" + post.category + "</div></div>" +
-                        "<a href='/details/" + post.id + "'>Подробнее</a>" +
+                        "<a class='btn btn-default' href='/details/" + post.id + "'>Подробнее</a>" +
+                        "<button id='" + post.id + "' class='zoominthismarker pull-right btn btn-default'>Приблизить</button>" +
                         "{% if g.user.is_admin %}" + "<br>" +
-                        "<a href='/edit_org/" + post.id + "?keyword=" + keyword + "'>Редактировать</a>" + "<br>" +
-                        "<a href='/del_org/" + post.id + "'>Удалить</a>"
-                        "{% endif %}";
+                            "<a href='/edit_org/" + post.id + "?keyword=" + keyword + "'>Редактировать</a>" + "<br>" +
+                            "<a href='/del_org/" + post.id + "'>Удалить</a>"
+                            "{% endif %}";
                 var infowindow1 = new google.maps.InfoWindow({content: content});
                 {#                    infowindow1.setZIndex(10);#}
                 marker1.addListener('click', function () {
                     infowindow1.open(map, marker1);
+                    // Слушать нажатие на Приблизить в инфобоксе маркера
+                    document.getElementById(post.id).addEventListener('click', function () {
+                        map.setCenter(myLatLng);
+                        map.setZoom(18);
+                    });
                 });
+                marker1.setMap(map);
                 markers.push(marker1);
             }
         }, timeout);
@@ -184,7 +259,6 @@
         if (location.coords.accuracy > 15) {
             $('#accuracy').text("Не удалось определить. Включите GPS (установите в настройках: определять только по GPS) - выйдите на улицу (или подойдите к окну) - нажмите на кнопку повторно.");
         } else {
-
             initialLocation = new google.maps.LatLng(location.coords.latitude, location.coords.longitude);
             map.setCenter(initialLocation);
             map.setZoom(18);
@@ -222,6 +296,47 @@
             new_markers_array[i].setMap(null);
         }
     }
+
+
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"
-        async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"></script>
+<script type="text/javascript"
+        src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/maplabel/src/maplabel-compiled.js"></script>
+<script>
+    // MapLabel
+    // My code
+    var districts = {
+        mkd: {text: 'МКД', lat: 45.355415, lon: 41.716152},
+        reo: {text: 'РЭО', lat: 45.359609, lon: 41.691504},
+        kurm: {text: 'Курмыши', lat: 45.386915, lon: 41.702203},
+        saharniy: {text: 'Сахарный', lat: 45.379790, lon: 41.691486},
+        raduga: {text: 'Радуга', lat: 45.383136, lon: 41.725544},
+        gazoprovod: {text: 'Газопровод', lat: 45.369725, lon: 41.726630},
+        atlant: {text: 'Атлант', lat: 45.391301, lon: 41.709852},
+        park: {text: 'Парк', lat: 45.379234, lon: 41.715152},
+    };
+    var points = {
+        autostation: {text: 'Автовокзал', lat: 45.372371, lon: 41.718527},
+        railstation: {text: 'Ж/Д вокзал', lat: 45.362041, lon: 41.707176},
+    };
+
+    for (var district in districts) {
+        var mapLabel = new MapLabel({
+            text: districts[district].text,
+            position: new google.maps.LatLng(districts[district].lat, districts[district].lon),
+            map: map,
+            fontSize: 25,
+            maxZoom: 15,
+        });
+    }
+    for (var point in points) {
+        var mapLabel = new MapLabel({
+            text: points[point].text,
+            position: new google.maps.LatLng(points[point].lat, points[point].lon),
+            map: map,
+            fontSize: 15,
+            maxZoom: 16,
+        });
+    }
+
+</script>

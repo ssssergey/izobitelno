@@ -14,10 +14,8 @@
     <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="/css/font-awesome.min.css" rel="stylesheet">
     <link href="/css/mystyles.css" rel="stylesheet" type="text/css">
-{#    <script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>#}
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    {#    <script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>#}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.min.js"></script>
     {#    <link rel="stylesheet" href="/css/tags.css">#}
     {#    <script type="text/javascript" src="/js/autofill.js"></script>#}
@@ -28,30 +26,58 @@
 <body>
 
 <!-- preloader -->
-    <style type="text/css">
-        .preloader_bg { position: fixed; background: rgba(15,15,15,1); width: 100%; height: 100%; top: 0; left: 0; z-index: 200; }
-        .preloader_content { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 201; font-size: 14px; }
-        .preloader_content span { display: block; margin: auto; text-align: center; text-transform: uppercase; color: rgba(225,225,225,1);}
-    </style>
-    <script type="text/javascript">
-    $(function(){
+<style type="text/css">
+    .preloader_bg {
+        position: fixed;
+        background: rgba(15, 15, 15, 1);
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 200;
+    }
+
+    .preloader_content {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 201;
+        font-size: 14px;
+    }
+
+    .preloader_content span {
+        display: block;
+        margin: auto;
+        text-align: center;
+        text-transform: uppercase;
+        color: rgba(225, 225, 225, 1);
+    }
+</style>
+<script type="text/javascript">
+    $(function () {
         $('.preloader_bg, .preloader_content').fadeIn(0);
-        $(window).load(function(){
+        $(window).load(function () {
             $('.preloader_bg').delay(250).fadeOut(1500);
             $('.preloader_content').delay(250).fadeOut(750);
         });
     });
-    </script>
-    <div class="preloader_bg"></div>
-    <div class="preloader_content">
-        <span>Идет загрузка...<br>Подождите...</span>
-    </div>
-    <noscript>
-        <style>
-            html, body { opacity: 1 !important; }
-            .preloader_bg, .preloader_content { display: none !important; }
-        </style>
-    </noscript>
+</script>
+<div class="preloader_bg"></div>
+<div class="preloader_content">
+    <span>Идет загрузка...<br>Подождите...</span>
+</div>
+<noscript>
+    <style>
+        html, body {
+            opacity: 1 !important;
+        }
+
+        .preloader_bg, .preloader_content {
+            display: none !important;
+        }
+    </style>
+</noscript>
 <!-- /preloader -->
 
 <script>
@@ -92,10 +118,14 @@
                     <li><a href="{{ url_for('secret_query_by_phonenumber') }}">По номеру</a></li>
                 {% endif %}
                 {% if current_user.is_authenticated %}
-                    <li><a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{ g.user.nickname }}</a></li>
-                    <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Выход</a></li>
+                    <li><a href="#"><span class="glyphicon glyphicon-user"
+                                          aria-hidden="true"></span> {{ g.user.nickname }}</a></li>
+                    <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"
+                                                                aria-hidden="true"></span> Выход</a></li>
                 {% else %}
-                    <li><a href="{{ url_for('login', url_back=request.url) }}"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Вход</a></li>
+                    <li><a href="{{ url_for('login', url_back=request.url) }}"><span class="glyphicon glyphicon-log-in"
+                                                                                     aria-hidden="true"></span> Вход</a>
+                    </li>
                 {% endif %}
             </ul>
         </div>
@@ -115,10 +145,11 @@
 {% endwith %}
 
 <div class="under-navbar">
-{% block content %}
+    {% block content %}
 
-{% endblock %}
+    {% endblock %}
 </div>
+
 
 </body>
 

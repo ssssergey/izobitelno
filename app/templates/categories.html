@@ -37,30 +37,27 @@
     <div class="row row-footer">
         <div class="col-sm-6">
             <ul>
-                <a href="{{ url_for('show_categories_all') }}">
-                    <li>Категории</li>
-                </a>
                 <a href="{{ url_for('get_all_comments') }}">
                     <li>Комментарии, пожелания, отзывы</li>
                 </a>
                 <a href="{{ url_for('contacts') }}">
-                    <li>Сотрудничество</li>
+                    <li>Контакты</li>
                 </a>
             </ul>
         </div>
-        <div class="col-sm-6">
-            <ul>
-                <a href="{{ url_for('list_orgs') }}">
-                    <li>Общий список</li>
-                </a>
-                <a href="{{ url_for('secret_query_by_phonenumber') }}">
-                    <li>Поиск по номеру</li>
-                </a>
-                <a href="{{ url_for('secret_get_allTags') }}">
-                    <li>Тэги</li>
-                </a>
-            </ul>
-        </div>
+{#        <div class="col-sm-6">#}
+{#            <ul>#}
+{#                <a href="{{ url_for('list_orgs') }}">#}
+{#                    <li>Общий список</li>#}
+{#                </a>#}
+{#                <a href="{{ url_for('secret_query_by_phonenumber') }}">#}
+{#                    <li>Поиск по номеру</li>#}
+{#                </a>#}
+{#                <a href="{{ url_for('secret_get_allTags') }}">#}
+{#                    <li>Тэги</li>#}
+{#                </a>#}
+{#            </ul>#}
+{#        </div>#}
     </div>
 
 {% endblock %}

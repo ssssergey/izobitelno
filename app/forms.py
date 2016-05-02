@@ -54,11 +54,11 @@ class SecretPhoneForm(Form):
     phonenumber_static = StringField(widget=widgets.Input(input_type="tel"), render_kw={"placeholder": u"9-99-99"})
 
 class RegistrationForm(Form):
-    email = StringField(u'Адрес электронной почты', validators=[DataRequired(message=u'Обязятельное поле')])
+    email = StringField(u'Адрес почты', validators=[DataRequired(message=u'Обязятельное поле')])
     password = StringField(u'Пароль', validators=[DataRequired(message=u'Обязятельное поле'),
                                                   EqualTo('confirm', message=u'Пароли не совпадают!')])
     confirm = StringField(u'Повторить пароль', validators=[DataRequired(message=u'Обязятельное поле')])
 
 class LoginForm(Form):
-    email = StringField(u'Адрес электронной почты', validators=[DataRequired(message=u'Обязятельное поле')])
+    email = StringField(u'Адрес почты', validators=[DataRequired(message=u'Обязятельное поле')])
     password = StringField(u'Пароль', validators=[DataRequired(message=u'Обязятельное поле')])

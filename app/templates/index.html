@@ -75,6 +75,7 @@
     </style>
 </noscript>
 <!-- /preloader -->
+
 <style>
     #overlay {
         width: 100%;
@@ -83,6 +84,13 @@
         left: 0;
         z-index: 10;
     }
+
+    @media (max-width: 768px) {
+    .hidden-768 {
+        display: none !important;
+    }
+
+}
 </style>
 <div id="overlay">
     {% with messages = get_flashed_messages() %}
@@ -100,11 +108,12 @@
 </div>
 <div class="container-fluid" style="height: 100%">
     <div class="row" style="background: #315981; height: 20%; min-height: 100px">
-        <div class="col-xs-12 col-sm-6">
+        <div class="col-xs-12 col-sm-9">
             <div style="margin-top: 10px; font-size: 20px"><span style="color:orangered">И</span><span
                     style="color:white">зобильный</span></div>
+            <h2 class="hidden-768" style="margin-top: 10px"><small style="color:gray;">Товары, услуги и организации города Изобильный</small></h2>
         </div>
-        <div class="col-xs-12 col-sm-6">
+        <div class="col-xs-12 col-sm-3">
             <a style="float: right; margin: 10px" class="btn btn-lg btn-info"
                href="{{ url_for('show_categories_all') }}" role="button" data-toggle="tooltip" data-placement="bottom"
                title="Ищите по категориям">Категории</a>
@@ -117,7 +126,6 @@
             <div class="row vertical-center-row">
                 <div class="text-center col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4">
                     <h1><span style="color:orangered">И</span>зопоиск</h1>
-
                     <form action="{{ url_for('search_result') }}" method="post" accept-charset="utf-8">
                         <input id="search" name="search" type="search" value=""
                                placeholder="Введите запрос" required autofocus/>

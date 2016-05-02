@@ -2,7 +2,7 @@
 {% block content %}
 
     <div class="container">
-        <div class="row">
+        <div class="row" style="margin-bottom: 50px">
             <div class="col-sm-12">
                 {% set posts_count = posts|length %}
                 {% if posts_count == 0 %}
@@ -95,15 +95,16 @@
         {% if post_with_adress %}
             <div>
                 <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"
-                        style="position: fixed; z-index: 999; bottom: 3px; right: 3px">
-                    <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Показать<br>на карте
+                <button id="showMap" type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#myModal"
+                        style="position: fixed; z-index: 999; bottom: 3px; right: 5px">
+                    <i class="fa fa-map-o" aria-hidden="true"></i> Показать<br>на карте
                 </button>
                 <!-- Modal -->
                 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
+                                <button id="zoomin_myself" type="button" class="btn btn-warning" style="display: none">Приблизить себя</button>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                         aria-hidden="true">Закрыть карту&nbsp;&nbsp;&times;</span></button>
                             </div>
@@ -117,18 +118,17 @@
                                     <div id="gps_button_group">
                                         <input id="address" type="textbox" value="" placeholder="ул. Ленина 10">
                                         <input id="submit_address" type="button" value="Искать">
-                                        <input id="gps_input" type="button" value="Определить себя по GPS">
                                     </div>
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть карту
+                                <button type="button" class="btn btn-warning" data-dismiss="modal">Закрыть карту
                                 </button>
                             </div>
                         </div>
                     </div>
+                    {% include 'base_map.html' %}
                 </div>
-                {% include 'base_map.html' %}
             </div>
         {% endif %}
     </div>
