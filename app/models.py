@@ -63,6 +63,8 @@ class UserModel(EndpointsModel):
     vk_access_token = ndb.StringProperty()
     vk_user_id = ndb.IntegerProperty()
     vk_expires_in = ndb.IntegerProperty()
+    ok_user_id = ndb.IntegerProperty()
+    ok_access_token = ndb.StringProperty()
     wot_access_token = ndb.StringProperty()
     wot_account_id = ndb.StringProperty()
     is_authenticated = ndb.BooleanProperty(default=True)

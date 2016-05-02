@@ -21,6 +21,8 @@
                 Через аккаунт Google</a></li>
             <li><a class="btn btn-default" role="button" href="{{ url_for("login_vk", login_attempt=True) }}"><i
                     class="fa fa-vk" aria-hidden="true"></i> Через аккаунт Вконтакте</a></li>
+            <li><a class="btn btn-default" role="button" href="{{ url_for("login_odnoklassniki", login_attempt=True) }}"><i
+                    class="fa fa-odnoklassniki" aria-hidden="true"></i> Через аккаунт Одноклассники</a></li>
             <li>
                 <p>Посредством ввода email и пароля (требуется предварительная регистрация)</p>
                 <ul>
@@ -32,7 +34,9 @@
                             {{ render_field(form.email) }}
                             {{ render_field(form.password) }}
                         </dl>
-                        <button type="submit" class="btn btn-default"><i class="fa fa-sign-in" aria-hidden="true"></i> Войти</button>
+                        <button type="submit" class="btn btn-default"><i class="fa fa-sign-in" aria-hidden="true"></i>
+                            Войти
+                        </button>
                     </form>
 
                     {% if error %}

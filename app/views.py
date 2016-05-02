@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import hashlib
 import json
+import urllib
 import urllib2
 from datetime import datetime
 # from passlib.handlers.sha2_crypt import sha256_crypt
@@ -147,6 +149,84 @@ def login_vk():
                 flask_user.put()
             login_user(flask_user, remember=True)
             flash(u'Вы успешно залогинились по аккунту ВКонтакте!')
+            return redirect(session['url_back'] or url_for('index'))
+
+
+@app.route('/login_odnoklassniki', methods=['GET', 'POST'])
+def login_odnoklassniki():
+    app_id = "1246901248"
+    app_key = "CBAFDDFLEBABABABA"
+    app_secret = "6F1192E1F73E17EFE7E00DC4"
+    if request.args.get('bussiness'):
+        scope = "VALUABLE_ACCESS"
+    else:
+        scope = "VALUABLE_ACCESS"
+    login_attempt = request.args.get('login_attempt')
+
+    code = request.args.get('code')
+    error = request.args.get('error')
+    error_description = request.args.get('error_description')
+
+    if login_attempt:
+        return redirect(
+            "https://connect.ok.ru/oauth/authorize?client_id={0}&scope={1}&response_type={2}&redirect_uri={3}".format(
+                app_id, scope, "code", url_for('login_odnoklassniki', _external=True)))
+    if code:
+        print code
+        # POST request
+        values = {
+            'code': code,
+            'client_id': app_id,
+            'client_secret': app_secret,
+            'redirect_uri': url_for('login_odnoklassniki', _external=True),
+            'grant_type': "authorization_code"
+        }
+        data = urllib.urlencode(values)
+        url_get_token = "https://api.ok.ru/oauth/token.do"
+        req = urllib2.Request(url_get_token, data)
+        opener = urllib2.build_opener()
+        f = opener.open(req)
+        json_obj = json.loads(f.read())
+        print json_obj
+        access_token = json_obj.get('access_token')
+        token_type = json_obj.get('token_type ')
+        refresh_token = json_obj.get('refresh_token ')
+        expires_in = json_obj.get('expires_in ')
+        #  MD5
+        sig_1 = "application_key={}method={}".format(app_key,"users.getCurrentUser")
+        sig_raw = access_token+app_secret
+        m = hashlib.md5()
+        m.update(sig_raw)
+        sig_2 = m.hexdigest()
+        sig = sig_1+sig_2
+        m = hashlib.md5()
+        m.update(sig)
+        sig = m.hexdigest()
+        if access_token:
+            values = {
+                'application_key': app_key,
+                'method': 'users.getCurrentUser',
+                'access_token': access_token,
+                'sig': sig,
+            }
+            data = urllib.urlencode(values)
+            url_getProfiles = "https://api.ok.ru/fb.do"
+            req = urllib2.Request(url_getProfiles, data)
+            opener = urllib2.build_opener()
+            f = opener.open(req)
+            json_obj = json.loads(f.read())
+            uid = int(json_obj['uid'])
+            name = json_obj['name']
+            flask_user = UserModel.query(UserModel.ok_user_id == uid).get()
+            if not flask_user:
+                flask_user = UserModel(
+                    nickname=name,
+                    ok_user_id=uid,
+                    ok_access_token=access_token,
+                )
+                flask_user.put()
+            login_user(flask_user, remember=True)
+            flash(u'Вы успешно залогинились по аккунту Одноклассники!')
             return redirect(session['url_back'] or url_for('index'))
 
 

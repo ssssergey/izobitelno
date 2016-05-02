@@ -67,8 +67,8 @@
 
 
         var WatchMyPosition = function (position) {
-                    var altitude = position.coords.altitude;
-                    if (altitude > 20) altitude = 'Точность местоопределения низкая';
+                    var accuracy = position.coords.accuracy;
+                    if (accuracy > 20) var accuracy_quality = 'Точность местоопределения низкая';
                     var lat = position.coords.latitude;
                     var long = position.coords.longitude;
                     var myLatlng = new google.maps.LatLng(lat, long);
@@ -86,7 +86,7 @@
                             icon: iconimage
                         });
 
-                        infowindow.setContent("Вы здесь!<br><button id='smile' class='btn btn-default btn-sm'>Приблизить</button>");
+                        infowindow.setContent("Вы здесь!<br><button id='smile' class='btn btn-default btn-sm'>Приблизить</button><br>Точность: "+accuracy);
                         infowindow.open(map, marker_smile);
                         // Нажатие на кнопку
                         document.getElementById("smile").addEventListener('click', function () {
