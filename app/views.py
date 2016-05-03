@@ -18,6 +18,7 @@ from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, 
     RegistrationForm, LoginForm
 
 from app.data import categories
+from settings import vk_app_id, vk_client_secret, ok_app_id,ok_app_key, ok_app_secret
 
 from token import generate_confirmation_token, confirm_token
 from email import send_email
@@ -97,8 +98,6 @@ def login_google():
 
 @app.route('/login_vk', methods=['GET', 'POST'])
 def login_vk():
-    vk_app_id = "5437643"
-    vk_client_secret = "BZMjgoDhd8lW4iIVw5hC"
     if request.args.get('bussiness'):
         vk_scope = "email,photos,audio,video,docs,notes,pages,status,wall,notifications,stats,ads,market,offline,nohttps"
     else:
@@ -154,9 +153,6 @@ def login_vk():
 
 @app.route('/login_odnoklassniki', methods=['GET', 'POST'])
 def login_odnoklassniki():
-    app_id = "1246901248"
-    app_key = "CBAFDDFLEBABABABA"
-    app_secret = "6F1192E1F73E17EFE7E00DC4"
     if request.args.get('bussiness'):
         scope = "VALUABLE_ACCESS"
     else:
@@ -170,14 +166,14 @@ def login_odnoklassniki():
     if login_attempt:
         return redirect(
             "https://connect.ok.ru/oauth/authorize?client_id={0}&scope={1}&response_type={2}&redirect_uri={3}".format(
-                app_id, scope, "code", url_for('login_odnoklassniki', _external=True)))
+                ok_app_id, scope, "code", url_for('login_odnoklassniki', _external=True)))
     if code:
         print code
         # POST request
         values = {
             'code': code,
-            'client_id': app_id,
-            'client_secret': app_secret,
+            'client_id': ok_app_id,
+            'client_secret': ok_app_secret,
             'redirect_uri': url_for('login_odnoklassniki', _external=True),
             'grant_type': "authorization_code"
         }
@@ -193,8 +189,8 @@ def login_odnoklassniki():
         refresh_token = json_obj.get('refresh_token ')
         expires_in = json_obj.get('expires_in ')
         #  MD5
-        sig_1 = "application_key={}method={}".format(app_key,"users.getCurrentUser")
-        sig_raw = access_token+app_secret
+        sig_1 = "application_key={}method={}".format(ok_app_key,"users.getCurrentUser")
+        sig_raw = access_token+ok_app_secret
         m = hashlib.md5()
         m.update(sig_raw)
         sig_2 = m.hexdigest()
@@ -204,7 +200,7 @@ def login_odnoklassniki():
         sig = m.hexdigest()
         if access_token:
             values = {
-                'application_key': app_key,
+                'application_key': ok_app_key,
                 'method': 'users.getCurrentUser',
                 'access_token': access_token,
                 'sig': sig,
@@ -314,18 +310,25 @@ def show_categories_all():
 def search_result():
     if request.method == 'GET':
         keyword = request.args.get('category_rus')
+        keyword = keyword.lower().strip()
     elif request.method == 'POST':
         keyword = request.form.get('search')
-        word = SearchWordsModel.query(SearchWordsModel.word == keyword.lower().strip()).get()
+        keyword = keyword.lower().strip()
+        word = SearchWordsModel.query(SearchWordsModel.word == keyword).get()
         if word:
             word.quantity = word.quantity + 1
             word.put()
         else:
             word = SearchWordsModel(word=keyword.lower().strip(), quantity=1)
             word.put()
-    selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
+    if keyword == u'круглосуточно':
+        selected_orgs = OrganizationModel.query(OrganizationModel.daynight == True).fetch()
+    elif keyword == u'доставка':
+        selected_orgs = OrganizationModel.query(OrganizationModel.delivery == True).fetch()
+    else:
+        selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword).fetch()
     return render_template("search_result.html", posts=json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
-                           categories=categories, keyword=keyword)
+                           categories=categories, keyword=keyword, title=keyword)
 
 
 # @app.route('/category/<category_eng>')
@@ -778,3 +781,7 @@ def secret_query_by_phonenumber():
     else:
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
+
+@app.route('/guide_geolocation')
+def guide_geolocation():
+    return render_template('guide_geolocation.html')

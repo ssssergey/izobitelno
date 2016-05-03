@@ -23,7 +23,7 @@
 
         var infowindow = new google.maps.InfoWindow({content: ""});
         var geocoder = new google.maps.Geocoder();
-        var myposition = null;
+        {#        var myposition = null;#}
         var marker_smile = null;
         addMarkerstoMap(posts);
 
@@ -53,13 +53,13 @@
             });
         }
         // Приближение себя.
-        if (document.getElementById('zoomin_myself')) {
-            document.getElementById('zoomin_myself').addEventListener('click', function () {
-                map.setCenter(myposition);
-                map.setZoom(18);
-            });
-        }
-        // Отслеживание своего местоположения
+        {#        if (document.getElementById('zoomin_myself')) {#}
+        {#            document.getElementById('zoomin_myself').addEventListener('click', function () {#}
+        {#                map.setCenter(myposition);#}
+        {#                map.setZoom(18);#}
+        {#            });#}
+        {#        }#}
+        // Отслеживание своего местоположения сразу при открытии карты
         document.getElementById('showMap').addEventListener('click', function () {
             var watchID = navigator.geolocation.watchPosition(WatchMyPosition, Error, {enableHighAccuracy: true});
 
@@ -67,48 +67,52 @@
 
 
         var WatchMyPosition = function (position) {
-                    var accuracy = position.coords.accuracy;
-                    if (accuracy > 20) var accuracy_quality = 'Точность местоопределения низкая';
-                    var lat = position.coords.latitude;
-                    var long = position.coords.longitude;
-                    var myLatlng = new google.maps.LatLng(lat, long);
-                    myposition = myLatlng;
+            var accuracy = position.coords.accuracy;
+            if (accuracy < 30) {
+                var lat = position.coords.latitude;
+                var long = position.coords.longitude;
+                var myLatlng = new google.maps.LatLng(lat, long);
+                {#                    myposition = myLatlng;#}
 
-                    if (marker_smile == null) {
-                        var iconimage = {
-                            url: '/images/man.png',
-                            scaledSize: new google.maps.Size(40, 40)
-                        };
-                        marker_smile = new google.maps.Marker({
-                            position: myLatlng,
-                            animation: google.maps.Animation.DROP,
-                            {#                map: map,#}
-                            icon: iconimage
-                        });
+                if (marker_smile == null) {
+                    var iconimage = {
+                        url: '/images/man.png',
+                        scaledSize: new google.maps.Size(40, 40)
+                    };
+                    marker_smile = new google.maps.Marker({
+                        position: myLatlng,
+                        animation: google.maps.Animation.DROP,
+                        {#                map: map,#}
+                        icon: iconimage
+                    });
 
-                        infowindow.setContent("Вы здесь!<br><button id='smile' class='btn btn-default btn-sm'>Приблизить</button><br>Точность: "+accuracy);
-                        infowindow.open(map, marker_smile);
-                        // Нажатие на кнопку
-                        document.getElementById("smile").addEventListener('click', function () {
-                            map.setCenter(myLatlng);
-                            map.setZoom(18);
-                        });
-                        // Нажатие на иконку
-                        marker_smile.addListener('click', function () {
-                                    infowindow.setContent("Вы здесь!<br><button id='smile' class='btn btn-default btn-sm'>Приблизить</button>");
-                                    infowindow.open(map, marker_smile);
-                                }
-                        );
-                        marker_smile.setMap(map);
-                        if (document.getElementById('zoomin_myself')) {
-                            document.getElementById('zoomin_myself').style.display = 'block';
-                        }
-                    }
-                    else {
-                        marker_smile.setPosition(myLatlng);
+                    infowindow.setContent("Вы здесь!<br><button id='smile_zoomin' class='btn btn-default btn-sm'>Приблизить</button><br>Точность: " + accuracy);
+                    infowindow.open(map, marker_smile);
+                    // Нажатие на кнопку
+                    document.getElementById("smile_zoomin").addEventListener('click', function () {
+                        map.setCenter(myLatlng);
+                        map.setZoom(18);
+                    });
+                    // Нажатие на иконку
+                    marker_smile.addListener('click', function () {
+                                infowindow.setContent("Вы здесь!<br><button id='smile' class='btn btn-default btn-sm'>Приблизить</button>");
+                                infowindow.open(map, marker_smile);
+                            }
+                    );
+                    marker_smile.setMap(map);
+                    if (document.getElementById('modal_header_text')) {
+                        document.getElementById('modal_header_text').innerHTML = "Вы нашлись!";
                     }
                 }
-                ;
+                else {
+                    marker_smile.setPosition(myLatlng);
+                }
+            } else {
+                if (document.getElementById('guide_link')) {
+                    document.getElementById('guide_link').innerHTML = "Недостаточная точность! - " + accuracy;
+                }
+            }
+        };
 
 
         function addMarkerstoMap(posts) {
@@ -127,10 +131,7 @@
             window.setTimeout(function () {
                 if (post.location) {
                     var myLatLng = {lat: post.location.lat, lng: post.location.lng};
-                    {#                                  var image = {#}
-                    {#                                    url: '/images/quality.png',#}
-                    {#                                    scaledSize: new google.maps.Size(50, 50)#}
-                    {#                                  };#}
+
                     var marker1 = new google.maps.Marker({
                         position: myLatLng,
                         {#                                                    icon: image,#}
@@ -139,6 +140,19 @@
                     });
                     if (post.id === id) {
                         marker1.setAnimation(google.maps.Animation.BOUNCE);
+                    }
+                    if (post.daynight === true) {
+                        var image = {
+                            url: '/images/24_1.png',
+                            scaledSize: new google.maps.Size(40, 40)
+                        };
+                        marker1.setIcon(image);
+                    } else if (post.delivery == true) {
+                        var image = {
+                            url: '/images/delivery.png',
+                            scaledSize: new google.maps.Size(40, 40)
+                        };
+                        marker1.setIcon(image);
                     }
 
                     var adress = post.adres.split(', Изобильный')[0];
@@ -172,7 +186,8 @@
                             "<a class='btn btn-default' href='/details/" + post.id + "'>Подробнее</a>" +
                             "<button id='" + post.id + "' class='zoominthismarker pull-right btn btn-default'>Приблизить</button>" +
                             "{% if g.user.is_admin %}" + "<br>" +
-                                "<a href='/edit_org/" + post.id + "?keyword=" + keyword + "'>Редактировать</a>" + "<br>"
+                                "<a href='/edit_org/" + post.id + "?keyword=" + keyword + "'>Редактировать</a>"
+                                + "<br>"
                                 +
                                 "<a href='/del_org/" + post.id + "'>Удалить</a>"
                                 "{% endif %}";
@@ -317,10 +332,10 @@
         atlant: {text: 'Атлант', lat: 45.391301, lon: 41.709852},
         park: {text: 'Парк', lat: 45.379234, lon: 41.715152},
     };
-{#    var points = {#}
-{#        autostation: {text: 'Автовокзал', lat: 45.372371, lon: 41.718527},#}
-{#        railstation: {text: 'Ж/Д вокзал', lat: 45.362041, lon: 41.707176},#}
-{#    };#}
+    {#    var points = {#}
+    {#        autostation: {text: 'Автовокзал', lat: 45.372371, lon: 41.718527},#}
+    {#        railstation: {text: 'Ж/Д вокзал', lat: 45.362041, lon: 41.707176},#}
+    {#    };#}
 
     for (var district in districts) {
         var mapLabel = new MapLabel({
@@ -331,14 +346,14 @@
             maxZoom: 15,
         });
     }
-{#    for (var point in points) {#}
-{#        var mapLabel = new MapLabel({#}
-{#            text: points[point].text,#}
-{#            position: new google.maps.LatLng(points[point].lat, points[point].lon),#}
-{#            map: map,#}
-{#            fontSize: 15,#}
-{#            maxZoom: 16,#}
-{#        });#}
-{#    }#}
+    {#    for (var point in points) {#}
+    {#        var mapLabel = new MapLabel({#}
+    {#            text: points[point].text,#}
+    {#            position: new google.maps.LatLng(points[point].lat, points[point].lon),#}
+    {#            map: map,#}
+    {#            fontSize: 15,#}
+    {#            maxZoom: 16,#}
+    {#        });#}
+    {#    }#}
 
 </script>

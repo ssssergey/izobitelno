@@ -95,7 +95,8 @@
         {% if post_with_adress %}
             <div>
                 <!-- Button trigger modal -->
-                <button id="showMap" type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#myModal"
+                <button id="showMap" type="button" class="btn btn-warning btn-lg" data-toggle="modal"
+                        data-target="#myModal"
                         style="position: fixed; z-index: 999; bottom: 3px; right: 5px">
                     <i class="fa fa-map-o" aria-hidden="true"></i> Показать<br>на карте
                 </button>
@@ -104,9 +105,12 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <button id="zoomin_myself" type="button" class="btn btn-warning" style="display: none">Приблизить себя</button>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                        aria-hidden="true">Закрыть карту&nbsp;&nbsp;&times;</span></button>
+                                <h4 id="modal_header_text" style="margin-bottom: 0"><a id="guide_link" href="/guide_geolocation">Почему
+                                    не отображается мое местоположение на карте?</a></h4>
+                                {#                                <button id="zoomin_myself" type="button" class="btn btn-warning" style="display: none">Приблизить себя</button>#}
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                        style="margin-top: -40px">Закрыть карту&nbsp;&nbsp;&times;
+                                </button>
                             </div>
                             <div class="modal-body">
                                 <div id="wrapper">

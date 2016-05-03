@@ -27,3 +27,9 @@ MAIL_PASSWORD = 'secret_password'
 
 # mail accounts
 MAIL_DEFAULT_SENDER = 'from@example.com'
+
+vk_app_id = "5437643"
+vk_client_secret = "BZMjgoDhd8lW4iIVw5hC"
+ok_app_id = "1246901248"
+ok_app_key = "CBAFDDFLEBABABABA"
+ok_app_secret = "6F1192E1F73E17EFE7E00DC4"
