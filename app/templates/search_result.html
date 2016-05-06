@@ -29,7 +29,7 @@
                                 <th>Режим раб.</th>
                                 {#                                <th class="hidden-500">Режим раб.</th>#}
                             </tr>
-                            {% for post in posts %}
+                            {% for post in posts|sort(attribute='title') %}
                                 <tr class="table-500">
                                     <td>
                                         <a href='/details/{{ post.id }}'>
@@ -61,12 +61,14 @@
                                     <td style="max-width: 10%">{{ adres_short }}</td>
                                     <td class="hidden-500">{{ post.category|replace("None", "-") }}</td>
                                     <td>
+                                        <span class="glyphicon glyphicon-phone" aria-hidden="true"></span>
                                         {% set comma = joiner(", ") %}
                                         {% for number in post.phonenumber %}
                                             {{ comma() }}<a href="tel: 8{{ number }}">{{ number }}</a>
                                         {% endfor %}
                                     </td>
                                     <td>
+                                        <span class="glyphicon glyphicon-earphone" aria-hidden="true"></span>
                                         {% set comma = joiner(", ") %}
                                         {% for number in post.phonenumber_static %}
                                             {{ comma() }}<a href="tel: 886545{{ number }}">
@@ -109,7 +111,7 @@
                                     не отображается мое местоположение на карте?</a></h4>
                                 {#                                <button id="zoomin_myself" type="button" class="btn btn-warning" style="display: none">Приблизить себя</button>#}
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                        style="margin-top: -40px">Закрыть карту&nbsp;&nbsp;&times;
+                                        style="margin-top: -40px">Закрыть&nbsp;&nbsp;&times;
                                 </button>
                             </div>
                             <div class="modal-body">

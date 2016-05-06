@@ -1,3 +1,13 @@
+html {
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    padding: 50px 0px 0px 0px;
+    z-index: 0;
+    background: #e0f8ff;
+}
+
 .row-header {
     margin: 0px auto;
     padding: 0px auto;
@@ -17,12 +27,7 @@
     padding: 20px 0px 20px 0px;
 }
 
-body {
-    padding: 50px 0px 0px 0px;
-    z-index: 0;
-    background: #e0f8ff;
-    font-family: Roboto, sans-serif;
-}
+
 
 .navbar-inverse {
     background: #315981;
@@ -93,7 +98,6 @@ body {
     /*padding: 5px;*/
     /*border: 1px solid #999;*/
     /*text-align: center;*/
-    /*font-family: 'Roboto', 'sans-serif';*/
     /*line-height: 30px;*/
     /*padding-left: 10px;*/
 /*}*/
@@ -106,7 +110,6 @@ body {
     /*padding: 5px;*/
     /*border: 1px solid #999;*/
     text-align: center;
-    font-family: 'Roboto', 'sans-serif';
     line-height: 30px;
     /*padding-left: 10px;*/
     /*margin-left: 10px;*/
@@ -121,7 +124,6 @@ body {
     /*padding: 5px;*/
     /*border: 1px solid #999;*/
     /*text-align: center;*/
-    /*font-family: 'Roboto', 'sans-serif';*/
     /*line-height: 30px;*/
     /*padding-left: 10px;*/
 /*}*/

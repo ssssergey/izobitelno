@@ -490,7 +490,7 @@ def del_org(id):
 
 @app.route('/orgs')
 def list_orgs():
-    orgs = OrganizationModel.query().order(-OrganizationModel.when_added)
+    orgs = OrganizationModel.query().order(-OrganizationModel.when_added).fetch(limit=50)
     return render_template('admin/list_orgs.html', posts=orgs, categories=categories)
 
 

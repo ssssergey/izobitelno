@@ -162,39 +162,49 @@
                     } else {
                         var description = ''
                     }
-                    var content = "<div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>" + post.title + "</h3></div>" +
-                            "<div class='panel-body'>" +
-                            "<div>Адрес: " + adress + "</div>";
+                    var $panel = $('<div/>').attr("class", "panel panel-info");
+                    var $heading = $("<div/>", {"class": "panel-heading"});
+                    var $h3 = $("<h3/>", {"class": "panel-title"}).append(post.title);
+                    $heading.append($h3);
+                    $panel.append($heading);
+                    var $body = $("<div>", {class: "panel-body"}).append("<div>Адрес: " + adress + "</div>");
                     if (post.phonenumber.join('') || post.phonenumber_static.join('')) {
-                        content = content + "<div>Телефон: </div>";
-                        for (i = 0; i < post.phonenumber.length; i++) {
+                        $body.append("<div>Телефон: </div>");
+                        for (var i = 0; i < post.phonenumber.length; i++) {
                             if (post.phonenumber.join('')) {
-                                content = content + "<a href='tel: 8" + post.phonenumber[i] + "'>" + post.phonenumber[i] + "</a>; "
+                                $body.append("<a href='tel: 8" + post.phonenumber[i] + "'>" + post.phonenumber[i] + "</a>; ");
                             }
                         }
-                        for (i = 0; i < post.phonenumber_static.length; i++) {
+                        for (var i = 0; i < post.phonenumber_static.length; i++) {
                             if (post.phonenumber_static.join('')) {
-                                content = content + "<a href='tel: 886545" + post.phonenumber_static[i] + "'>" + post.phonenumber_static[i] + "</a>; "
+                                $body.append("<a href='tel: 886545" + post.phonenumber_static[i] + "'>" + post.phonenumber_static[i] + "</a>; ");
                             }
                         }
                     }
-                    content = content +
-                            "<div>Рейтинг: " + post.rating + "</div>" +
-                            "<div>Изменено: " + moment.unix(post.when_modified).format('LLL') + "</div>" +
-                            "</div>" +
-                            "<div class='panel-footer'>" + post.category + "</div></div>" +
-                            "<a class='btn btn-default' href='/details/" + post.id + "'>Подробнее</a>" +
-                            "<button id='" + post.id + "' class='zoominthismarker pull-right btn btn-default'>Приблизить</button>" +
-                            "{% if g.user.is_admin %}" + "<br>" +
-                                "<a href='/edit_org/" + post.id + "?keyword=" + keyword + "'>Редактировать</a>"
-                                + "<br>"
-                                +
-                                "<a href='/del_org/" + post.id + "'>Удалить</a>"
-                                "{% endif %}";
+                    $body.append("<div>Рейтинг: " + post.rating + "</div>");
+                    $body.append("<div>Изменено: " + moment.unix(post.when_modified).format('LLL') + "</div>");
+                    $panel.append($body);
+                    var $footer = $("<div>", {class: "panel-footer"}).text(post.category);
+                    $panel.append($footer);
 
-                    {#                    infowindow1.setZIndex(10);#}
+                    var $button_details = $("<a>", {
+                        class: "btn btn-default",
+                        href: "/details/" + post.id
+                    }).append("Подробнее");
+                    var $button_zoom = $("<button>", {
+                        id: post.id,
+                        class: "zoominthismarker pull-right btn btn-default"
+                    }).append("Приблизить");
+                    var content = $("<div>");
+                    content.append($panel).append($button_details).append($button_zoom);
+                    var link_edit = "<br><a href='/edit_org/" + post.id + "?keyword=" + keyword + "'>Редактировать</a>";
+                    var link_delete = "<br><a href='/del_org/" + post.id + "'>Удалить</a>";
+                    var admin_functions = "{% if g.user.is_admin %}" + link_edit + link_delete + "{% endif %}";
+                    var ext_content = content.html() + admin_functions;
+
+
                     marker1.addListener('click', function () {
-                        infowindow.setContent(content);
+                        infowindow.setContent(ext_content);
                         infowindow.open(map, marker1);
                         // Слушать нажатие на Приблизить в инфобоксе маркера
                         document.getElementById(post.id).addEventListener('click', function () {
