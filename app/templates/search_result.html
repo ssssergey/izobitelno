@@ -106,13 +106,17 @@
                 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 id="modal_header_text" style="margin-bottom: 0"><a id="guide_link" href="/guide_geolocation">Почему
-                                    не отображается мое местоположение на карте?</a></h4>
-                                {#                                <button id="zoomin_myself" type="button" class="btn btn-warning" style="display: none">Приблизить себя</button>#}
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                        style="margin-top: -40px">Закрыть&nbsp;&nbsp;&times;
-                                </button>
+                            <div class="modal-header row">
+                                <div class="col-sm-3 pull-right">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                            >Закрыть&nbsp;&nbsp;&times;
+                                    </button>
+                                </div>
+                                <div class="col-sm-9">
+                                    <h4 id="modal_header_text" style="margin-bottom: 0"><a id="guide_link"
+                                                                                           href="/guide_geolocation">Почему
+                                        не отображается мое местоположение на карте?</a></h4>
+                                </div>
                             </div>
                             <div class="modal-body">
                                 <div id="wrapper">

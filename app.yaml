@@ -34,7 +34,7 @@ handlers:
 
 - url: .*
   script: main.app
-  secure: optional
+  secure: always
 #  login: required
 
 

@@ -4,12 +4,20 @@
     <div class="container">
         <div class="row" style="padding-top: 10px;">
             <div class="col-sm-6">
-                <h4>Здесь вы можете почитать и оставить свои комментарии, отзывы и предложения.</h4>
+                <h2>Часто задаваемые вопросы.</h2>
+
+                <h3>Насколько точны данные на карте?</h3>
+
+                <p>Ответ: Метки на картах установлены максимально точно по координатам. Однако поиск по адресам
+                    использует данные Google Maps, которые не всегда точны. Ориентируйтесь по нанесенным на карту
+                    меткам.</p>
             </div>
             <div class="col-sm-6" style="padding-top: 10px;">
-                <a class="btn btn-primary" href="{{ url_for('comment_new_general') }}" role="button">Добавить комментарий</a>
+                <a class="btn btn-primary" href="{{ url_for('comment_new_general') }}" role="button">Добавить
+                    вопрос/комментарий</a>
             </div>
         </div>
+        <h3>Текущие комментарии:</h3>
         <table class="table table-striped">
             {% for post in posts %}
                 <tr>
