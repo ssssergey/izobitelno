@@ -291,7 +291,12 @@ def confirm_email(token):
 @app.route('/')
 def index():
     all_tags = get_all_tags()
-    return render_template("index.html", all_tags=','.join(all_tags))
+    selected_orgs = memcache.get(u'daynight_delivery')
+    if selected_orgs is None:
+        selected_orgs = OrganizationModel.query(ndb.OR(OrganizationModel.daynight == True, OrganizationModel.delivery == True)).fetch()
+        selected_orgs = json.loads(json.dumps(selected_orgs, cls=GaeEncoder))
+        memcache.set(u'daynight_delivery', selected_orgs)
+    return render_template("index.html", all_tags=','.join(all_tags), posts=selected_orgs)
 
 
 @app.route('/details/<int:id>')
@@ -310,9 +315,11 @@ def show_categories_all():
 def search_result():
     if request.method == 'GET':
         keyword = request.args.get('category_rus')
+        if not keyword: return redirect(url_for('index'))
         keyword = keyword.lower().strip()
     elif request.method == 'POST':
         keyword = request.form.get('search')
+        if not keyword: redirect(url_for('index'))
         keyword = keyword.lower().strip()
         word = SearchWordsModel.query(SearchWordsModel.word == keyword).get()
         if word:
@@ -322,12 +329,24 @@ def search_result():
             word = SearchWordsModel(word=keyword.lower().strip(), quantity=1)
             word.put()
     if keyword == u'круглосуточно':
-        selected_orgs = OrganizationModel.query(OrganizationModel.daynight == True).fetch()
+        selected_orgs = memcache.get(keyword)
+        if selected_orgs is None:
+            selected_orgs = OrganizationModel.query(OrganizationModel.daynight == True).fetch()
+            selected_orgs = json.loads(json.dumps(selected_orgs, cls=GaeEncoder))
+            memcache.set(keyword, selected_orgs)
     elif keyword == u'доставка':
-        selected_orgs = OrganizationModel.query(OrganizationModel.delivery == True).fetch()
+        selected_orgs = memcache.get(keyword)
+        if selected_orgs is None:
+            selected_orgs = OrganizationModel.query(OrganizationModel.delivery == True).fetch()
+            selected_orgs = json.loads(json.dumps(selected_orgs, cls=GaeEncoder))
+            memcache.set(keyword, selected_orgs)
     else:
-        selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword).fetch()
-    return render_template("search_result.html", posts=json.loads(json.dumps(selected_orgs, cls=GaeEncoder)),
+        selected_orgs = memcache.get(keyword)
+        if selected_orgs is None:
+            selected_orgs = OrganizationModel.query(OrganizationModel.tags == keyword).fetch()
+            selected_orgs = json.loads(json.dumps(selected_orgs, cls=GaeEncoder))
+            memcache.set(keyword, selected_orgs)
+    return render_template("search_result.html", posts=selected_orgs,
                            categories=categories, keyword=keyword, title=keyword)
 
 
@@ -385,9 +404,11 @@ def new_org():
                                      daynight=form.daynight.data,
                                      high_quality=form.high_quality.data,
                                      internet_site=form.internet_site.data,
+                                     email=form.email.data,
                                      )
             post.put()
             flash(u'Организация успешно добавлена!')
+            memcache.flush_all()
             return redirect(url_for('show_categories_all'))
         else:
             flash(u'Форма не прошла валидацию.', 'error')
@@ -433,9 +454,11 @@ def edit_org(id):
                              daynight=form.daynight.data,
                              high_quality=form.high_quality.data,
                              internet_site=form.internet_site.data,
+                             email=form.email.data,
                              )
                 org.put()
                 flash(u'Изменения приняты!')
+                memcache.flush_all()
                 return redirect(url_for('show_categories_all'))
         form.category.data = org.category
         form.title.data = org.title
@@ -457,6 +480,7 @@ def edit_org(id):
         form.internet_site.data = org.internet_site
         form.daynight.data = org.daynight
         form.high_quality.data = org.high_quality
+        form.email.data = org.email
         keyword = request.args.get('keyword')
         if keyword:
             orgs = OrganizationModel.query(OrganizationModel.tags == keyword.lower().strip()).fetch()
@@ -478,10 +502,12 @@ def del_org(id):
     if users.is_current_user_admin():
         flash(u"Вы успешно удалили объект как администратор!")
         org.key.delete()
+        memcache.flush_all()
         return redirect(url_for('index'))
     if current_user.nickname == org.author:
         flash(u"Вы успешно удалили объект как автор!")
         org.key.delete()
+        memcache.flush_all()
         return redirect(url_for('index'))
     else:
         flash(u"У вас нет права на удаление. Вы не являетесь автором этого объекта!", 'error')

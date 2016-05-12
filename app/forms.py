@@ -30,10 +30,11 @@ class OrganizationForm(Form):
     delivery = BooleanField(u'Доставка',default=False)
     daynight = BooleanField(u'Круглосуточно',default=False)
     new = BooleanField(u'Мы открылись',default=False)
+    email = StringField(u'Email')
 
 
 class CommentForm(Form):
-    content = TextAreaField('Content', validators=[DataRequired(message=u'Обязятельное поле')])
+    content = TextAreaField(u'Комментарий', validators=[DataRequired(message=u'Обязятельное поле')])
 
 
 class DeleteTagForm(Form):

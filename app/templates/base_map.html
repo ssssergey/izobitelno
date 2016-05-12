@@ -2,6 +2,7 @@
 
 <script>
     var posts = {{ posts | tojson | safe }};
+    console.log(posts)
     var keyword = "{{ keyword | safe }}";
     var id = parseInt("{{ id | safe }}");
     var map;
@@ -36,9 +37,11 @@
             });
         }
         // Обработка ввода улицы.
+        if (document.getElementById('submit_address')) {
         document.getElementById('submit_address').addEventListener('click', function () {
             geocodeAddress(geocoder);
         });
+        }
         // Обработка клика по карте - создание маркера.
         if (document.getElementById('gps_input')) {
             map.addListener('click', function (event) {
@@ -60,11 +63,12 @@
         {#            });#}
         {#        }#}
         // Отслеживание своего местоположения сразу при открытии карты
+        if (document.getElementById('showMap')) {
         document.getElementById('showMap').addEventListener('click', function () {
             var watchID = navigator.geolocation.watchPosition(WatchMyPosition, Error, {enableHighAccuracy: true});
 
         });
-
+        }
 
         var WatchMyPosition = function (position) {
             var accuracy = position.coords.accuracy;
@@ -328,7 +332,7 @@
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgm2-ORIhtHlegZTKlPt2TqkOS7cQb2iM&callback=initMap"></script>
 <script type="text/javascript"
-        src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/maplabel/src/maplabel-compiled.js"></script>
+        src="/js/maplabel-compiled.js"></script>
 <script>
     // MapLabel
     // My code

@@ -151,11 +151,7 @@ body {
     padding: 10px;
 }
 
-@media (min-width: 768px) and (max-width: 1000px) {
-    .under-navbar {
-        margin-top: 100px !important;
-    }
-}
+
 
 .under-navbar {
     max-width: 100% !important;
@@ -211,6 +207,11 @@ dd {
     background-color: #333333;
 }
 
+@media (min-width: 768px) and (max-width: 1000px) {
+    .under-navbar {
+        margin-top: 100px !important;
+    }
+}
 /*Table*/
 @media (max-width: 500px) {
     .hidden-500 {

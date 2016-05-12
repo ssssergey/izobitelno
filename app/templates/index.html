@@ -18,6 +18,7 @@
     {#    <link href="css/mystyles.css" rel="stylesheet" type="text/css">#}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript" src="js/autofill.js"></script>
+    <script src="/js/moment.min.js"></script>
 </head>
 
 <body>
@@ -75,23 +76,11 @@
     </style>
 </noscript>
 <!-- /preloader -->
+<script>
+    var locale = window.navigator.userLanguage || window.navigator.language;
+    moment.locale(locale);
+</script>
 
-<style>
-    #overlay {
-        width: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 10;
-    }
-
-    @media (max-width: 768px) {
-    .hidden-768 {
-        display: none !important;
-    }
-
-}
-</style>
 <div id="overlay">
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -106,12 +95,16 @@
         {% endif %}
     {% endwith %}
 </div>
-<div class="container-fluid" style="height: 100%">
+<div class="container-fluid"
+     style="height: 100%"
+        >
     <div class="row" style="background: #315981; height: 20%; min-height: 100px">
         <div class="col-xs-12 col-sm-9">
             <div style="margin-top: 10px; font-size: 20px"><span style="color:orangered">И</span><span
                     style="color:white">зобильный</span></div>
-            <h2 class="hidden-768" style="margin-top: 10px"><small style="color:gray;">Товары, услуги и организации города Изобильный</small></h2>
+            <h2 class="hidden-768" style="margin-top: 10px">
+                <small style="color:gray;">Товары, услуги и организации города Изобильный</small>
+            </h2>
         </div>
         <div class="col-xs-12 col-sm-3">
             <a style="float: right; margin: 10px" class="btn btn-lg btn-info"
@@ -121,26 +114,70 @@
     </div>
 
 
-    <div class="row" style="height: 60%; min-height: 300px">
+    <div class="row"
+         style="height: 60%; min-height: 300px"
+            >
         <div class="container container-table">
             <div class="row vertical-center-row">
                 <div class="text-center col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4">
                     <h1><span style="color:orangered">И</span>зопоиск</h1>
+
                     <form action="{{ url_for('search_result') }}" method="post" accept-charset="utf-8">
                         <input id="search" name="search" type="search" value=""
                                placeholder="Введите запрос" required autofocus/>
                         <button type="submit" class="btn btn-primary">Поиск в Изобильном</button>
+                        <!-- Button trigger modal -->
+
                     </form>
                 </div>
             </div>
         </div>
+            <div class="row" align="center">
+        <button id="showMap" type="button" class="btn btn-warning" data-toggle="modal"
+                data-target="#myModal" style="margin-top: 20px">
+            <i class="fa fa-map-o" aria-hidden="true"></i> Интересное<br>на карте
+        </button>
+    </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header row">
+                    <div class="col-sm-3 pull-right">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                >Закрыть&nbsp;&nbsp;&times;
+                        </button>
+                    </div>
+                    <div class="col-sm-9">
+                        <h4 id="modal_header_text" style="margin-bottom: 0"><a id="guide_link"
+                                                                               href="/guide_geolocation">Почему
+                            не отображается мое местоположение на карте?</a></h4>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div id="wrapper">
+                        <div id="map">
+                            Google Maps
+                        </div>
+                        <div id="accuracy" align="center" style="background-color: red; color: white">
+                            <strong></strong></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+        {% include 'base_map.html' %}
+    </div>
+    <!-- Modal End-->
     <div class="row" style="background: #DFDFDF; padding: 10px 0 20px 0; bottom: 0">
         <div class="col-sm-6">
             <ul>
                 <li><a href="{{ url_for('show_categories_all') }}">Категории</a></li>
-                <li><a href="{{ url_for('get_all_comments') }}">Комментарии, пожелания, отзывы</a></li>
+                <li><a href="{{ url_for('get_all_comments') }}">Вопросы</a></li>
                 <li><a href="{{ url_for('contacts') }}">Контакты</a></li>
             </ul>
         </div>
@@ -155,8 +192,13 @@
             </ul>
         </div>
     </div>
-
-
+    <script>
+        $('#myModal').on('shown.bs.modal', function () {
+            var currentCenter = map.getCenter();  // Get current center before resizing
+            google.maps.event.trigger(map, "resize");
+            map.setCenter(currentCenter); // Re-set previous center
+        });
+    </script>
     <script>
         $(function () {
             var tags = "{{ all_tags | safe }}";

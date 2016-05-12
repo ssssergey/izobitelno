@@ -17,22 +17,26 @@
                     вопрос/комментарий</a>
             </div>
         </div>
-        <h3>Текущие комментарии:</h3>
-        <table class="table table-striped">
-            {% for post in posts %}
-                <tr>
-                    <td>{{ post.content }}</td>
-                    {% if post.author %}
-                        <td>{{ post.author }}</td>
-                    {% else %}
-                        <td>Аноним</td>
-                    {% endif %}
-                    <td>{{ post.org }}</td>
-                    <td>{{ post.category }}</td>
-                    <td>{{ momentjs(post.when).fromNow() }}</td>
-                    <td>{{ momentjs(post.when).format('LLLL') }}</td>
-                </tr>
-            {% endfor %}
-        </table>
+        {% if g.user.is_admin %}
+            <div class="row">
+                <h3>Текущие комментарии:</h3>
+                <table class="table table-striped">
+                    {% for post in posts %}
+                        <tr>
+                            <td>{{ post.content }}</td>
+                            {% if post.author %}
+                                <td>{{ post.author }}</td>
+                            {% else %}
+                                <td>Аноним</td>
+                            {% endif %}
+                            <td>{{ post.org }}</td>
+                            <td>{{ post.category }}</td>
+                            <td>{{ momentjs(post.when).fromNow() }}</td>
+                            <td>{{ momentjs(post.when).format('LLLL') }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
