@@ -94,3 +94,7 @@ button {
 .modal-dialog {
     width: 100% !important;
 }
+
+.ok {
+    color: #ed812b;
+}

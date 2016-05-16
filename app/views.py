@@ -92,7 +92,7 @@ def login_google():
             flask_user.put()
         login_user(flask_user, remember=True)
         flash(u'Вы успешно залогинились по аккунту Google!')
-        return redirect(session['url_back'] or url_for('index'))
+        return redirect(session.get('url_back') or url_for('index'))
     return redirect(users.create_login_url(request.url))
 
 
@@ -421,7 +421,7 @@ def new_org():
 @login_required
 def edit_org(id):
     org = OrganizationModel.get_by_id(int(id))
-    if users.is_current_user_admin():
+    if current_user.is_admin:
         form = OrganizationForm(request.form)
         if request.method == 'POST':
             if form.validate_on_submit():
@@ -499,7 +499,7 @@ def edit_org(id):
 @login_required
 def del_org(id):
     org = OrganizationModel.get_by_id(int(id))
-    if users.is_current_user_admin():
+    if current_user.is_admin:
         flash(u"Вы успешно удалили объект как администратор!")
         org.key.delete()
         memcache.flush_all()
@@ -657,7 +657,7 @@ def like():
 
 @app.route('/admin/secret_edit_tags', methods=['GET', 'POST'])
 def secret_edit_tags():
-    if users.is_current_user_admin():
+    if current_user.is_admin:
         form1 = DeleteTagForm(prefix="form1")
         form2 = ReplaceTagForm(prefix="form2")
         form3 = ReplaceTagForm(prefix="form3")
@@ -755,7 +755,7 @@ def delete_some_tags(tag_to_delete):
 
 @app.route('/admin/secret_get_allTags', methods=['GET', 'POST'])
 def secret_get_allTags():
-    if users.is_current_user_admin():
+    if current_user.is_admin:
         form = GetAllTagsForm()
         if request.method == 'POST':
             if form.validate_on_submit():
@@ -781,7 +781,7 @@ def secret_get_allTags():
 
 @app.route('/admin/secret_query_by_phonenumber', methods=['GET', 'POST'])
 def secret_query_by_phonenumber():
-    if users.is_current_user_admin():
+    if current_user.is_admin:
         formS = SecretPhoneForm()
         if request.method == 'POST':
             if formS.validate_on_submit():

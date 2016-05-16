@@ -122,8 +122,8 @@
                 <div class="text-center col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4">
                     <h1><span style="color:orangered">И</span>зопоиск</h1>
 
-                    <form action="{{ url_for('search_result') }}" method="post" accept-charset="utf-8">
-                        <input id="search" name="search" type="search" value=""
+                    <form action="{{ url_for('search_result') }}" method="get" accept-charset="utf-8">
+                        <input id="search" name="category_rus" type="search"
                                placeholder="Введите запрос" required autofocus/>
                         <button type="submit" class="btn btn-primary">Поиск в Изобильном</button>
                         <!-- Button trigger modal -->
@@ -132,12 +132,12 @@
                 </div>
             </div>
         </div>
-            <div class="row" align="center">
-        <button id="showMap" type="button" class="btn btn-warning" data-toggle="modal"
-                data-target="#myModal" style="margin-top: 20px">
-            <i class="fa fa-map-o" aria-hidden="true"></i> Интересное<br>на карте
-        </button>
-    </div>
+        <div class="row" align="center">
+            <button id="showMap" type="button" class="btn btn-warning" data-toggle="modal"
+                    data-target="#myModal" style="margin-top: 20px">
+                <i class="fa fa-map-o" aria-hidden="true"></i> Интересное<br>на карте
+            </button>
+        </div>
     </div>
 
     <!-- Modal -->
@@ -182,7 +182,16 @@
             </ul>
         </div>
         <div class="col-sm-6">
+            <strong>Изопоиск</strong> рекомендует:
             <ul>
+                <li><a href="http://ok.ru/group/53073424285796"><i class="fa fa-odnoklassniki-square ok" aria-hidden="true"></i>
+                    Группа "Объявления Изобильный - Барахолка"</a></li>
+                <li><a href="http://ok.ru/carcamera"><i class="fa fa-odnoklassniki ok" aria-hidden="true"></i> Группа
+                    "Объявления Изобильный"</a></li>
+                <li><a href="http://ok.ru/group56684498583614"><i class="fa fa-odnoklassniki-square ok" aria-hidden="true"></i>
+                    Группа "Доска объявлений,г.Изобильный"</a></li>
+                <li><a href="http://ok.ru/doskaizob"><i class="fa fa-odnoklassniki ok" aria-hidden="true"></i> Группа
+                    "☆ДОСКА ОБЪЯВЛЕНИЙ,г.ИЗОБИЛЬНЫЙ☆"</a></li>
                 {% if g.user.is_admin %}
                     <li><a href="{{ url_for('list_orgs') }}">Общий список</a></li>
                     <li><a href="{{ url_for('secret_query_by_phonenumber') }}">Поиск по номеру</a></li>
