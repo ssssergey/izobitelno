@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
+from secret import *
 
 DEBUG=True
-SECRET_KEY='dev_key_h8hfne89vm'
-SECURITY_PASSWORD_SALT = 'sljgajie99gwtjwi3jlgklsgmslijseilgh'
+SECRET_KEY=secret_key
+SECURITY_PASSWORD_SALT = security_password_salt
 CSRF_ENABLED=True
-CSRF_SESSION_LKEY='dev_key_h8asSNJ9s9=+'
+CSRF_SESSION_LKEY=csrf_session_lkey
 
 # main config
 BCRYPT_LOG_ROUNDS = 13
@@ -21,15 +22,15 @@ MAIL_USE_SSL = True
 
 # gmail authentication
 # MAIL_USERNAME = os.environ['APP_MAIL_USERNAME']
-MAIL_USERNAME = 'izopoisk@gmail.com'
+MAIL_USERNAME = mail_username
 # MAIL_PASSWORD = os.environ['APP_MAIL_PASSWORD']
-MAIL_PASSWORD = 'secret_password'
+MAIL_PASSWORD = mail_password
 
 # mail accounts
 MAIL_DEFAULT_SENDER = 'from@example.com'
 
-vk_app_id = "5437643"
-vk_client_secret = "BZMjgoDhd8lW4iIVw5hC"
-ok_app_id = "1246901248"
-ok_app_key = "CBAFDDFLEBABABABA"
-ok_app_secret = "6F1192E1F73E17EFE7E00DC4"
+vk_app_id = vk_app_id_S
+vk_client_secret = vk_client_secret_S
+ok_app_id = ok_app_id_S
+ok_app_key = ok_app_key_S
+ok_app_secret = ok_app_secret_S
