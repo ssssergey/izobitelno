@@ -2,6 +2,8 @@
 <html lang="ru">
 <head>
     <title>Изобильный</title>
+    <meta name='yandex-verification' content='6f2c83ff7e702117'/>
+    <meta name="google-site-verification" content="rHmA_U2Hyg8sAkyTQIoDw0f4hr0iZhNPUKRj1XWSuRg"/>
     <meta content='изопоиск, izopoisk, магазины, услуги, товары, цены, Изобильный, изобильный, црб, пицца, диагностический центр,
     доставка, купить, Ставропольский край' name='keywords'/>
     <meta name="description" content="Сайт г. Изобильный (Ставропольский край), помогает жителям города в поиске товаров и услуг,
@@ -182,16 +184,20 @@
             </ul>
         </div>
         <div class="col-sm-6">
-            <strong>Изопоиск</strong> рекомендует:
+{#            <strong>Изопоиск</strong> рекомендует:#}
+{##}
+{#            <li><a href="http://ok.ru/group/53073424285796"><i class="fa fa-odnoklassniki-square ok"#}
+{#                                                               aria-hidden="true"></i>#}
+{#                Группа "Объявления Изобильный - Барахолка"</a></li>#}
+{#            <li><a href="http://ok.ru/carcamera"><i class="fa fa-odnoklassniki ok" aria-hidden="true"></i> Группа#}
+{#                "Объявления Изобильный"</a></li>#}
+{#            <li><a href="http://ok.ru/group56684498583614"><i class="fa fa-odnoklassniki-square ok"#}
+{#                                                              aria-hidden="true"></i>#}
+{#                Группа "Доска объявлений,г.Изобильный"</a></li>#}
+{#            <li><a href="http://ok.ru/doskaizob"><i class="fa fa-odnoklassniki ok" aria-hidden="true"></i> Группа#}
+{#                "☆ДОСКА ОБЪЯВЛЕНИЙ,г.ИЗОБИЛЬНЫЙ☆"</a></li>#}
+{#            </ul>#}
             <ul>
-                <li><a href="http://ok.ru/group/53073424285796"><i class="fa fa-odnoklassniki-square ok" aria-hidden="true"></i>
-                    Группа "Объявления Изобильный - Барахолка"</a></li>
-                <li><a href="http://ok.ru/carcamera"><i class="fa fa-odnoklassniki ok" aria-hidden="true"></i> Группа
-                    "Объявления Изобильный"</a></li>
-                <li><a href="http://ok.ru/group56684498583614"><i class="fa fa-odnoklassniki-square ok" aria-hidden="true"></i>
-                    Группа "Доска объявлений,г.Изобильный"</a></li>
-                <li><a href="http://ok.ru/doskaizob"><i class="fa fa-odnoklassniki ok" aria-hidden="true"></i> Группа
-                    "☆ДОСКА ОБЪЯВЛЕНИЙ,г.ИЗОБИЛЬНЫЙ☆"</a></li>
                 {% if g.user.is_admin %}
                     <li><a href="{{ url_for('list_orgs') }}">Общий список</a></li>
                     <li><a href="{{ url_for('secret_query_by_phonenumber') }}">Поиск по номеру</a></li>
@@ -226,6 +232,24 @@
         })
     </script>
 </div>
+
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-80546756-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
 </body>
 
 {#<script type="text/javascript" src="js/angular.min.js"></script>#}

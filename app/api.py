@@ -11,8 +11,10 @@ class OrganizationsApi(remote.Service):
         org.author = endpoints.get_current_user()
         org.put()
         return org
+
     @OrganizationModel.query_method(name='organizationAPI.list', path='orgs')
     def get_org(self, query):
         return query
+
 
 application_API = endpoints.api_server([OrganizationsApi])

@@ -10,7 +10,7 @@ from google.appengine.api import users, datastore_types
 from google.appengine.ext import ndb
 from google.appengine.api import memcache
 
-from flask import render_template, redirect, flash, url_for, request, g, abort, session
+from flask import render_template, redirect, flash, url_for, request, g, abort, session, Response, jsonify
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from app import app, lm
 from models import CommentModel, OrganizationModel, TagsModel, SearchWordsModel, UserModel
@@ -18,7 +18,7 @@ from forms import OrganizationForm, CommentForm, DeleteTagForm, ReplaceTagForm, 
     RegistrationForm, LoginForm
 
 from app.data import categories
-from settings import vk_app_id, vk_client_secret, ok_app_id,ok_app_key, ok_app_secret
+from settings import vk_app_id, vk_client_secret, ok_app_id, ok_app_key, ok_app_secret
 
 from token import generate_confirmation_token, confirm_token
 from email import send_email
@@ -43,7 +43,7 @@ class GaeEncoder(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, obj)
 
-
+app.json_encoder = GaeEncoder
 ###################Login->
 
 
@@ -189,12 +189,12 @@ def login_odnoklassniki():
         refresh_token = json_obj.get('refresh_token ')
         expires_in = json_obj.get('expires_in ')
         #  MD5
-        sig_1 = "application_key={}method={}".format(ok_app_key,"users.getCurrentUser")
-        sig_raw = access_token+ok_app_secret
+        sig_1 = "application_key={}method={}".format(ok_app_key, "users.getCurrentUser")
+        sig_raw = access_token + ok_app_secret
         m = hashlib.md5()
         m.update(sig_raw)
         sig_2 = m.hexdigest()
-        sig = sig_1+sig_2
+        sig = sig_1 + sig_2
         m = hashlib.md5()
         m.update(sig)
         sig = m.hexdigest()
@@ -293,7 +293,8 @@ def index():
     all_tags = get_all_tags()
     selected_orgs = memcache.get(u'daynight_delivery')
     if selected_orgs is None:
-        selected_orgs = OrganizationModel.query(ndb.OR(OrganizationModel.daynight == True, OrganizationModel.delivery == True)).fetch()
+        selected_orgs = OrganizationModel.query(
+            ndb.OR(OrganizationModel.daynight == True, OrganizationModel.delivery == True)).fetch()
         selected_orgs = json.loads(json.dumps(selected_orgs, cls=GaeEncoder))
         memcache.set(u'daynight_delivery', selected_orgs)
     return render_template("index.html", all_tags=','.join(all_tags), posts=selected_orgs)
@@ -515,9 +516,18 @@ def del_org(id):
 
 
 @app.route('/orgs')
+@login_required
 def list_orgs():
     orgs = OrganizationModel.query().order(-OrganizationModel.when_added).fetch(limit=50)
     return render_template('admin/list_orgs.html', posts=orgs, categories=categories)
+
+@app.route('/json')
+@login_required
+def list_json():
+    orgs = OrganizationModel.query().order(-OrganizationModel.when_added).fetch()
+    # orgs = json.loads(json.dumps(orgs, cls=GaeEncoder))
+    # resp = Response(response=orgs, status=200, mimetype="application/json")
+    return jsonify(data=orgs)
 
 
 ### Edit all_Tags
@@ -807,6 +817,7 @@ def secret_query_by_phonenumber():
     else:
         flash(u"У вас нет права доступа!", 'error')
         return redirect(url_for('index'))
+
 
 @app.route('/guide_geolocation')
 def guide_geolocation():
